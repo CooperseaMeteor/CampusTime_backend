@@ -241,8 +241,9 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // 登录成功，保存token到本地存储
-                    localStorage.setItem('token', data.data.token);
+                    // 登录成功，保存 accessToken 和 refreshToken 到本地存储
+                    localStorage.setItem('token', data.data.accessToken || data.data.token);
+                    if (data.data.refreshToken) localStorage.setItem('refreshToken', data.data.refreshToken);
                     localStorage.setItem('userId', data.data.userId);
                     localStorage.setItem('username', data.data.username);
                     localStorage.setItem('role', data.data.role);
@@ -264,6 +265,15 @@
                 submitBtn.textContent = originalText;
             }
         });
+    </script>
+    <script>
+        // 全局帮助：返回带 Authorization 头的对象
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
     </script>
 </body>
 </html>

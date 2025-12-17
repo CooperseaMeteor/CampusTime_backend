@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const pool = require('../config/database');
+require('dotenv').config();
 
 // 注册用户
 exports.register = async (req, res) => {
@@ -125,14 +127,30 @@ exports.login = async (req, res) => {
 
         connection.release();
 
-        // 生成JWT Token
-        const token = jwt.sign(
+        // 生成 access token
+        const accessToken = jwt.sign(
             { userId: user.id, username: user.username, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '1h' }
         );
 
-        // 返回成功响应
+        // 生成 refresh token（随机字符串），有效期 30 天
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+        // 存储 refresh token
+        try {
+            const conn2 = await pool.getConnection();
+            await conn2.execute(
+                'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)',
+                [user.id, refreshToken, expiresAt]
+            );
+            conn2.release();
+        } catch (err) {
+            console.error('存储 refresh token 失败:', err);
+        }
+
+        // 返回成功响应（包含 access + refresh token）
         res.json({
             code: 200,
             message: '登录成功',
@@ -140,7 +158,8 @@ exports.login = async (req, res) => {
                 userId: user.id,
                 username: user.username,
                 role: user.role,
-                token: token
+                accessToken: accessToken,
+                refreshToken: refreshToken
             }
         });
 
@@ -186,5 +205,64 @@ exports.getUserInfo = async (req, res) => {
             code: 500,
             message: '获取用户信息失败'
         });
+    }
+};
+
+// 刷新 access token
+exports.refresh = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) return res.status(400).json({ code: 400, message: '缺少 refreshToken' });
+
+        const connection = await pool.getConnection();
+        const [rows] = await connection.execute(
+            'SELECT id, user_id, expires_at FROM refresh_tokens WHERE token = ?',
+            [refreshToken]
+        );
+
+        if (rows.length === 0) {
+            connection.release();
+            return res.status(401).json({ code: 401, message: '无效的 refreshToken' });
+        }
+
+        const rec = rows[0];
+        const now = new Date();
+        if (new Date(rec.expires_at) < now) {
+            // 已过期，删除记录
+            await connection.execute('DELETE FROM refresh_tokens WHERE id = ?', [rec.id]);
+            connection.release();
+            return res.status(401).json({ code: 401, message: 'refreshToken 已过期' });
+        }
+
+        // 查询用户信息
+        const [users] = await connection.execute('SELECT id, username, role FROM users WHERE id = ?', [rec.user_id]);
+        connection.release();
+        if (users.length === 0) return res.status(404).json({ code: 404, message: '用户不存在' });
+
+        const user = users[0];
+        // 签发新的 access token
+        const newAccessToken = jwt.sign({ userId: user.id, username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        return res.json({ code: 200, message: '刷新成功', data: { accessToken: newAccessToken } });
+    } catch (error) {
+        console.error('刷新 token 错误:', error);
+        return res.status(500).json({ code: 500, message: '刷新失败' });
+    }
+};
+
+// 注销（删除 refresh token）
+exports.logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) return res.status(400).json({ code: 400, message: '缺少 refreshToken' });
+
+        const connection = await pool.getConnection();
+        await connection.execute('DELETE FROM refresh_tokens WHERE token = ?', [refreshToken]);
+        connection.release();
+
+        return res.json({ code: 200, message: '已注销' });
+    } catch (error) {
+        console.error('注销错误:', error);
+        return res.status(500).json({ code: 500, message: '注销失败' });
     }
 };

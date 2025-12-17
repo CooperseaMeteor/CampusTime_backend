@@ -245,5 +245,14 @@
             }
         });
     </script>
+    <script>
+        // 全局帮助：返回带 Authorization 头的对象
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+    </script>
 </body>
 </html>
