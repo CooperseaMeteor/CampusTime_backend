@@ -1,0 +1,741 @@
+<!-- 菜品详情弹窗 + 评价弹窗（公共组件，可在任意页面引入） -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹窗组件</title>
+    <style>
+        /* 弹窗遮罩 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* 菜品详情弹窗 */
+        .dish-detail-modal {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 15px;
+            overflow: hidden;
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .dish-detail-header {
+            position: relative;
+        }
+        
+        .dish-detail-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .dish-detail-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dish-detail-content {
+            padding: 20px;
+            max-height: calc(80vh - 320px);
+            overflow-y: auto;
+        }
+        
+        .dish-detail-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .dish-detail-price {
+            font-size: 24px;
+            color: #FF6B35;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .dish-detail-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .dish-detail-tag {
+            background: #fff5eb;
+            color: #FF6B35;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+        }
+        
+        .dish-detail-story {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .dish-detail-status {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .dish-detail-status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .dish-detail-status.limited {
+            background: #ffe6e6;
+            color: #d32f2f;
+        }
+        
+        .dish-detail-status.sold-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .dish-detail-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .dish-detail-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .dish-detail-btn.primary {
+            background: #FF6B35;
+            color: white;
+        }
+        
+        .dish-detail-btn.secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .dish-detail-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* 评价弹窗 */
+        .review-modal {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .review-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .review-close {
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        
+        /* 评分区 */
+        .review-rating {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .review-rating-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            font-size: 32px;
+        }
+        
+        .star {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .star.active {
+            color: #FFD700;
+        }
+        
+        .star:not(.active) {
+            color: #ddd;
+        }
+        
+        .star:hover {
+            transform: scale(1.2);
+        }
+        
+        /* 口味标签 */
+        .review-tags-section {
+            margin-bottom: 20px;
+        }
+        
+        .review-section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .review-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .review-tag {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .review-tag.active {
+            background: #fff5eb;
+            color: #FF6B35;
+            border-color: #FF6B35;
+        }
+        
+        /* 图片上传 */
+        .review-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .review-image-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .review-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .review-image-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .review-image-upload {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .review-image-upload:hover {
+            border-color: #FF6B35;
+            color: #FF6B35;
+        }
+        
+        /* 文字输入 */
+        .review-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .review-textarea:focus {
+            outline: none;
+            border-color: #FF6B35;
+        }
+        
+        /* AI辅助按钮 */
+        .ai-assist-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .ai-assist-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 身份展示勾选 */
+        .review-identity {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .review-identity input {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* 提交按钮 */
+        .review-submit {
+            width: 100%;
+            padding: 14px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .review-submit:hover {
+            background: #e55a2a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.4);
+        }
+        
+        .review-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 菜品详情弹窗 -->
+    <div class="modal-overlay" id="dishDetailOverlay" onclick="closeDishDetail(event)">
+        <div class="dish-detail-modal" onclick="event.stopPropagation()">
+            <div class="dish-detail-header">
+                <img src="" alt="" class="dish-detail-image" id="dishDetailImage">
+                <button class="dish-detail-close" onclick="closeDishDetail()">×</button>
+            </div>
+            <div class="dish-detail-content">
+                <div class="dish-detail-name" id="dishDetailName">菜品名称</div>
+                <div class="dish-detail-price" id="dishDetailPrice">¥0</div>
+                <div class="dish-detail-tags" id="dishDetailTags"></div>
+                <div class="dish-detail-story" id="dishDetailStory">菜品故事加载中...</div>
+                <div class="dish-detail-status" id="dishDetailStatus"></div>
+                <div class="dish-detail-actions">
+                    <button class="dish-detail-btn secondary" onclick="handleFavorite()">
+                        <span id="favoriteText">收藏</span>
+                    </button>
+                    <button class="dish-detail-btn secondary" onclick="handleShare()">分享</button>
+                    <button class="dish-detail-btn primary" onclick="openReview()">评价</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 评价弹窗 -->
+    <div class="modal-overlay" id="reviewOverlay" onclick="closeReview(event)">
+        <div class="review-modal" onclick="event.stopPropagation()">
+            <div class="review-header">
+                <div class="review-title">评价</div>
+                <button class="review-close" onclick="closeReview()">×</button>
+            </div>
+            
+            <!-- 评分 -->
+            <div class="review-rating">
+                <div class="review-rating-label">您的评分</div>
+                <div class="star-rating" id="starRating">
+                    <span class="star" data-rating="1" onclick="setRating(1)">☆</span>
+                    <span class="star" data-rating="2" onclick="setRating(2)">☆</span>
+                    <span class="star" data-rating="3" onclick="setRating(3)">☆</span>
+                    <span class="star" data-rating="4" onclick="setRating(4)">☆</span>
+                    <span class="star" data-rating="5" onclick="setRating(5)">☆</span>
+                </div>
+            </div>
+            
+            <!-- 口味标签 -->
+            <div class="review-tags-section">
+                <div class="review-section-title">口味标签（可多选）</div>
+                <div class="review-tags">
+                    <div class="review-tag" data-tag="好吃" onclick="toggleTag(this)">好吃</div>
+                    <div class="review-tag" data-tag="分量足" onclick="toggleTag(this)">分量足</div>
+                    <div class="review-tag" data-tag="实惠" onclick="toggleTag(this)">实惠</div>
+                    <div class="review-tag" data-tag="新鲜" onclick="toggleTag(this)">新鲜</div>
+                    <div class="review-tag" data-tag="味道正" onclick="toggleTag(this)">味道正</div>
+                    <div class="review-tag" data-tag="环境好" onclick="toggleTag(this)">环境好</div>
+                </div>
+            </div>
+            
+            <!-- 图片上传 -->
+            <div class="review-section-title">上传图片（最多9张）</div>
+            <div class="review-images" id="reviewImages">
+                <div class="review-image-upload" onclick="uploadImage()">+</div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)">
+            
+            <!-- 文字输入 -->
+            <textarea class="review-textarea" id="reviewText" placeholder="分享您的用餐体验...（选填）"></textarea>
+            
+            <!-- AI辅助 -->
+            <button class="ai-assist-btn" onclick="aiAssist()">✨ AI帮我写</button>
+            
+            <!-- 身份展示 -->
+            <div class="review-identity">
+                <input type="checkbox" id="showIdentity">
+                <label for="showIdentity">展示我的身份标签（如有）</label>
+            </div>
+            
+            <!-- 提交 -->
+            <button class="review-submit" id="reviewSubmit" onclick="submitReview()">提交评价</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://39.108.138.4:5000/api';
+        let currentDish = null;
+        let currentRating = 0;
+        let selectedTags = [];
+        let uploadedImages = [];
+        
+        // ===== 菜品详情弹窗相关 =====
+        
+        // 打开菜品详情
+        function openDishDetail(dish) {
+            currentDish = dish;
+            
+            document.getElementById('dishDetailImage').src = dish.image;
+            document.getElementById('dishDetailImage').alt = dish.name;
+            document.getElementById('dishDetailName').textContent = dish.name;
+            document.getElementById('dishDetailPrice').textContent = `¥${dish.price}`;
+            
+            // 渲染标签
+            const tagsHtml = dish.tags.map(tag => `<span class="dish-detail-tag">${tag}</span>`).join('');
+            document.getElementById('dishDetailTags').innerHTML = tagsHtml;
+            
+            // 菜品故事
+            document.getElementById('dishDetailStory').textContent = dish.story || '这道菜精选优质食材，经过大厨精心烹制，口感鲜美，营养丰富。';
+            
+            // 库存状态
+            const statusEl = document.getElementById('dishDetailStatus');
+            if (dish.stockMode === 'limited') {
+                const percentage = (dish.remainingStock / dish.totalStock) * 100;
+                statusEl.className = `dish-detail-status ${dish.remainingStock > 0 ? 'limited' : 'sold-out'}`;
+                statusEl.textContent = dish.remainingStock > 0 ? `限量供应，仅剩 ${dish.remainingStock} 份` : '已售罄';
+            } else {
+                statusEl.className = `dish-detail-status ${dish.isAvailable ? 'available' : 'sold-out'}`;
+                statusEl.textContent = dish.isAvailable ? '正常供应中' : '已售罄';
+            }
+            
+            document.getElementById('dishDetailOverlay').classList.add('active');
+        }
+        
+        // 关闭菜品详情
+        function closeDishDetail(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('dishDetailOverlay').classList.remove('active');
+        }
+        
+        // 收藏菜品
+        function handleFavorite() {
+            // TODO: 调用API保存收藏
+            const text = document.getElementById('favoriteText').textContent;
+            document.getElementById('favoriteText').textContent = text === '收藏' ? '已收藏' : '收藏';
+            
+            // 飞星动画（可选）
+            alert('收藏成功！');
+        }
+        
+        // 分享菜品
+        function handleShare() {
+            alert('分享功能开发中...\n\n实际会生成分享海报');
+            // TODO: 生成分享海报
+        }
+        
+        // ===== 评价弹窗相关 =====
+        
+        // 打开评价弹窗
+        function openReview() {
+            closeDishDetail();
+            document.getElementById('reviewOverlay').classList.add('active');
+            resetReviewForm();
+        }
+        
+        // 关闭评价弹窗
+        function closeReview(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('reviewOverlay').classList.remove('active');
+        }
+        
+        // 设置评分
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                    star.textContent = '★';
+                } else {
+                    star.classList.remove('active');
+                    star.textContent = '☆';
+                }
+            });
+        }
+        
+        // 切换标签
+        function toggleTag(element) {
+            const tag = element.dataset.tag;
+            element.classList.toggle('active');
+            
+            if (element.classList.contains('active')) {
+                selectedTags.push(tag);
+            } else {
+                selectedTags = selectedTags.filter(t => t !== tag);
+            }
+        }
+        
+        // 上传图片
+        function uploadImage() {
+            if (uploadedImages.length >= 9) {
+                alert('最多上传9张图片');
+                return;
+            }
+            document.getElementById('imageInput').click();
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            const container = document.getElementById('reviewImages');
+            
+            for (let i = 0; i < files.length && uploadedImages.length < 9; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    uploadedImages.push(e.target.result);
+                    
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'review-image-item';
+                    imageItem.innerHTML = `
+                        <img src="${e.target.result}" alt="上传图片">
+                        <button class="review-image-remove" onclick="removeImage(${uploadedImages.length - 1})">×</button>
+                    `;
+                    
+                    container.insertBefore(imageItem, container.lastElementChild);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            event.target.value = '';
+        }
+        
+        // 移除图片
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderImages();
+        }
+        
+        // 重新渲染图片
+        function renderImages() {
+            const container = document.getElementById('reviewImages');
+            container.innerHTML = '<div class="review-image-upload" onclick="uploadImage()">+</div>';
+            
+            uploadedImages.forEach((img, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'review-image-item';
+                imageItem.innerHTML = `
+                    <img src="${img}" alt="上传图片">
+                    <button class="review-image-remove" onclick="removeImage(${index})">×</button>
+                `;
+                container.insertBefore(imageItem, container.lastElementChild);
+            });
+        }
+        
+        // AI辅助文案
+        function aiAssist() {
+            const text = document.getElementById('reviewText').value;
+            
+            // 模拟AI生成（实际应调用后端AI接口）
+            const aiTexts = [
+                '这道菜味道很正宗，分量也很足，性价比超高！强烈推荐！',
+                '菜品新鲜，口感很好，是我在食堂吃过最好吃的菜之一。',
+                '环境干净卫生，服务态度好，菜品质量稳定，会经常来光顾。'
+            ];
+            
+            const randomText = aiTexts[Math.floor(Math.random() * aiTexts.length)];
+            document.getElementById('reviewText').value = text ? text + '\n\n' + randomText : randomText;
+        }
+        
+        // 提交评价
+        async function submitReview() {
+            if (currentRating === 0) {
+                alert('请先评分');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('reviewSubmit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+            
+            try {
+                const reviewData = {
+                    dishId: currentDish.id,
+                    rating: currentRating,
+                    tags: selectedTags,
+                    text: document.getElementById('reviewText').value,
+                    images: uploadedImages,
+                    showIdentity: document.getElementById('showIdentity').checked
+                };
+                
+                // TODO: 调用后端API提交评价
+                // const response = await fetch(`${API_BASE_URL}/reviews`, {
+                //     method: 'POST',
+                //     headers: getAuthHeaders(),
+                //     body: JSON.stringify(reviewData)
+                // });
+                
+                console.log('评价数据:', reviewData);
+                
+                alert('评价成功！感谢您的反馈');
+                closeReview();
+            } catch (error) {
+                console.error('提交评价失败:', error);
+                alert('提交失败，请稍后重试');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交评价';
+            }
+        }
+        
+        // 重置评价表单
+        function resetReviewForm() {
+            currentRating = 0;
+            selectedTags = [];
+            uploadedImages = [];
+            
+            document.querySelectorAll('.star').forEach(star => {
+                star.classList.remove('active');
+                star.textContent = '☆';
+            });
+            
+            document.querySelectorAll('.review-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            
+            document.getElementById('reviewImages').innerHTML = '<div class="review-image-upload" onclick="uploadImage()">+</div>';
+            document.getElementById('reviewText').value = '';
+            document.getElementById('showIdentity').checked = false;
+        }
+        
+        // 返回带认证头的对象
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+        
+        // 暴露全局函数供其他页面调用
+        window.openDishDetailModal = openDishDetail;
+        window.openReviewModal = openReview;
+    </script>
+</body>
+</html>

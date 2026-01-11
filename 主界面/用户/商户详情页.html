@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户详情 - 校园食光</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+        
+        /* 顶部返回栏 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .back-btn {
+            font-size: 20px;
+            cursor: pointer;
+            color: #FF6B35;
+        }
+        
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 商户信息区 */
+        .merchant-header {
+            margin-top: 50px;
+            background: white;
+            padding: 20px;
+        }
+        
+        .merchant-banner {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        
+        .merchant-info {
+            margin-bottom: 15px;
+        }
+        
+        .merchant-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .merchant-path {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        
+        .merchant-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .tag {
+            background: #fff5eb;
+            color: #FF6B35;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+        }
+        
+        .merchant-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF6B35;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        /* 操作按钮区 */
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: white;
+            margin-top: 10px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 12px;
+            border: 1px solid #FF6B35;
+            border-radius: 8px;
+            background: white;
+            color: #FF6B35;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn.primary {
+            background: #FF6B35;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Tab导航 */
+        .tabs {
+            display: flex;
+            background: white;
+            margin-top: 10px;
+            padding: 0 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 15px;
+            color: #777;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #FF6B35;
+            border-bottom-color: #FF6B35;
+            font-weight: bold;
+        }
+        
+        /* 档口列表 */
+        .stall-list {
+            padding: 15px;
+        }
+        
+        .stall-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stall-card:hover {
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .stall-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: #fff5eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-right: 15px;
+        }
+        
+        .stall-info {
+            flex: 1;
+        }
+        
+        .stall-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stall-category {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        .stall-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .stall-status.open {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stall-status.closed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部返回栏 -->
+    <div class="top-bar">
+        <span class="back-btn" onclick="history.back()">←</span>
+        <div class="page-title">商户详情</div>
+        <div style="width: 20px;"></div>
+    </div>
+    
+    <!-- 商户信息区 -->
+    <div class="merchant-header" id="merchantHeader">
+        <div class="loading">加载中...</div>
+    </div>
+    
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+        <button class="action-btn" onclick="handleWantToGo()">想去试试</button>
+        <button class="action-btn primary" onclick="handleCheckin()">已打卡</button>
+        <button class="action-btn" onclick="handleShare()">分享</button>
+    </div>
+    
+    <!-- Tab导航 -->
+    <div class="tabs">
+        <div class="tab active" data-tab="all" onclick="switchTab('all')">全部</div>
+        <div class="tab" data-tab="open" onclick="switchTab('open')">营业中</div>
+        <div class="tab" data-tab="favorite" onclick="switchTab('favorite')">收藏</div>
+    </div>
+    
+    <!-- 档口列表 -->
+    <div class="stall-list" id="stallList">
+        <div class="loading">加载中...</div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://39.108.138.4:5000/api';
+        let currentTab = 'all';
+        let merchantData = null;
+        let stallsData = [];
+        
+        // 获取商户ID（从URL参数）
+        const urlParams = new URLSearchParams(window.location.search);
+        const merchantId = urlParams.get('id') || '1';
+        
+        // 页面加载时获取数据
+        window.onload = function() {
+            loadMerchantInfo();
+            loadStalls();
+        };
+        
+        // 加载商户信息
+        async function loadMerchantInfo() {
+            try {
+                // 模拟数据（待接入真实API）
+                merchantData = {
+                    id: merchantId,
+                    name: '学生第一食堂',
+                    path: '北京大学 → 学生食堂区 → 一层',
+                    banner: 'https://via.placeholder.com/400x200?text=食堂图片',
+                    tags: ['实惠', '种类丰富', '营业至晚上10点', '支持校园卡'],
+                    customerFlow: '适中',
+                    rating: 4.5,
+                    reviews: 328
+                };
+                
+                renderMerchantHeader();
+            } catch (error) {
+                console.error('加载商户信息失败:', error);
+                document.getElementById('merchantHeader').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        // 渲染商户头部
+        function renderMerchantHeader() {
+            const html = `
+                <img src="${merchantData.banner}" alt="${merchantData.name}" class="merchant-banner">
+                <div class="merchant-info">
+                    <div class="merchant-name">${merchantData.name}</div>
+                    <div class="merchant-path">📍 ${merchantData.path}</div>
+                    <div class="merchant-tags">
+                        ${merchantData.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="merchant-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${merchantData.customerFlow}</div>
+                        <div class="stat-label">客流密度</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${merchantData.rating}</div>
+                        <div class="stat-label">综合评分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${merchantData.reviews}</div>
+                        <div class="stat-label">评价数</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('merchantHeader').innerHTML = html;
+        }
+        
+        // 加载档口列表
+        async function loadStalls() {
+            try {
+                // 模拟数据（待接入真实API）
+                stallsData = [
+                    { id: 1, name: '川味小炒', category: '川菜·炒菜', status: 'open', icon: '🔥' },
+                    { id: 2, name: '特色面点', category: '面食·主食', status: 'open', icon: '🍜' },
+                    { id: 3, name: '营养套餐', category: '快餐·套餐', status: 'open', icon: '🍱' },
+                    { id: 4, name: '甜品饮品', category: '甜品·饮料', status: 'closed', icon: '🍰' },
+                    { id: 5, name: '特色小吃', category: '小吃·零食', status: 'open', icon: '🌭' }
+                ];
+                
+                renderStallList();
+            } catch (error) {
+                console.error('加载档口列表失败:', error);
+                document.getElementById('stallList').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        // 渲染档口列表
+        function renderStallList() {
+            let filteredStalls = stallsData;
+            
+            // 根据tab筛选
+            if (currentTab === 'open') {
+                filteredStalls = stallsData.filter(s => s.status === 'open');
+            } else if (currentTab === 'favorite') {
+                // TODO: 从localStorage获取收藏列表
+                filteredStalls = [];
+            }
+            
+            if (filteredStalls.length === 0) {
+                document.getElementById('stallList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🍽️</div>
+                        <div>暂无档口</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = filteredStalls.map(stall => `
+                <div class="stall-card" onclick="goToStallMenu(${stall.id})">
+                    <div class="stall-icon">${stall.icon}</div>
+                    <div class="stall-info">
+                        <div class="stall-name">${stall.name}</div>
+                        <div class="stall-category">${stall.category}</div>
+                    </div>
+                    <div class="stall-status ${stall.status}">
+                        ${stall.status === 'open' ? '营业中' : '已打烊'}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('stallList').innerHTML = html;
+        }
+        
+        // 切换Tab
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // 更新Tab样式
+            document.querySelectorAll('.tab').forEach(t => {
+                if (t.dataset.tab === tab) {
+                    t.classList.add('active');
+                } else {
+                    t.classList.remove('active');
+                }
+            });
+            
+            renderStallList();
+        }
+        
+        // 跳转到档口菜单页
+        function goToStallMenu(stallId) {
+            window.location.href = `档口菜单页.html?id=${stallId}&merchant=${merchantId}`;
+        }
+        
+        // 想去试试
+        function handleWantToGo() {
+            alert('已添加到想去列表！');
+            // TODO: 调用API保存到用户想去列表
+        }
+        
+        // 已打卡
+        function handleCheckin() {
+            alert('打卡成功！');
+            // TODO: 调用API记录打卡，生成社区动态
+        }
+        
+        // 分享
+        function handleShare() {
+            alert('分享功能开发中...');
+            // TODO: 生成分享海报
+        }
+        
+        // 返回带认证头的对象
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+    </script>
+</body>
+</html>

@@ -6,15 +6,23 @@ require('dotenv').config();
 const app = express();
 
 // 中间件配置
-app.use(cors());
+const allowedOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: allowedOrigin }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // 导入路由
 const authRoutes = require('./routes/auth');
+const coreRoutes = require('./routes/core');
 
 // 使用路由
 app.use('/api', authRoutes);
+app.use('/api', coreRoutes);
+
+// 轻量级连通性测试（用于排查超时）
+app.get('/api/ping', (req, res) => {
+    res.json({ status: 'OK', time: Date.now() });
+});
 
 // 健康检查端点
 app.get('/health', (req, res) => {

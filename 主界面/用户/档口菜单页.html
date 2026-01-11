@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>档口菜单 - 校园食光</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        /* 顶部栏 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .nav-bar {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .back-btn {
+            font-size: 20px;
+            cursor: pointer;
+            color: #FF6B35;
+        }
+        
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 搜索栏 */
+        .search-bar {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #FF6B35;
+        }
+        
+        /* 快速筛选标签 */
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-tags::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .filter-tag {
+            padding: 6px 15px;
+            border-radius: 15px;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .filter-tag.active {
+            background: #FF6B35;
+            color: white;
+        }
+        
+        /* 菜品列表 */
+        .dish-list {
+            margin-top: 160px;
+            padding: 15px;
+        }
+        
+        .dish-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .dish-card:hover {
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 匹配度标签 */
+        .match-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #FF6B35, #ff8c5a);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .dish-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .dish-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .dish-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .dish-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        
+        .dish-tag {
+            background: #fff5eb;
+            color: #FF6B35;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .dish-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dish-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FF6B35;
+        }
+        
+        /* 库存状态 */
+        .stock-status {
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        /* 模式一：设置份数 */
+        .stock-status.limited {
+            background: #ffe6e6;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        
+        .stock-progress {
+            width: 60px;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 3px;
+        }
+        
+        .stock-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #d32f2f, #ff6b6b);
+            transition: width 0.3s;
+        }
+        
+        /* 模式二：不设置份数 */
+        .stock-status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stock-status.sold-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* 已售罄样式 */
+        .dish-card.sold-out {
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .dish-card.sold-out::after {
+            content: '已售罄';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        /* 悬浮评价按钮 */
+        .float-review-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35, #ff8c5a);
+            color: white;
+            border: none;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+        
+        .float-review-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(255, 107, 53, 0.5);
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部栏 -->
+    <div class="top-bar">
+        <div class="nav-bar">
+            <span class="back-btn" onclick="history.back()">←</span>
+            <div class="page-title" id="stallName">加载中...</div>
+            <div style="width: 20px;"></div>
+        </div>
+        
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="搜索菜品..." id="searchInput" oninput="handleSearch()">
+        </div>
+        
+        <!-- 快速筛选标签 -->
+        <div class="filter-tags" id="filterTags">
+            <div class="filter-tag active" data-filter="all" onclick="handleFilter('all')">全部</div>
+            <div class="filter-tag" data-filter="recommend" onclick="handleFilter('recommend')">AI推荐</div>
+            <div class="filter-tag" data-filter="hot" onclick="handleFilter('hot')">热门</div>
+            <div class="filter-tag" data-filter="new" onclick="handleFilter('new')">新品</div>
+            <div class="filter-tag" data-filter="favorite" onclick="handleFilter('favorite')">收藏</div>
+        </div>
+    </div>
+    
+    <!-- 菜品列表 -->
+    <div class="dish-list" id="dishList">
+        <div class="loading">加载中...</div>
+    </div>
+    
+    <!-- 悬浮评价按钮 -->
+    <button class="float-review-btn" onclick="openReviewModal()" title="快速评价">✏️</button>
+
+    <script>
+        const API_BASE_URL = 'http://39.108.138.4:5000/api';
+        let currentFilter = 'all';
+        let allDishes = [];
+        let filteredDishes = [];
+        
+        // 获取档口ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const stallId = urlParams.get('id') || '1';
+        const merchantId = urlParams.get('merchant') || '1';
+        
+        // 页面加载
+        window.onload = function() {
+            loadStallInfo();
+            loadDishes();
+        };
+        
+        // 加载档口信息
+        async function loadStallInfo() {
+            try {
+                // 模拟数据
+                const stallInfo = {
+                    name: '川味小炒',
+                    location: '学生第一食堂 一层 A区'
+                };
+                
+                document.getElementById('stallName').textContent = stallInfo.name;
+            } catch (error) {
+                console.error('加载档口信息失败:', error);
+            }
+        }
+        
+        // 加载菜品列表
+        async function loadDishes() {
+            try {
+                // 模拟数据（含两种库存模式）
+                allDishes = [
+                    {
+                        id: 1,
+                        name: '宫保鸡丁',
+                        price: 15,
+                        image: 'https://via.placeholder.com/100?text=宫保鸡丁',
+                        tags: ['招牌', '微辣', '下饭'],
+                        stockMode: 'limited', // 限量模式
+                        remainingStock: 12,
+                        totalStock: 50,
+                        matchScore: 95,
+                        isRecommend: true
+                    },
+                    {
+                        id: 2,
+                        name: '麻婆豆腐',
+                        price: 12,
+                        image: 'https://via.placeholder.com/100?text=麻婆豆腐',
+                        tags: ['经典', '中辣', '素食'],
+                        stockMode: 'unlimited', // 不限量模式
+                        isAvailable: true,
+                        matchScore: 88,
+                        isRecommend: true
+                    },
+                    {
+                        id: 3,
+                        name: '番茄炒蛋',
+                        price: 10,
+                        image: 'https://via.placeholder.com/100?text=番茄炒蛋',
+                        tags: ['家常', '清淡', '下饭'],
+                        stockMode: 'unlimited',
+                        isAvailable: true,
+                        matchScore: 82
+                    },
+                    {
+                        id: 4,
+                        name: '鱼香肉丝',
+                        price: 16,
+                        image: 'https://via.placeholder.com/100?text=鱼香肉丝',
+                        tags: ['热卖', '微辣'],
+                        stockMode: 'limited',
+                        remainingStock: 3,
+                        totalStock: 30,
+                        matchScore: 78
+                    },
+                    {
+                        id: 5,
+                        name: '青椒肉丝',
+                        price: 14,
+                        image: 'https://via.placeholder.com/100?text=青椒肉丝',
+                        tags: ['家常', '微辣'],
+                        stockMode: 'unlimited',
+                        isAvailable: false, // 已售罄
+                        matchScore: 70
+                    }
+                ];
+                
+                // AI智能排序：口味匹配度 > 实时供应状态 > 社区评价热度
+                allDishes.sort((a, b) => {
+                    // 优先显示有货的
+                    const aAvailable = getAvailability(a);
+                    const bAvailable = getAvailability(b);
+                    if (aAvailable !== bAvailable) return bAvailable - aAvailable;
+                    
+                    // 按匹配度排序
+                    return b.matchScore - a.matchScore;
+                });
+                
+                filteredDishes = [...allDishes];
+                renderDishList();
+            } catch (error) {
+                console.error('加载菜品失败:', error);
+                document.getElementById('dishList').innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        // 判断菜品是否可用
+        function getAvailability(dish) {
+            if (dish.stockMode === 'limited') {
+                return dish.remainingStock > 0 ? 1 : 0;
+            } else {
+                return dish.isAvailable ? 1 : 0;
+            }
+        }
+        
+        // 渲染菜品列表
+        function renderDishList() {
+            if (filteredDishes.length === 0) {
+                document.getElementById('dishList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🍽️</div>
+                        <div>暂无菜品</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = filteredDishes.map(dish => {
+                const available = getAvailability(dish);
+                const soldOutClass = available ? '' : 'sold-out';
+                
+                // 库存状态渲染
+                let stockHtml = '';
+                if (dish.stockMode === 'limited') {
+                    const percentage = (dish.remainingStock / dish.totalStock) * 100;
+                    stockHtml = `
+                        <div class="stock-status limited">
+                            剩${dish.remainingStock}份
+                            <div class="stock-progress">
+                                <div class="stock-progress-bar" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    stockHtml = `
+                        <div class="stock-status ${available ? 'available' : 'sold-out'}">
+                            ${available ? '在售' : '售罄'}
+                        </div>
+                    `;
+                }
+                
+                // 匹配度标签（仅推荐菜品显示）
+                const matchBadge = dish.isRecommend ? `<div class="match-badge">匹配${dish.matchScore}%</div>` : '';
+                
+                return `
+                    <div class="dish-card ${soldOutClass}" onclick="openDishDetail(${dish.id})">
+                        ${matchBadge}
+                        <img src="${dish.image}" alt="${dish.name}" class="dish-image">
+                        <div class="dish-info">
+                            <div>
+                                <div class="dish-name">${dish.name}</div>
+                                <div class="dish-tags">
+                                    ${dish.tags.map(tag => `<span class="dish-tag">${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="dish-bottom">
+                                <div class="dish-price">¥${dish.price}</div>
+                                ${stockHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('dishList').innerHTML = html;
+        }
+        
+        // 搜索菜品
+        function handleSearch() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!keyword) {
+                filteredDishes = [...allDishes];
+            } else {
+                filteredDishes = allDishes.filter(dish => 
+                    dish.name.toLowerCase().includes(keyword) ||
+                    dish.tags.some(tag => tag.toLowerCase().includes(keyword))
+                );
+            }
+            
+            renderDishList();
+        }
+        
+        // 筛选菜品
+        function handleFilter(filter) {
+            currentFilter = filter;
+            
+            // 更新标签样式
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                if (tag.dataset.filter === filter) {
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            });
+            
+            // 筛选逻辑
+            if (filter === 'all') {
+                filteredDishes = [...allDishes];
+            } else if (filter === 'recommend') {
+                filteredDishes = allDishes.filter(d => d.isRecommend);
+            } else if (filter === 'favorite') {
+                // TODO: 从localStorage获取收藏列表
+                filteredDishes = [];
+            } else {
+                filteredDishes = [...allDishes];
+            }
+            
+            renderDishList();
+        }
+        
+        // 打开菜品详情弹窗
+        function openDishDetail(dishId) {
+            // 在URL中添加参数，触发菜品详情弹窗（不跳转页面）
+            const dish = allDishes.find(d => d.id === dishId);
+            if (!dish) return;
+            
+            // 这里应该打开弹窗，暂时用alert代替
+            alert(`菜品详情：${dish.name}\n价格：¥${dish.price}\n\n实际开发中这里会打开详情弹窗`);
+            
+            // TODO: 调用菜品详情弹窗
+            // window.openDishDetailModal(dish);
+        }
+        
+        // 打开评价弹窗
+        function openReviewModal() {
+            alert('评价弹窗开发中...\n\n实际开发中这里会打开评价表单');
+            // TODO: 调用评价弹窗
+        }
+        
+        // 返回带认证头的对象
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+    </script>
+</body>
+</html>
