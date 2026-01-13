@@ -762,6 +762,8 @@
             }
         }
     </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -782,19 +784,19 @@
     <!-- 主导航 -->
     <nav class="main-nav">
         <div class="nav-tabs">
-            <a class="nav-tab" href="./管理员首页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.toAdminIndex()">
                 <i class="fas fa-tachometer-alt"></i> 控制台
             </a>
-            <a class="nav-tab" href="./数据报表页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteDataReport())">
                 <i class="fas fa-chart-line"></i> 数据报表
             </a>
-            <a class="nav-tab" href="./评论管理页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteCommentManage())">
                 <i class="fas fa-comments"></i> 评论管理
             </a>
-            <a class="nav-tab active" href="./食堂管理页.html">
+            <a class="nav-tab active" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteCanteenManage())">
                 <i class="fas fa-store"></i> 食堂管理
             </a>
-            <a class="nav-tab" href="./内容发布页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteContentPublish())">
                 <i class="fas fa-bullhorn"></i> 内容发布
             </a>
         </div>

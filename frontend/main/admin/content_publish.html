@@ -782,6 +782,8 @@
             }
         }
     </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -802,7 +804,7 @@
     <!-- 主导航 -->
     <nav class="main-nav">
         <div class="nav-tabs">
-            <a class="nav-tab" href="./管理员首页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.toAdminIndex()">
                 <i class="fas fa-tachometer-alt"></i> 控制台
             </a>
             <a class="nav-tab" href="./数据报表页.html">

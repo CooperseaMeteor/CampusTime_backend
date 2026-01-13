@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商户详情 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
     <style>
         * {
             margin: 0;
@@ -292,7 +294,6 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://39.108.138.4:5000/api';
         let currentTab = 'all';
         let merchantData = null;
         let stallsData = [];
@@ -310,18 +311,20 @@
         // 加载商户信息
         async function loadMerchantInfo() {
             try {
-                // 模拟数据（待接入真实API）
-                merchantData = {
-                    id: merchantId,
-                    name: '学生第一食堂',
-                    path: '北京大学 → 学生食堂区 → 一层',
-                    banner: 'https://via.placeholder.com/400x200?text=食堂图片',
-                    tags: ['实惠', '种类丰富', '营业至晚上10点', '支持校园卡'],
-                    customerFlow: '适中',
-                    rating: 4.5,
-                    reviews: 328
-                };
-                
+                const resp = await Router.apiCall(API_ENDPOINTS.MERCHANT_DETAIL(merchantId));
+                if (resp && resp.code === 200) {
+                    const m = resp.data;
+                    merchantData = {
+                        id: m.id,
+                        name: m.name,
+                        path: m.location_path || '校区 · 食堂区域',
+                        banner: m.banner_image || 'https://via.placeholder.com/400x200?text=食堂图片',
+                        tags: Array.isArray(m.tags) ? m.tags : (m.tags ? JSON.parse(m.tags) : ['实惠','种类丰富']),
+                        customerFlow: m.customer_flow || '适中',
+                        rating: m.rating || 0,
+                        reviews: m.review_count || 0
+                    };
+                }
                 renderMerchantHeader();
             } catch (error) {
                 console.error('加载商户信息失败:', error);
@@ -361,15 +364,18 @@
         // 加载档口列表
         async function loadStalls() {
             try {
-                // 模拟数据（待接入真实API）
-                stallsData = [
-                    { id: 1, name: '川味小炒', category: '川菜·炒菜', status: 'open', icon: '🔥' },
-                    { id: 2, name: '特色面点', category: '面食·主食', status: 'open', icon: '🍜' },
-                    { id: 3, name: '营养套餐', category: '快餐·套餐', status: 'open', icon: '🍱' },
-                    { id: 4, name: '甜品饮品', category: '甜品·饮料', status: 'closed', icon: '🍰' },
-                    { id: 5, name: '特色小吃', category: '小吃·零食', status: 'open', icon: '🌭' }
-                ];
-                
+                const resp = await Router.apiCall(API_ENDPOINTS.MERCHANT_STALLS(merchantId));
+                if (resp && resp.code === 200) {
+                    stallsData = resp.data.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        category: s.category || '档口',
+                        status: s.is_open ? 'open' : 'closed',
+                        icon: '🍽️'
+                    }));
+                } else {
+                    stallsData = [];
+                }
                 renderStallList();
             } catch (error) {
                 console.error('加载档口列表失败:', error);
@@ -433,7 +439,7 @@
         
         // 跳转到档口菜单页
         function goToStallMenu(stallId) {
-            window.location.href = `档口菜单页.html?id=${stallId}&merchant=${merchantId}`;
+            Router.navigate(USER_ROUTES.getAbsoluteStallMenu(stallId));
         }
         
         // 想去试试

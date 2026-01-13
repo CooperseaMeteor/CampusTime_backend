@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校园食光 - 注册</title>
+    <title>校园食光 - 管理员登录</title>
     <style>
         /* 基础样式重置 */
         * {
@@ -14,7 +14,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #fff5eb, #f8f9fa);
+            background: linear-gradient(135deg, #e6f7ff, #f8f9fa);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,11 +22,11 @@
             padding: 20px;
         }
         
-        /* 注册卡片样式 */
-        .register-container {
+        /* 登录卡片样式 */
+        .login-container {
             background-color: white;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.2);
+            box-shadow: 0 5px 20px rgba(24, 144, 255, 0.2);
             width: 100%;
             max-width: 450px;
             padding: 30px;
@@ -36,7 +36,7 @@
         /* Logo和标题 */
         .logo {
             font-size: 32px;
-            color: #FF6B35;
+            color: #1890FF;
             margin-bottom: 15px;
         }
         
@@ -49,8 +49,18 @@
         
         .subtitle {
             color: #777;
-            margin-bottom: 30px;
+            margin-bottom: 5px;
             font-size: 14px;
+        }
+        
+        .admin-tag {
+            display: inline-block;
+            background-color: #1890FF;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
         
         /* 表单样式 */
@@ -76,21 +86,9 @@
         }
         
         .form-control:focus {
-            border-color: #FF6B35;
+            border-color: #1890FF;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
-        }
-        
-        /* 复选框样式 */
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-        }
-        
-        .checkbox-group input {
-            margin-right: 8px;
-            transform: scale(1.2);
+            box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
         }
         
         /* 按钮样式 */
@@ -107,22 +105,21 @@
         }
         
         .btn-primary {
-            background-color: #FF6B35;
+            background-color: #1890FF;
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: #e55a2a;
+            background-color: #0c7cd5;
         }
         
         /* 底部链接 */
-        .login-link {
-            margin-top: 20px;
-            color: #777;
+        .user-link {
+            margin-top: 25px;
             font-size: 14px;
         }
         
-        .login-link a {
+        .user-link a {
             color: #FF6B35;
             text-decoration: none;
             font-weight: bold;
@@ -130,23 +127,26 @@
         
         /* 响应式调整 */
         @media (max-width: 480px) {
-            .register-container {
+            .login-container {
                 padding: 20px;
                 margin: 10px;
             }
         }
     </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
 </head>
 <body>
-    <div class="register-container">
+    <div class="login-container">
         <div class="logo">🍽️</div>
         <h1 class="title">校园食光</h1>
-        <p class="subtitle">发现校园里的每一处美食</p>
+        <p class="subtitle">食堂管理后台</p>
+        <div class="admin-tag">管理平台</div>
         
-        <form id="registerForm">
+        <form id="adminLoginForm">
             <div class="form-group">
-                <label for="phone">用户名</label>
-                <input type="tel" id="phone" class="form-control" placeholder="请输入用户名" required>
+                <label for="adminId">管理员账号</label>
+                <input type="text" id="adminId" class="form-control" placeholder="请输入管理员账号" required>
             </div>
             
             <div class="form-group">
@@ -154,41 +154,24 @@
                 <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
             </div>
             
-            <div class="form-group">
-                <label for="confirmPassword">确认密码</label>
-                <input type="password" id="confirmPassword" class="form-control" placeholder="请再次输入密码" required>
-            </div>
-            
-            <div class="checkbox-group">
-                <input type="checkbox" id="isAdmin">
-                <label for="isAdmin">我是食堂管理员</label>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">立即注册</button>
+            <button type="submit" class="btn btn-primary">管理员登录</button>
         </form>
         
-        <div class="login-link">
-            已有账号？<a href="用户登录界面.html">立即登录</a>
+        <div class="user-link">
+            <a href="javascript:void(0)" onclick="Router.toUserLogin()">返回普通用户登录</a>
         </div>
     </div>
 
     <script>
-        // 简单的表单验证
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        // 管理员登录验证
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const phone = document.getElementById('phone').value;
+            const username = document.getElementById('adminId').value;
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
             
-            // // 简单的手机号验证（11位数字）
-            // if (!/^1[3-9]\d{9}$/.test(phone)) {
-            //     alert('请输入有效的手机号码');
-            //     return;
-            // }
-            
-            if (password !== confirmPassword) {
-                alert('两次输入的密码不一致！');
+            if (username.trim() === '') {
+                alert('请输入管理员账号');
                 return;
             }
             
@@ -197,15 +180,27 @@
                 return;
             }
             
-            // 根据是否是管理员，跳转到不同的页面
-            const isAdmin = document.getElementById('isAdmin').checked;
-            
-            if (isAdmin) {
-                alert('注册成功！即将跳转到管理员界面');
-                // window.location.href = 'admin.html';
-            } else {
-                alert('注册成功！即将跳转到用户界面');
-                // window.location.href = 'user.html';
+            try {
+                const data = await Router.apiCall(API_ENDPOINTS.LOGIN, {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (data && data.code === 200) {
+                    if (data.data.role !== 'admin') {
+                        alert('该账号不是管理员账号！');
+                        return;
+                    }
+                    
+                    Router.saveUserData(data.data);
+                    alert('管理员登录成功！即将跳转到管理后台');
+                    Router.toAdminIndex();
+                } else {
+                    alert('登录失败：' + ((data && data.message) || '账号或密码错误'));
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                alert('登录失败，请检查网络连接或稍后重试');
             }
         });
     </script>

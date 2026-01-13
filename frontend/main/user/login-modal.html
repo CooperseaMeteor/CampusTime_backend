@@ -22,6 +22,6 @@
 
 <script>
 function closeLoginModal(){ const m = document.getElementById('login-modal'); if(m) m.classList.add('hidden'); }
-function simulateUserLogin(){ try{ localStorage.setItem('userRole','user'); }catch(e){}; window.location.href = '../用户/用户“首页”界面.html'; }
-function simulateAdminLogin(){ try{ localStorage.setItem('userRole','admin'); }catch(e){}; window.location.href = '../管理员/管理员首页.html'; }
+function simulateUserLogin(){ try{ localStorage.setItem('userRole','user'); }catch(e){}; Router.toUserIndex(); }
+function simulateAdminLogin(){ try{ localStorage.setItem('userRole','admin'); }catch(e){}; Router.toAdminIndex(); }
 </script>

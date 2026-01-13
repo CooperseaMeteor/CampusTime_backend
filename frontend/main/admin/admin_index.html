@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员后台 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
     
     <!-- 字体图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -528,6 +530,8 @@
             display: none !important;
         }
     </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -548,19 +552,19 @@
     <!-- 主导航 -->
     <nav class="main-nav">
         <div class="nav-tabs">
-            <a class="nav-tab active" href="./管理员首页.html">
+            <a class="nav-tab active" href="javascript:void(0)" onclick="Router.toAdminIndex()">
                 <i class="fas fa-tachometer-alt"></i> 控制台
             </a>
-            <a class="nav-tab" href="./数据报表页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteDataReport())">
                 <i class="fas fa-chart-line"></i> 数据报表
             </a>
-            <a class="nav-tab" href="./评论管理页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteCommentManage())">
                 <i class="fas fa-comments"></i> 评论管理
             </a>
-            <a class="nav-tab" href="./食堂管理页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteCanteenManage())">
                 <i class="fas fa-store"></i> 食堂管理
             </a>
-            <a class="nav-tab" href="./内容发布页.html">
+            <a class="nav-tab" href="javascript:void(0)" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteContentPublish())">
                 <i class="fas fa-bullhorn"></i> 内容发布
             </a>
         </div>

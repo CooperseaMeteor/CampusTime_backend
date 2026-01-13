@@ -932,7 +932,11 @@
             font-size: 12px;
         }
     </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
 </head>
+<script src="/config.js"></script>
+<script src="/router.js"></script>
 <body>
     <!-- 全局导航栏 -->
     <nav class="global-nav">
@@ -959,19 +963,19 @@
     <!-- 主导航 - 已改为真正的超链接 -->
     <nav class="main-nav">
         <div class="nav-tabs">
-            <a href="用户“首页”界面.html" class="nav-tab">
+            <a href="javascript:void(0)" class="nav-tab" onclick="Router.toUserIndex()">
                 <i class="fas fa-home"></i>首页
             </a>
-            <a href="./用户“社区”界面.html" class="nav-tab">
+            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCommunity())">
                 <i class="fas fa-users"></i>社区 
             </a>
-            <a href="./用户“食堂”界面.html" class="nav-tab">
+            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCanteen())">
                 <i class="fas fa-store"></i>食堂
             </a>
-            <a href="用户“我的”界面.html" class="nav-tab">
+            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteProfile())">
                 <i class="fas fa-user"></i>我的
             </a>
-            <a href="./用户“ai助手”界面.html" class="nav-tab active">
+            <a href="javascript:void(0)" class="nav-tab active" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
                 <i class="fas fa-robot"></i>AI助手
             </a>
         </div>
@@ -1755,7 +1759,7 @@
           return;
         }
       }catch(e){}
-      window.location.href = '../管理员/管理员首页.html';
+    Router.toAdminIndex();
     }
     </script>
 </body>

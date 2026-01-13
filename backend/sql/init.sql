@@ -12,10 +12,20 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL COMMENT '加密后的密码',
     role ENUM('user', 'admin') DEFAULT 'user' COMMENT '用户角色',
     status VARCHAR(20) DEFAULT 'active' COMMENT '账户状态',
+    real_name VARCHAR(50) NULL COMMENT '真实姓名',
+    student_id VARCHAR(20) NULL UNIQUE COMMENT '学号',
+    college VARCHAR(100) NULL COMMENT '学院',
+    major VARCHAR(100) NULL COMMENT '专业',
+    grade VARCHAR(20) NULL COMMENT '年级(如:大一、大二、大三、大四、研一等)',
+    class_name VARCHAR(50) NULL COMMENT '班级',
+    phone VARCHAR(20) NULL COMMENT '手机号',
+    avatar VARCHAR(255) NULL COMMENT '头像URL',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_username (username),
-    INDEX idx_role (role)
+    INDEX idx_role (role),
+    INDEX idx_college (college),
+    INDEX idx_student_id (student_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 插入测试数据（可选）

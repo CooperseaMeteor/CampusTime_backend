@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园食光 - 注册</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff5eb, #f8f9fa);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* 注册卡片样式 */
+        .register-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        /* Logo和标题 */
+        .logo {
+            font-size: 32px;
+            color: #FF6B35;
+            margin-bottom: 15px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #FF6B35;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+        
+        /* 复选框样式 */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .checkbox-group input {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #FF6B35;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e55a2a;
+        }
+        
+        /* 底部链接 */
+        .login-link {
+            margin-top: 20px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .login-link a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">🍽️</div>
+        <h1 class="title">校园食光</h1>
+        <p class="subtitle">发现校园里的每一处美食</p>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" placeholder="请输入密码(至少6位)" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">确认密码</label>
+                <input type="password" id="confirmPassword" class="form-control" placeholder="请再次输入密码" required>
+            </div>
+            
+            <!-- 普通用户需要填写的信息 -->
+            <div id="userFields" style="display: none;">
+                <div class="form-group">
+                    <label for="realName">真实姓名</label>
+                    <input type="text" id="realName" class="form-control" placeholder="请输入真实姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentId">学号</label>
+                    <input type="text" id="studentId" class="form-control" placeholder="请输入学号">
+                </div>
+                
+                <div class="form-group">
+                    <label for="college">学院</label>
+                    <select id="college" class="form-control">
+                        <option value="">请选择学院</option>
+                        <option value="计算机科学与技术学院">计算机科学与技术学院</option>
+                        <option value="电信工程与智能化学院">电信工程与智能化学院</option>
+                        <option value="生态环境与建筑工程学院">生态环境与建筑工程学院</option>
+                        <option value="马克思主义学院">马克思主义学院</option>
+                        <option value="研究生院">研究生院</option>
+                        <option value="卓越工程师学院">卓越工程师学院</option>
+                        <option value="经管学院">经管学院</option>
+                        <option value="外国语学院">外国语学院</option>
+                        <option value="教育学院">教育学院</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="major">专业</label>
+                    <input type="text" id="major" class="form-control" placeholder="请输入专业">
+                </div>
+                
+                <div class="form-group">
+                    <label for="grade">年级</label>
+                    <select id="grade" class="form-control">
+                        <option value="">请选择年级</option>
+                        <option value="大一">大一</option>
+                        <option value="大二">大二</option>
+                        <option value="大三">大三</option>
+                        <option value="大四">大四</option>
+                        <option value="研一">研一</option>
+                        <option value="研二">研二</option>
+                        <option value="研三">研三</option>
+                        <option value="博一">博一</option>
+                        <option value="博二">博二</option>
+                        <option value="博三">博三</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">手机号</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="请输入手机号">
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="isAdmin">
+                <label for="isAdmin">我是食堂管理员</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">立即注册</button>
+        </form>
+        
+        <div class="login-link">
+            已有账号？<a href="javascript:void(0)" onclick="Router.toUserLogin()">立即登录</a>
+        </div>
+    </div>
+
+    <script>
+        // 监听管理员复选框变化,切换用户信息字段显示
+        const isAdminCheckbox = document.getElementById('isAdmin');
+        const userFields = document.getElementById('userFields');
+        
+        isAdminCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                userFields.style.display = 'none';
+                userFields.querySelectorAll('input, select').forEach(el => el.removeAttribute('required'));
+            } else {
+                userFields.style.display = 'block';
+            }
+        });
+        
+        userFields.style.display = 'block';
+        
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('两次输入的密码不一致！');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('密码至少需要6位字符！');
+                return;
+            }
+            
+            const isAdmin = document.getElementById('isAdmin').checked;
+            
+            const registerData = {
+                username,
+                password,
+                isAdmin
+            };
+            
+            if (!isAdmin) {
+                registerData.realName = document.getElementById('realName').value || null;
+                registerData.studentId = document.getElementById('studentId').value || null;
+                registerData.college = document.getElementById('college').value || null;
+                registerData.major = document.getElementById('major').value || null;
+                registerData.grade = document.getElementById('grade').value || null;
+                registerData.phone = document.getElementById('phone').value || null;
+            }
+            
+            try {
+                const data = await Router.apiCall(API_ENDPOINTS.REGISTER, {
+                    method: 'POST',
+                    body: JSON.stringify(registerData)
+                });
+                
+                if (data && data.code === 200) {
+                    alert('注册成功！即将跳转到登录页面');
+                    if (isAdmin) {
+                        Router.toAdminLogin();
+                    } else {
+                        Router.toUserLogin();
+                    }
+                } else {
+                    alert('注册失败：' + ((data && data.message) || '未知错误'));
+                }
+            } catch (error) {
+                console.error('注册请求失败:', error);
+                alert('注册失败，请检查网络连接或稍后重试');
+            }
+        });
+    </script>
+</body>
+</html>

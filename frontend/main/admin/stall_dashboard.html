@@ -423,7 +423,7 @@
             
             if (!token || role !== 'admin') {
                 alert('请先登录管理员账号');
-                window.location.href = '../../注册及登录/管理员登录界面.html';
+                Router.toAdminLogin();
             }
         }
         
@@ -645,7 +645,7 @@
         
         // 返回首页
         function backToHome() {
-            window.location.href = '../用户/用户"首页"界面.html';
+            Router.toUserIndex();
         }
         
         // 退出登录
@@ -655,7 +655,7 @@
                 localStorage.removeItem('userId');
                 localStorage.removeItem('username');
                 localStorage.removeItem('role');
-                window.location.href = '../../注册及登录/管理员登录界面.html';
+                Router.toAdminLogin();
             }
         }
         

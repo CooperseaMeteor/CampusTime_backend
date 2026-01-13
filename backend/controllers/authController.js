@@ -7,7 +7,17 @@ require('dotenv').config();
 // 注册用户
 exports.register = async (req, res) => {
     try {
-        const { username, password, isAdmin } = req.body;
+        const { 
+            username, 
+            password, 
+            isAdmin,
+            realName,
+            studentId,
+            college,
+            major,
+            grade,
+            phone
+        } = req.body;
 
         // 验证输入
         if (!username || !password) {
@@ -40,6 +50,22 @@ exports.register = async (req, res) => {
             });
         }
 
+        // 如果提供了学号,检查学号是否已存在
+        if (studentId) {
+            const [existingStudent] = await connection.execute(
+                'SELECT id FROM users WHERE student_id = ?',
+                [studentId]
+            );
+            
+            if (existingStudent.length > 0) {
+                connection.release();
+                return res.status(400).json({
+                    code: 400,
+                    message: '该学号已被注册'
+                });
+            }
+        }
+
         // 加密密码
         const passwordHash = await bcrypt.hash(password, 10);
 
@@ -48,8 +74,30 @@ exports.register = async (req, res) => {
 
         // 插入用户记录
         const [result] = await connection.execute(
-            'INSERT INTO users (username, password_hash, role, status) VALUES (?, ?, ?, ?)',
-            [username, passwordHash, role, 'active']
+            `INSERT INTO users (
+                username, 
+                password_hash, 
+                role, 
+                status,
+                real_name,
+                student_id,
+                college,
+                major,
+                grade,
+                phone
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                username, 
+                passwordHash, 
+                role, 
+                'active',
+                realName || null,
+                studentId || null,
+                college || null,
+                major || null,
+                grade || null,
+                phone || null
+            ]
         );
 
         connection.release();

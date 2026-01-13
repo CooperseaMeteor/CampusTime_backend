@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>档口菜单 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
     <style>
         * {
             margin: 0;
@@ -321,7 +323,6 @@
     <button class="float-review-btn" onclick="openReviewModal()" title="快速评价">✏️</button>
 
     <script>
-        const API_BASE_URL = 'http://39.108.138.4:5000/api';
         let currentFilter = 'all';
         let allDishes = [];
         let filteredDishes = [];
@@ -340,13 +341,11 @@
         // 加载档口信息
         async function loadStallInfo() {
             try {
-                // 模拟数据
-                const stallInfo = {
-                    name: '川味小炒',
-                    location: '学生第一食堂 一层 A区'
-                };
-                
-                document.getElementById('stallName').textContent = stallInfo.name;
+                const resp = await Router.apiCall(API_ENDPOINTS.STALL_DETAIL(stallId));
+                if (resp && resp.code === 200) {
+                    const stall = resp.data;
+                    document.getElementById('stallName').textContent = stall.name || '档口';
+                }
             } catch (error) {
                 console.error('加载档口信息失败:', error);
             }
