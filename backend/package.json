@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "cleanup:uploads": "node scripts/cleanup-unused-uploads.js",
+    "cleanup:uploads:apply": "node scripts/cleanup-unused-uploads.js --apply",
+    "link:dish-images": "node scripts/link-dish-images-by-name.js",
+    "link:dish-images:apply": "node scripts/link-dish-images-by-name.js --apply"
   },
   "keywords": [
     "campus",

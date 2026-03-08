@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>系统设置 - 校园食光</title>
+
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    
+
+    <!-- 字体图标 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+
+    <style>
+
+        /* 全局样式 - 与现有页面保持一致 */
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 15px;
+
+            --spacing-large: 20px;
+
+            --border-radius: 4px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            --role-super-admin: #e60012;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+        .embedded-shell .global-nav,
+        .embedded-shell .main-nav {
+            display: none;
+        }
+
+        .embedded-shell .admin-main {
+            padding-top: var(--spacing-large);
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 - 与现有页面保持一致 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        /* 主导航 - 使用动态导航栏 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            position: sticky;
+
+            top: 45px;
+
+            z-index: 999;
+
+        }
+
+        
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none;
+
+            padding: 0 15px;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 主要内容区域 */
+
+        .admin-main {
+
+            padding: var(--spacing-large) 0 60px;
+
+        }
+
+        
+
+        /* 页面标题 */
+
+        .page-header {
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .page-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .page-title i {
+
+            margin-right: 10px;
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-subtitle {
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 设置区域 */
+
+        .settings-section {
+
+            display: grid;
+
+            grid-template-columns: 250px 1fr;
+
+            gap: var(--spacing-large);
+
+        }
+
+        
+
+        /* 设置菜单 */
+
+        .settings-menu {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            height: fit-content;
+
+            position: sticky;
+
+            top: 100px;
+
+        }
+
+        
+
+        .menu-item {
+
+            display: flex;
+
+            align-items: center;
+
+            padding: var(--spacing-medium);
+
+            cursor: pointer;
+
+            transition: background-color 0.3s;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .menu-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .menu-item:hover {
+
+            background-color: #fafafa;
+
+        }
+
+        
+
+        .menu-item.active {
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .menu-item i {
+
+            width: 20px;
+
+            margin-right: 12px;
+
+            font-size: 16px;
+
+        }
+
+        
+
+        /* 设置内容 */
+
+        .settings-content {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .content-header {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+        
+
+        .content-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .content-actions {
+
+            display: flex;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .content-body {
+
+            padding: var(--spacing-large);
+
+        }
+
+        
+
+        /* 表单样式 */
+
+        .form-group {
+
+            margin-bottom: 20px;
+
+        }
+
+        
+
+        .form-label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: 500;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .form-input {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-input:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-textarea {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            min-height: 100px;
+
+            resize: vertical;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-textarea:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-select {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            background-color: white;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-select:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-switch {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+        
+
+        .switch {
+
+            position: relative;
+
+            width: 50px;
+
+            height: 24px;
+
+            background-color: #ccc;
+
+            border-radius: 24px;
+
+            cursor: pointer;
+
+            transition: background-color 0.3s;
+
+        }
+
+        
+
+        .switch.active {
+
+            background-color: var(--primary-color);
+
+        }
+
+        
+
+        .switch::after {
+
+            content: '';
+
+            position: absolute;
+
+            top: 2px;
+
+            left: 2px;
+
+            width: 20px;
+
+            height: 20px;
+
+            background-color: white;
+
+            border-radius: 50%;
+
+            transition: transform 0.3s;
+
+        }
+
+        
+
+        .switch.active::after {
+
+            transform: translateX(26px);
+
+        }
+
+        
+
+        .form-help {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+            margin-top: 5px;
+
+        }
+
+        
+
+        /* 操作按钮 */
+
+        .action-btn {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            white-space: nowrap;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background-color: #cc0010;
+
+        }
+
+        
+
+        .action-btn-secondary {
+
+            background-color: white;
+
+            color: var(--text-dark);
+
+            border: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .action-btn-secondary:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .form-actions {
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid var(--border-color);
+
+        }
+
+        
+
+        /* 系统信息 */
+
+        .system-info {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .info-item {
+
+            background-color: #fafafa;
+
+            border-radius: var(--border-radius);
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .info-label {
+
+            font-size: 14px;
+
+            color: var(--text-light);
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .info-value {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        /* 备份记录 */
+
+        .backup-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .backup-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: var(--spacing-medium);
+
+            background-color: #fafafa;
+
+            border-radius: var(--border-radius);
+
+        }
+
+        
+
+        .backup-info {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .backup-name {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .backup-meta {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .backup-actions {
+
+            display: flex;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .action-btn-small {
+
+            padding: 6px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            background-color: white;
+
+            font-size: 13px;
+
+            color: var(--text-dark);
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .action-btn-small:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        /* 日志列表 */
+
+        .log-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .log-item {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            padding: var(--spacing-medium);
+
+            background-color: #fafafa;
+
+            border-radius: var(--border-radius);
+
+        }
+
+        
+
+        .log-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .log-level {
+
+            display: inline-block;
+
+            padding: 2px 8px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .level-error {
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .level-warning {
+
+            background-color: rgba(255, 193, 7, 0.1);
+
+            color: var(--rating-color);
+
+        }
+
+        
+
+        .level-info {
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--tag-blue);
+
+        }
+
+        
+
+        .log-message {
+
+            font-size: 14px;
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .log-meta {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        /* 响应式调整 */
+
+        @media (max-width: 992px) {
+
+            .settings-section {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .settings-menu {
+
+                position: static;
+
+                display: flex;
+
+                flex-wrap: wrap;
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .menu-item {
+
+                flex: 0 0 auto;
+
+                min-width: 150px;
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-medium);
+
+            }
+
+            
+
+            .page-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            
+
+            .content-actions {
+
+                flex-direction: column;
+
+                gap: var(--spacing-small);
+
+            }
+
+            
+
+            .system-info {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .backup-item {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 10px;
+
+            }
+
+            
+
+            .backup-actions {
+
+                width: 100%;
+
+                justify-content: flex-start;
+
+            }
+
+            
+
+            .nav-tabs {
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .nav-tab {
+
+                flex: 0 0 auto;
+
+                padding: 0 15px;
+
+                font-size: 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+    
+
+    <!-- 主要内容 -->
+
+    <main class="container admin-main">
+
+        <!-- 页面标题 -->
+
+        <div class="page-header">
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+
+                <button class="action-btn" onclick="window.location.href='/main/admin/super_admin_index.html'">
+
+                    <i class="fas fa-arrow-left"></i> 返回控制台
+
+                </button>
+
+                <div>
+
+                    <h1 class="page-title">
+
+                        <i class="fas fa-cogs"></i> 系统设置
+
+                    </h1>
+
+                    <p class="page-subtitle">全局敏感词、基本运营规则、系统参数配置</p>
+
+                </div>
+
+            </div>
+
+            <button class="action-btn" onclick="saveAllSettings()">
+
+                <i class="fas fa-save"></i> 保存所有设置
+
+            </button>
+
+        </div>
+
+        
+
+        <!-- 设置区域 -->
+
+        <section class="settings-section">
+
+            <!-- 设置菜单 -->
+
+            <div class="settings-menu">
+
+                <div class="menu-item active" onclick="switchTab('basic')">
+
+                    <i class="fas fa-sliders-h"></i> 基本设置
+
+                </div>
+
+                <div class="menu-item" onclick="switchTab('sensitive')">
+
+                    <i class="fas fa-shield-alt"></i> 敏感词管理
+
+                </div>
+
+                <div class="menu-item" onclick="switchTab('backup')">
+
+                    <i class="fas fa-database"></i> 数据备份
+
+                </div>
+
+                <div class="menu-item" onclick="switchTab('logs')">
+
+                    <i class="fas fa-file-alt"></i> 系统日志
+
+                </div>
+
+                <div class="menu-item" onclick="switchTab('system')">
+
+                    <i class="fas fa-info-circle"></i> 系统信息
+
+                </div>
+
+            </div>
+
+            
+
+            <!-- 设置内容 -->
+
+            <div class="settings-content">
+
+                <!-- 基本设置 -->
+
+                <div class="tab-content" id="basic-tab">
+
+                    <div class="content-header">
+
+                        <div class="content-title">基本设置</div>
+
+                        <div class="content-actions">
+
+                            <button class="action-btn action-btn-secondary" onclick="resetBasicSettings()">
+
+                                <i class="fas fa-undo"></i> 重置
+
+                            </button>
+
+                            <button class="action-btn" onclick="saveBasicSettings()">
+
+                                <i class="fas fa-save"></i> 保存
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="content-body">
+
+                        <div class="form-group">
+
+                            <label class="form-label">平台名称</label>
+
+                            <input type="text" class="form-input" id="platformName" value="校园食光">
+
+                            <div class="form-help">显示在页面标题和Logo旁边的名称</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">平台域名</label>
+
+                            <input type="text" class="form-input" id="platformDomain" value="campusfood.cn">
+
+                            <div class="form-help">平台的主要域名，用于邮件发送等</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">平台描述</label>
+
+                            <textarea class="form-textarea" id="platformDescription">校园食光是一个校园餐饮服务平台，为用户提供食堂信息浏览、菜品评价、社区互动等功能。</textarea>
+
+                            <div class="form-help">用于SEO和社交媒体分享</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">用户注册</label>
+
+                            <div class="form-switch">
+
+                                <div class="switch active" id="userRegistration" onclick="toggleSwitch(this)"></div>
+
+                                <span>允许用户注册</span>
+
+                            </div>
+
+                            <div class="form-help">关闭后用户无法自行注册，只能由管理员添加</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">内容审核</label>
+
+                            <div class="form-switch">
+
+                                <div class="switch active" id="contentAudit" onclick="toggleSwitch(this)"></div>
+
+                                <span>开启内容审核</span>
+
+                            </div>
+
+                            <div class="form-help">用户发布的内容需要经过审核才能显示</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">评论权限</label>
+
+                            <select class="form-select" id="commentPermission">
+
+                                <option value="all">所有用户</option>
+
+                                <option value="verified">已验证用户</option>
+
+                                <option value="none">禁止评论</option>
+
+                            </select>
+
+                            <div class="form-help">设置谁可以发表评论</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <!-- 敏感词管理 -->
+
+                <div class="tab-content" id="sensitive-tab" style="display: none;">
+
+                    <div class="content-header">
+
+                        <div class="content-title">敏感词管理</div>
+
+                        <div class="content-actions">
+
+                            <button class="action-btn action-btn-secondary" onclick="importSensitiveWords()">
+
+                                <i class="fas fa-upload"></i> 导入
+
+                            </button>
+
+                            <button class="action-btn" onclick="exportSensitiveWords()">
+
+                                <i class="fas fa-download"></i> 导出
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="content-body">
+
+                        <div class="form-group">
+
+                            <label class="form-label">添加敏感词</label>
+
+                            <input type="text" class="form-input" id="newSensitiveWord" placeholder="输入敏感词，多个用逗号分隔">
+
+                            <div class="form-help">支持正则表达式，如：\b(垃圾|骗子)\b</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">敏感词列表</label>
+
+                            <textarea class="form-textarea" id="sensitiveWordsList" rows="10" placeholder="每行一个敏感词">垃圾
+
+骗子
+
+差评
+
+难吃
+
+服务差
+
+价格贵
+
+不推荐
+
+卫生差</textarea>
+
+                            <div class="form-help">每行一个敏感词，支持正则表达式</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">敏感词处理方式</label>
+
+                            <select class="form-select" id="sensitiveWordAction">
+
+                                <option value="replace">替换为***</option>
+
+                                <option value="hide">隐藏内容</option>
+
+                                <option value="review">提交审核</option>
+
+                            </select>
+
+                            <div class="form-help">检测到敏感词时的处理方式</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-actions">
+
+                            <button class="action-btn" onclick="saveSensitiveWords()">
+
+                                <i class="fas fa-save"></i> 保存敏感词
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <!-- 数据备份 -->
+
+                <div class="tab-content" id="backup-tab" style="display: none;">
+
+                    <div class="content-header">
+
+                        <div class="content-title">数据备份</div>
+
+                        <div class="content-actions">
+
+                            <button class="action-btn" onclick="createBackup()">
+
+                                <i class="fas fa-plus"></i> 创建备份
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="content-body">
+
+                        <div class="form-group">
+
+                            <label class="form-label">自动备份</label>
+
+                            <div class="form-switch">
+
+                                <div class="switch active" id="autoBackup" onclick="toggleSwitch(this)"></div>
+
+                                <span>开启自动备份</span>
+
+                            </div>
+
+                            <div class="form-help">定期自动创建数据备份</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">备份频率</label>
+
+                            <select class="form-select" id="backupFrequency">
+
+                                <option value="daily">每天</option>
+
+                                <option value="weekly">每周</option>
+
+                                <option value="monthly">每月</option>
+
+                            </select>
+
+                            <div class="form-help">自动备份的频率</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">备份数量</label>
+
+                            <input type="number" class="form-input" id="backupCount" value="7" min="1" max="30">
+
+                            <div class="form-help">保留的备份数量，超过后将删除最早的备份</div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">备份记录</label>
+
+                            <div class="backup-list">
+
+                                <div class="backup-item">
+
+                                    <div class="backup-info">
+
+                                        <div class="backup-name">系统自动备份</div>
+
+                                        <div class="backup-meta">2024-12-20 03:00 | 125.6 MB</div>
+
+                                    </div>
+
+                                    <div class="backup-actions">
+
+                                        <button class="action-btn-small" onclick="downloadBackup(1)">
+
+                                            <i class="fas fa-download"></i> 下载
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="restoreBackup(1)">
+
+                                            <i class="fas fa-undo"></i> 恢复
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="deleteBackup(1)">
+
+                                            <i class="fas fa-trash"></i> 删除
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="backup-item">
+
+                                    <div class="backup-info">
+
+                                        <div class="backup-name">手动备份</div>
+
+                                        <div class="backup-meta">2024-12-18 14:30 | 124.8 MB</div>
+
+                                    </div>
+
+                                    <div class="backup-actions">
+
+                                        <button class="action-btn-small" onclick="downloadBackup(2)">
+
+                                            <i class="fas fa-download"></i> 下载
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="restoreBackup(2)">
+
+                                            <i class="fas fa-undo"></i> 恢复
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="deleteBackup(2)">
+
+                                            <i class="fas fa-trash"></i> 删除
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="backup-item">
+
+                                    <div class="backup-info">
+
+                                        <div class="backup-name">系统自动备份</div>
+
+                                        <div class="backup-meta">2024-12-17 03:00 | 123.9 MB</div>
+
+                                    </div>
+
+                                    <div class="backup-actions">
+
+                                        <button class="action-btn-small" onclick="downloadBackup(3)">
+
+                                            <i class="fas fa-download"></i> 下载
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="restoreBackup(3)">
+
+                                            <i class="fas fa-undo"></i> 恢复
+
+                                        </button>
+
+                                        <button class="action-btn-small" onclick="deleteBackup(3)">
+
+                                            <i class="fas fa-trash"></i> 删除
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <!-- 系统日志 -->
+
+                <div class="tab-content" id="logs-tab" style="display: none;">
+
+                    <div class="content-header">
+
+                        <div class="content-title">系统日志</div>
+
+                        <div class="content-actions">
+
+                            <button class="action-btn action-btn-secondary" onclick="clearLogs()">
+
+                                <i class="fas fa-trash"></i> 清空日志
+
+                            </button>
+
+                            <button class="action-btn" onclick="exportLogs()">
+
+                                <i class="fas fa-download"></i> 导出日志
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="content-body">
+
+                        <div class="form-group">
+
+                            <label class="form-label">日志级别</label>
+
+                            <select class="form-select" id="logLevel" onchange="filterLogs()">
+
+                                <option value="all">全部</option>
+
+                                <option value="error">错误</option>
+
+                                <option value="warning">警告</option>
+
+                                <option value="info">信息</option>
+
+                            </select>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">日志记录</label>
+
+                            <div class="log-list">
+
+                                <div class="log-item">
+
+                                    <div class="log-info">
+
+                                        <div class="log-message">
+
+                                            <span class="log-level level-error">错误</span>
+
+                                            数据库连接失败，尝试重新连接...
+
+                                        </div>
+
+                                        <div class="log-meta">2024-12-20 14:32:15 | 系统核心</div>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="log-item">
+
+                                    <div class="log-info">
+
+                                        <div class="log-message">
+
+                                            <span class="log-level level-warning">警告</span>
+
+                                            内存使用率超过80%，建议优化
+
+                                        </div>
+
+                                        <div class="log-meta">2024-12-20 13:15:32 | 性能监控</div>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="log-item">
+
+                                    <div class="log-info">
+
+                                        <div class="log-message">
+
+                                            <span class="log-level level-info">信息</span>
+
+                                            用户登录: zhangsan (IP: 192.168.1.100)
+
+                                        </div>
+
+                                        <div class="log-meta">2024-12-20 12:45:18 | 用户认证</div>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="log-item">
+
+                                    <div class="log-info">
+
+                                        <div class="log-message">
+
+                                            <span class="log-level level-info">信息</span>
+
+                                            自动备份完成: backup_20241220.sql
+
+                                        </div>
+
+                                        <div class="log-meta">2024-12-20 03:00:05 | 数据备份</div>
+
+                                    </div>
+
+                                </div>
+
+                                
+
+                                <div class="log-item">
+
+                                    <div class="log-info">
+
+                                        <div class="log-message">
+
+                                            <span class="log-level level-error">错误</span>
+
+                                            邮件发送失败: SMTP连接超时
+
+                                        </div>
+
+                                        <div class="log-meta">2024-12-19 18:22:47 | 邮件服务</div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <!-- 系统信息 -->
+
+                <div class="tab-content" id="system-tab" style="display: none;">
+
+                    <div class="content-header">
+
+                        <div class="content-title">系统信息</div>
+
+                        <div class="content-actions">
+
+                            <button class="action-btn action-btn-secondary" onclick="checkUpdate()">
+
+                                <i class="fas fa-sync-alt"></i> 检查更新
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="content-body">
+
+                        <div class="form-group">
+
+                            <label class="form-label">系统版本</label>
+
+                            <div class="system-info">
+
+                                <div class="info-item">
+
+                                    <div class="info-label">当前版本</div>
+
+                                    <div class="info-value">v2.1.0</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">发布日期</div>
+
+                                    <div class="info-value">2024-12-15</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">更新日志</div>
+
+                                    <div class="info-value">优化性能，修复已知问题</div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">服务器信息</label>
+
+                            <div class="system-info">
+
+                                <div class="info-item">
+
+                                    <div class="info-label">操作系统</div>
+
+                                    <div class="info-value">Ubuntu 20.04 LTS</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">Web服务器</div>
+
+                                    <div class="info-value">Nginx 1.18.0</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">数据库</div>
+
+                                    <div class="info-value">MySQL 8.0.25</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">PHP版本</div>
+
+                                    <div class="info-value">PHP 8.1.0</div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        
+
+                        <div class="form-group">
+
+                            <label class="form-label">系统状态</label>
+
+                            <div class="system-info">
+
+                                <div class="info-item">
+
+                                    <div class="info-label">CPU使用率</div>
+
+                                    <div class="info-value">35%</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">内存使用率</div>
+
+                                    <div class="info-value">68%</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">磁盘使用率</div>
+
+                                    <div class="info-value">42%</div>
+
+                                </div>
+
+                                <div class="info-item">
+
+                                    <div class="info-label">运行时间</div>
+
+                                    <div class="info-value">15天 8小时</div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/admin/admin-permission.js"></script>
+
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+
+    
+
+    <script>
+
+        // 页面初始化
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                window.DynamicNavbar.updateNavbar('super_admin_settings.html');
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+        });
+
+        
+
+        // 切换标签页
+
+        function switchTab(tabName) {
+
+            // 更新菜单状态
+
+            const menuItems = document.querySelectorAll('.menu-item');
+
+            menuItems.forEach(item => {
+
+                item.classList.remove('active');
+
+            });
+
+            event.target.closest('.menu-item').classList.add('active');
+
+            
+
+            // 隐藏所有标签页
+
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabContents.forEach(tab => {
+
+                tab.style.display = 'none';
+
+            });
+
+            
+
+            // 显示选中的标签页
+
+            document.getElementById(`${tabName}-tab`).style.display = 'block';
+
+        }
+
+        
+
+        // 切换开关
+
+        function toggleSwitch(element) {
+
+            element.classList.toggle('active');
+
+        }
+
+        
+
+        // 保存基本设置
+
+        function saveBasicSettings() {
+
+            const settings = {
+
+                platformName: document.getElementById('platformName').value,
+
+                platformDomain: document.getElementById('platformDomain').value,
+
+                platformDescription: document.getElementById('platformDescription').value,
+
+                userRegistration: document.getElementById('userRegistration').classList.contains('active'),
+
+                contentAudit: document.getElementById('contentAudit').classList.contains('active'),
+
+                commentPermission: document.getElementById('commentPermission').value
+
+            };
+
+            
+
+            // 模拟API调用
+
+            console.log('保存基本设置:', settings);
+
+            alert('基本设置保存成功！');
+
+        }
+
+        
+
+        // 重置基本设置
+
+        function resetBasicSettings() {
+
+            if (confirm('确定要重置基本设置吗？这将恢复所有设置到默认值。')) {
+
+                // 重置表单
+
+                document.getElementById('platformName').value = '校园食光';
+
+                document.getElementById('platformDomain').value = 'campusfood.cn';
+
+                document.getElementById('platformDescription').value = '校园食光是一个校园餐饮服务平台，为用户提供食堂信息浏览、菜品评价、社区互动等功能。';
+
+                document.getElementById('userRegistration').classList.add('active');
+
+                document.getElementById('contentAudit').classList.add('active');
+
+                document.getElementById('commentPermission').value = 'all';
+
+                
+
+                alert('基本设置已重置！');
+
+            }
+
+        }
+
+        
+
+        // 保存敏感词
+
+        function saveSensitiveWords() {
+
+            const newWord = document.getElementById('newSensitiveWord').value.trim();
+
+            const wordsList = document.getElementById('sensitiveWordsList').value;
+
+            const action = document.getElementById('sensitiveWordAction').value;
+
+            
+
+            // 处理新添加的敏感词
+
+            if (newWord) {
+
+                const newWords = newWord.split(',').map(word => word.trim()).filter(word => word);
+
+                newWords.forEach(word => {
+
+                    if (!wordsList.includes(word)) {
+
+                        wordsList += (wordsList ? '\n' : '') + word;
+
+                    }
+
+                });
+
+                document.getElementById('sensitiveWordsList').value = wordsList;
+
+                document.getElementById('newSensitiveWord').value = '';
+
+            }
+
+            
+
+            // 模拟API调用
+
+            console.log('保存敏感词:', { wordsList, action });
+
+            alert('敏感词保存成功！');
+
+        }
+
+        
+
+        // 导入敏感词
+
+        function importSensitiveWords() {
+
+            alert('导入敏感词功能开发中...\n支持从CSV或TXT文件导入');
+
+        }
+
+        
+
+        // 导出敏感词
+
+        function exportSensitiveWords() {
+
+            const wordsList = document.getElementById('sensitiveWordsList').value;
+
+            const blob = new Blob([wordsList], { type: 'text/plain' });
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+
+            a.href = url;
+
+            a.download = 'sensitive_words.txt';
+
+            a.click();
+
+            URL.revokeObjectURL(url);
+
+        }
+
+        
+
+        // 创建备份
+
+        function createBackup() {
+
+            if (confirm('确定要创建新的数据备份吗？这可能需要几分钟时间。')) {
+
+                // 模拟API调用
+
+                console.log('创建数据备份');
+
+                alert('数据备份创建成功！');
+
+                
+
+                // 刷新备份列表
+
+                location.reload();
+
+            }
+
+        }
+
+        
+
+        // 下载备份
+
+        function downloadBackup(backupId) {
+
+            alert(`下载备份 #${backupId}\n实际开发中会开始下载备份文件`);
+
+        }
+
+        
+
+        // 恢复备份
+
+        function restoreBackup(backupId) {
+
+            if (confirm(`确定要恢复备份 #${backupId} 吗？这将覆盖当前数据！`)) {
+
+                // 模拟API调用
+
+                console.log(`恢复备份 ${backupId}`);
+
+                alert('数据恢复成功！系统将在5秒后重启。');
+
+            }
+
+        }
+
+        
+
+        // 删除备份
+
+        function deleteBackup(backupId) {
+
+            if (confirm(`确定要删除备份 #${backupId} 吗？此操作不可恢复！`)) {
+
+                // 模拟API调用
+
+                console.log(`删除备份 ${backupId}`);
+
+                alert('备份删除成功！');
+
+                
+
+                // 刷新备份列表
+
+                location.reload();
+
+            }
+
+        }
+
+        
+
+        // 筛选日志
+
+        function filterLogs() {
+
+            const level = document.getElementById('logLevel').value;
+
+            const logItems = document.querySelectorAll('.log-item');
+
+            
+
+            logItems.forEach(item => {
+
+                if (level === 'all') {
+
+                    item.style.display = 'flex';
+
+                } else {
+
+                    const levelElement = item.querySelector('.log-level');
+
+                    const itemLevel = levelElement.className.replace('log-level level-', '');
+
+                    item.style.display = itemLevel === level ? 'flex' : 'none';
+
+                }
+
+            });
+
+        }
+
+        
+
+        // 清空日志
+
+        function clearLogs() {
+
+            if (confirm('确定要清空所有日志吗？此操作不可恢复！')) {
+
+                // 模拟API调用
+
+                console.log('清空日志');
+
+                alert('日志清空成功！');
+
+                
+
+                // 刷新日志列表
+
+                location.reload();
+
+            }
+
+        }
+
+        
+
+        // 导出日志
+
+        function exportLogs() {
+
+            alert('导出日志功能开发中...\n即将支持导出为CSV或TXT格式');
+
+        }
+
+        
+
+        // 检查更新
+
+        function checkUpdate() {
+
+            alert('正在检查更新...\n\n当前版本: v2.1.0\n最新版本: v2.1.0\n\n您的系统已是最新版本！');
+
+        }
+
+        
+
+        // 保存所有设置
+
+        function saveAllSettings() {
+
+            if (confirm('确定要保存所有设置吗？')) {
+
+                // 保存各个标签页的设置
+
+                saveBasicSettings();
+
+                saveSensitiveWords();
+
+                
+
+                alert('所有设置保存成功！');
+
+            }
+
+        }
+
+        // 返回控制台
+        function navigateBackToConsole() {
+            // 检查是否在iframe中
+            if (window.self !== window.top) {
+                // 在iframe中，重新加载控制台主页
+                window.location.href = '/main/admin/super_admin_index.html?shell=1';
+            } else {
+                // 不在iframe中，直接跳转
+                window.location.href = '/main/admin/super_admin_index.html';
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

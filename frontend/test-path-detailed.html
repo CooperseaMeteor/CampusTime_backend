@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路径测试 - 校园食光</title>
+    <script src="/config.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>路径生成测试</h1>
+    
+    <div class="test-section">
+        <h2>当前环境信息</h2>
+        <div class="test-result" id="current-path"></div>
+        <div class="test-result" id="base-url"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>登录页面路径</h2>
+        <div class="test-result" id="user-login-path"></div>
+        <div class="test-result" id="admin-login-path"></div>
+        <div class="test-result" id="register-path"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>主页面路径</h2>
+        <div class="test-result" id="user-index-path"></div>
+        <div class="test-result" id="admin-index-path"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>路径验证</h2>
+        <div class="test-result" id="path-validation"></div>
+    </div>
+    
+    <script>
+        // 显示当前路径
+        const currentPath = window.location.pathname;
+        document.getElementById('current-path').innerHTML = `当前路径: ${currentPath}`;
+        
+        // 显示基础URL
+        const baseUrl = CONFIG.getBaseUrl();
+        document.getElementById('base-url').innerHTML = `基础URL: ${baseUrl}`;
+        
+        // 显示登录页面路径
+        const userLoginPath = LOGIN_ROUTES.getAbsoluteUserLogin();
+        document.getElementById('user-login-path').innerHTML = `用户登录路径: ${userLoginPath}`;
+        
+        const adminLoginPath = LOGIN_ROUTES.getAbsoluteAdminLogin();
+        document.getElementById('admin-login-path').innerHTML = `管理员登录路径: ${adminLoginPath}`;
+        
+        const registerPath = LOGIN_ROUTES.getAbsoluteRegister();
+        document.getElementById('register-path').innerHTML = `注册页面路径: ${registerPath}`;
+        
+        // 显示主页面路径
+        const userIndexPath = USER_ROUTES.getAbsoluteIndex();
+        document.getElementById('user-index-path').innerHTML = `用户首页路径: ${userIndexPath}`;
+        
+        const adminIndexPath = ADMIN_ROUTES.getAbsoluteIndex();
+        document.getElementById('admin-index-path').innerHTML = `管理员首页路径: ${adminIndexPath}`;
+        
+        // 路径验证
+        const validation = document.getElementById('path-validation');
+        let validationHtml = '<h3>路径验证结果:</h3>';
+        
+        // 检查路径是否包含重复的login或main
+        if (userLoginPath.includes('/login/login/') || adminLoginPath.includes('/login/login/')) {
+            validationHtml += '<div class="error">错误: 登录路径包含重复的/login/前缀</div>';
+        } else {
+            validationHtml += '<div class="success">正确: 登录路径没有重复前缀</div>';
+        }
+        
+        // 检查主页面路径
+        if (userIndexPath.includes('/main/main/') || adminIndexPath.includes('/main/main/')) {
+            validationHtml += '<div class="error">错误: 主页面路径包含重复的/main/前缀</div>';
+        } else {
+            validationHtml += '<div class="success">正确: 主页面路径没有重复前缀</div>';
+        }
+        
+        validation.innerHTML = validationHtml;
+    </script>
+</body>
+</html>

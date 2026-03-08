@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑饮食档案 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/navigation-manager.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局样式 - 遵循设计规范 */
+        :root {
+            --primary-color: #e60012; /* 大众点评红 */
+            --bg-gray: #f8f8f8; /* 背景灰 */
+            --border-color: #e5e5e5; /* 浅灰边框 */
+            --text-dark: #333; /* 深灰文字 */
+            --text-light: #999; /* 浅灰文字 */
+            --status-open: #52c41a; /* 营业中 */
+            --status-closed: #ff4d4f; /* 已关闭 */
+            --rating-color: #ffc107; /* 评分金色 */
+            --tag-blue: #1890ff; /* 标签蓝 */
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        /* 顶部导航栏 */
+        .global-nav {
+            background-color: var(--primary-color);
+            height: 45px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            margin-left: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover {
+            opacity: 0.9;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: white;
+        }
+        
+        /* 主导航 - 改为超链接样式 */
+        .main-nav {
+            background-color: white;
+            height: 50px;
+            margin-top: 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 主导航项改为a标签样式 */
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none; /* 移除下划线 */
+        }
+        
+        /* 悬停状态 */
+        .nav-tab:hover {
+            color: var(--primary-color);
+            text-decoration: none; /* 确保悬停时没有下划线 */
+        }
+        
+        /* 当前页面激活状态 */
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-top: var(--spacing-large);
+            padding-bottom: 50px;
+        }
+        
+        /* 编辑卡片 */
+        .edit-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-large);
+            padding-bottom: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .edit-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .back-btn {
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+        
+        .back-btn i {
+            margin-right: 5px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: var(--spacing-medium);
+            font-size: 15px;
+        }
+        
+        .form-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+        }
+        
+        .form-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .form-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .form-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .form-option label {
+            cursor: pointer;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.2);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.2);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #d5000f;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e8e8e8;
+            color: var(--text-dark);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-medium);
+            justify-content: flex-end;
+            margin-top: var(--spacing-large);
+            padding-top: var(--spacing-medium);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-medium);
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .nav-tab {
+                min-width: 100px;
+                font-size: 14px;
+            }
+            
+            .edit-card {
+                padding: var(--spacing-medium);
+            }
+            
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* 工具类 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <div class="container">
+        <div class="main-content">
+            <!-- 编辑卡片 -->
+            <div class="edit-card">
+                <div class="edit-header">
+                    <h2 class="edit-title">编辑饮食档案</h2>
+                    <div class="back-btn" onclick="Router.toUserProfile()">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </div>
+                </div>
+                
+                <form id="dietProfileForm">
+                    <!-- 饮食偏好 -->
+                    <div class="form-group">
+                        <label class="form-label">饮食偏好</label>
+                        <div class="form-options">
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-spicy" name="preferences" value="偏爱辣味">
+                                <label for="preference-spicy">偏爱辣味</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-sweet" name="preferences" value="偏爱甜味">
+                                <label for="preference-sweet">偏爱甜味</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-sour" name="preferences" value="偏爱酸味">
+                                <label for="preference-sour">偏爱酸味</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-salty" name="preferences" value="偏爱咸味">
+                                <label for="preference-salty">偏爱咸味</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-noodle" name="preferences" value="喜欢面食">
+                                <label for="preference-noodle">喜欢面食</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-rice" name="preferences" value="喜欢米饭">
+                                <label for="preference-rice">喜欢米饭</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-vegetarian" name="preferences" value="素食主义">
+                                <label for="preference-vegetarian">素食主义</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="preference-meat" name="preferences" value="喜欢肉类">
+                                <label for="preference-meat">喜欢肉类</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 预算范围 -->
+                    <div class="form-group">
+                        <label class="form-label">预算范围</label>
+                        <div class="form-options">
+                            <div class="form-option">
+                                <input type="radio" id="budget-low" name="budget" value="预算较低">
+                                <label for="budget-low">预算较低（< ¥10）</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="radio" id="budget-medium" name="budget" value="预算适中">
+                                <label for="budget-medium">预算适中（¥10-¥20）</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="radio" id="budget-high" name="budget" value="预算较高">
+                                <label for="budget-high">预算较高（> ¥20）</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 饮食风格 -->
+                    <div class="form-group">
+                        <label class="form-label">饮食风格</label>
+                        <div class="form-options">
+                            <div class="form-option">
+                                <input type="checkbox" id="style-healthy" name="styles" value="健康饮食">
+                                <label for="style-healthy">健康饮食</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="style-fast" name="styles" value="快餐爱好者">
+                                <label for="style-fast">快餐爱好者</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="style-traditional" name="styles" value="传统美食">
+                                <label for="style-traditional">传统美食</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="style-western" name="styles" value="西式餐饮">
+                                <label for="style-western">西式餐饮</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="style-asian" name="styles" value="亚洲美食">
+                                <label for="style-asian">亚洲美食</label>
+                            </div>
+                            <div class="form-option">
+                                <input type="checkbox" id="style-innovation" name="styles" value="创新菜品">
+                                <label for="style-innovation">创新菜品</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 其他偏好 -->
+                    <div class="form-group">
+                        <label class="form-label">其他偏好</label>
+                        <textarea class="form-textarea" id="other-preferences" placeholder="请输入其他饮食偏好或特殊要求..."></textarea>
+                    </div>
+                    
+                    <!-- 表单操作 -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="Router.toUserProfile()">取消</button>
+                        <button type="submit" class="btn">保存修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载当前饮食档案信息
+        function loadCurrentDietProfile() {
+            // 这里可以从本地存储或API加载当前饮食档案信息
+            // 示例：从本地存储加载
+            const dietProfile = localStorage.getItem('dietProfile');
+            if (dietProfile) {
+                try {
+                    const profile = JSON.parse(dietProfile);
+                    
+                    // 加载偏好
+                    if (profile.preferences) {
+                        profile.preferences.forEach(preference => {
+                            const checkbox = document.querySelector(`input[name="preferences"][value="${preference}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    }
+                    
+                    // 加载预算
+                    if (profile.budget) {
+                        const radio = document.querySelector(`input[name="budget"][value="${profile.budget}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                    
+                    // 加载风格
+                    if (profile.styles) {
+                        profile.styles.forEach(style => {
+                            const checkbox = document.querySelector(`input[name="styles"][value="${style}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    }
+                    
+                    // 加载其他偏好
+                    if (profile.other) {
+                        document.getElementById('other-preferences').value = profile.other;
+                    }
+                } catch (error) {
+                    console.error('加载饮食档案失败:', error);
+                }
+            } else {
+                // 设置默认值
+                document.getElementById('preference-spicy').checked = true;
+                document.getElementById('preference-noodle').checked = true;
+                document.getElementById('budget-medium').checked = true;
+                document.getElementById('style-healthy').checked = true;
+            }
+        }
+        
+        // 保存饮食档案信息
+        function saveDietProfile() {
+            // 收集表单数据
+            const preferences = Array.from(document.querySelectorAll('input[name="preferences"]:checked')).map(input => input.value);
+            const budget = document.querySelector('input[name="budget"]:checked')?.value || '预算适中';
+            const styles = Array.from(document.querySelectorAll('input[name="styles"]:checked')).map(input => input.value);
+            const other = document.getElementById('other-preferences').value;
+            
+            // 构建饮食档案对象
+            const dietProfile = {
+                preferences,
+                budget,
+                styles,
+                other
+            };
+            
+            // 保存到本地存储
+            localStorage.setItem('dietProfile', JSON.stringify(dietProfile));
+            
+            // 显示成功提示
+            alert('饮食档案更新成功！');
+            
+            // 跳回个人资料页面
+            Router.toUserProfile();
+        }
+        
+        // 表单提交处理
+        document.getElementById('dietProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveDietProfile();
+        });
+        
+        // 页面加载时加载当前饮食档案
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentDietProfile();
+        });
+    </script>
+</body>
+</html>

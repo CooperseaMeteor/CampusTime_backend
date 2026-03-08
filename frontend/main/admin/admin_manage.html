@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员管理 - 校园食光</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-modals.css">
+    <style>
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --danger-color: #ff4d4f;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-large);
+        }
+
+        /* 页面头部 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-large);
+            background: white;
+            padding: var(--spacing-large);
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-medium);
+            align-items: center;
+        }
+
+        /* 搜索框 */
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+            background: white;
+            padding: var(--spacing-small) var(--spacing-medium);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            width: 300px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .search-box button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: -1px;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-header {
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-light);
+            background: var(--bg-gray);
+        }
+
+        .search-result-item {
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-gray);
+        }
+
+        .result-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .result-name strong {
+            color: var(--primary-color);
+        }
+
+        .result-info {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .result-node {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .search-empty {
+            padding: var(--spacing-large);
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        /* 按钮 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #c70010;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            gap: var(--spacing-large);
+        }
+
+        .admin-list-wrapper {
+            flex: 1;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 树结构 */
+        #adminTreeContainer {
+            padding: var(--spacing-large);
+        }
+
+        .tree-section {
+            margin-bottom: var(--spacing-large);
+        }
+
+        .tree-section-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            padding: var(--spacing-medium) 0 var(--spacing-small) 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: var(--spacing-medium);
+        }
+
+        .tree-node {
+            margin-bottom: var(--spacing-small);
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-small) var(--spacing-medium);
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .node-header:hover {
+            background: var(--bg-gray);
+        }
+
+        .expand-btn {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: var(--spacing-small);
+            color: var(--text-light);
+            font-size: 12px;
+        }
+
+        .node-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .node-count {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-left: var(--spacing-small);
+        }
+
+        .node-children {
+            transition: display 0.3s;
+        }
+
+        /* 管理员行 */
+        .admin-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-medium);
+            border-radius: 4px;
+            margin: var(--spacing-small) 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .admin-row:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .admin-row.disabled {
+            opacity: 0.6;
+            background: #fafafa;
+        }
+
+        .admin-row.highlight {
+            border-color: var(--primary-color);
+            background: #fff5f5;
+        }
+
+        .admin-info {
+            flex: 1;
+        }
+
+        .admin-name {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .admin-identity {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .identity-label {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .identity-suffix {
+            background: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .suffix-pending {
+            background: var(--danger-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+
+        .admin-position {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: var(--spacing-small);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-sm:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-edit {
+            color: var(--primary-color);
+        }
+
+        .btn-transfer {
+            color: var(--success-color);
+        }
+
+        .btn-more {
+            color: var(--text-light);
+        }
+
+        .more-menu {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+        }
+
+        .menu-item {
+            width: 100%;
+            padding: var(--spacing-medium);
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: background 0.2s;
+        }
+
+        .menu-item:first-child {
+            border-radius: 4px 4px 0 0;
+        }
+
+        .menu-item:last-child {
+            border-radius: 0 0 4px 4px;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-gray);
+        }
+
+        /* 侧栏 */
+        .created-admins-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 350px;
+            background: white;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .created-admins-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-large);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .sidebar-close {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-light);
+        }
+
+        .sidebar-close:hover {
+            color: var(--text-dark);
+        }
+
+        .created-admins-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-small);
+        }
+
+        .created-admin-item {
+            padding: var(--spacing-medium);
+            margin-bottom: var(--spacing-small);
+            background: var(--bg-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .created-admin-item:hover {
+            background: #e8e8e8;
+        }
+
+        .created-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .created-admin-name {
+            font-weight: 500;
+        }
+
+        .created-admin-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .created-admin-info {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .created-admin-identity {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .created-admin-role {
+            color: var(--text-light);
+        }
+
+        .created-admin-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .created-admin-actions button {
+            flex: 1;
+            padding: 6px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .created-admin-actions button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .created-empty {
+            padding: var(--spacing-large);
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .container {
+                padding: var(--spacing-medium);
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .created-admins-sidebar {
+                width: 100%;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                gap: var(--spacing-small);
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <h1 class="page-title">管理员管理</h1>
+            <div class="header-actions">
+                <div class="search-box" style="position: relative;">
+                    <input type="text" id="adminSearch" placeholder="搜索管理员名称...">
+                    <button id="searchBtn" type="button" title="搜索">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button id="clearSearchBtn" type="button" title="清空" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+
+                <button class="btn-secondary" id="myCreatedBtn">
+                    <i class="fas fa-history"></i> 我的创建
+                </button>
+                <button class="btn-primary" id="createAdminBtn">
+                    <i class="fas fa-plus"></i> 新增管理员
+                </button>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="admin-list-wrapper">
+                <div id="adminTreeContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 我的创建侧栏 -->
+    <div id="createdAdminsSidebar" class="created-admins-sidebar">
+        <div class="sidebar-header">
+            <h3>我的创建</h3>
+            <button class="sidebar-close" title="关闭">✕</button>
+        </div>
+        <div id="createdAdminsList" class="created-admins-list"></div>
+    </div>
+
+    <!-- 模态框容器 -->
+    <div id="modalContainer"></div>
+
+    <!-- 导入脚本 -->
+    <script src="admin-modals.js"></script>
+    <script src="admin-search-manager.js"></script>
+    <script>
+        // 初始化模态框管理器
+        const adminModalMgr = new AdminModalManager();
+
+        // 初始化搜索管理器
+        const adminSearchMgr = new AdminSearchManager();
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载管理员列表
+            loadAdminList();
+
+            // 绑定事件
+            bindEvents();
+        });
+
+        /**
+         * 加载管理员列表
+         */
+        function loadAdminList() {
+            const token = localStorage.getItem('adminToken');
+            const positionId = localStorage.getItem('adminActivePositionId');
+
+            fetch('/api/admin/list', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Active-Position-Id': positionId
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        renderAdminTree(data.data);
+                    } else {
+                        console.error('加载失败:', data.message);
+                        // 使用 mock 数据
+                        renderAdminTree(getMockAdminTree());
+                    }
+                })
+                .catch(err => {
+                    console.error('请求失败:', err);
+                    // 使用 mock 数据
+                    renderAdminTree(getMockAdminTree());
+                });
+        }
+
+        /**
+         * 渲染管理员树
+         */
+        function renderAdminTree(treeData) {
+            const container = document.getElementById('adminTreeContainer');
+            if (!container) return;
+
+            let html = '';
+
+            // 未分配的管理员
+            const unassigned = treeData.filter(node => node.type === 'unassigned');
+            if (unassigned.length > 0) {
+                html += '<div class="tree-section">';
+                html += '<div class="tree-section-title">待分配</div>';
+                unassigned.forEach(admin => {
+                    html += renderAdminNode(admin, 0);
+                });
+                html += '</div>';
+            }
+
+            // 学校及其下属
+            const schools = treeData.filter(node => node.type === 'school');
+            schools.forEach(school => {
+                html += renderSchoolNode(school, 0);
+            });
+
+            container.innerHTML = html;
+            bindTreeEvents();
+        }
+
+        /**
+         * 渲染学校节点
+         */
+        function renderSchoolNode(school, indent) {
+            let html = `<div class="tree-node school-node" data-node-id="school_${school.id}" data-indent="${indent}">`;
+            html += `
+                <div class="node-header" style="padding-left: ${indent * 20}px">
+                    <span class="expand-btn">▶</span>
+                    <span class="node-name">${school.name}</span>
+                    <span class="node-count">(${school.merchantCount || 0})</span>
+                </div>
+            `;
+
+            const hasAdmins = school.admins && school.admins.length > 0;
+            const hasMerchants = school.children && school.children.length > 0;
+
+            if (hasAdmins || hasMerchants) {
+                html += '<div class="node-children" style="display: none;">';
+                if (hasAdmins) {
+                    school.admins.forEach(admin => {
+                        html += renderAdminNode(admin, indent + 1);
+                    });
+                }
+                if (hasMerchants) {
+                    school.children.forEach(merchant => {
+                        html += renderMerchantNode(merchant, indent + 1);
+                    });
+                }
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        /**
+         * 渲染商户节点
+         */
+        function renderMerchantNode(merchant, indent) {
+            let html = `<div class="tree-node merchant-node" data-node-id="merchant_${merchant.id}" data-indent="${indent}">`;
+            html += `
+                <div class="node-header" style="padding-left: ${indent * 20}px">
+                    <span class="expand-btn">▶</span>
+                    <span class="node-name">${merchant.name}</span>
+                    <span class="node-count">(${merchant.stallCount || 0})</span>
+                </div>
+            `;
+
+            const hasAdmins = merchant.admins && merchant.admins.length > 0;
+            const hasStalls = merchant.children && merchant.children.length > 0;
+
+            if (hasAdmins || hasStalls) {
+                html += '<div class="node-children" style="display: none;">';
+                if (hasAdmins) {
+                    merchant.admins.forEach(admin => {
+                        html += renderAdminNode(admin, indent + 1);
+                    });
+                }
+                if (hasStalls) {
+                    merchant.children.forEach(stall => {
+                        html += renderStallNode(stall, indent + 1);
+                    });
+                }
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        /**
+         * 渲染档口节点
+         */
+        function renderStallNode(stall, indent) {
+            let html = `<div class="tree-node stall-node" data-node-id="stall_${stall.id}" data-indent="${indent}">`;
+            html += `
+                <div class="node-header" style="padding-left: ${indent * 20}px">
+                    <span class="expand-btn">▶</span>
+                    <span class="node-name">${stall.name}</span>
+                    <span class="node-count">(${stall.adminCount || 0})</span>
+                </div>
+            `;
+
+            if (stall.admins && stall.admins.length > 0) {
+                html += '<div class="node-children" style="display: none;">';
+                stall.admins.forEach(admin => {
+                    html += renderAdminNode(admin, indent + 1);
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        /**
+         * 渲染管理员节点
+         */
+        function renderAdminNode(admin, indent) {
+            const statusClass = admin.status === 'disabled' ? 'disabled' : 'active';
+            const suffixHtml = admin.identitySuffix ? 
+                `<span class="identity-suffix">${admin.identitySuffix}</span>` : '';
+            const suffixStatusHtml = admin.identitySuffixStatus === 'pending_review' ?
+                `<span class="suffix-pending">待审核</span>` : '';
+
+            let html = `
+                <div class="admin-row ${statusClass}" data-admin-id="${admin.id}" data-admin-name="${admin.name}" data-identity-suffix="${admin.identitySuffix || ''}" data-identity-suffix-status="${admin.identitySuffixStatus || ''}" style="padding-left: ${indent * 20}px">
+                    <div class="admin-info">
+                        <span class="admin-name">${admin.name}</span>
+                        <div class="admin-identity">
+                            <span class="identity-label">${admin.identityLabel}</span>
+                            ${suffixHtml}
+                            ${suffixStatusHtml}
+                        </div>
+                        <span class="admin-position">${admin.position}</span>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-sm btn-edit" data-id="${admin.id}">编辑</button>
+                        <button class="btn-sm btn-transfer" data-id="${admin.id}">调岗</button>
+                        <button class="btn-sm btn-more" data-id="${admin.id}">更多</button>
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        /**
+         * 绑定树节点事件
+         */
+        function bindTreeEvents() {
+            // 展开/折叠事件
+            document.querySelectorAll('.node-header .expand-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const nodeEl = this.closest('.tree-node');
+                    const childrenEl = nodeEl.querySelector('.node-children');
+                    
+                    if (childrenEl) {
+                        const isExpanded = childrenEl.style.display !== 'none';
+                        childrenEl.style.display = isExpanded ? 'none' : 'block';
+                        this.textContent = isExpanded ? '▶' : '▼';
+                    }
+                });
+            });
+
+            // 管理员操作按钮
+            document.querySelectorAll('.admin-row .btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const adminId = btn.getAttribute('data-id');
+                    adminModalMgr.openAdminForm('edit', { id: adminId });
+                });
+            });
+
+            document.querySelectorAll('.admin-row .btn-transfer').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const adminId = btn.getAttribute('data-id');
+                    const adminEl = btn.closest('.admin-row');
+                    const name = adminEl.querySelector('.admin-name').textContent;
+                    const position = adminEl.querySelector('.admin-position').textContent;
+                    adminModalMgr.openTransferModal(adminId, name, position);
+                });
+            });
+
+            document.querySelectorAll('.admin-row .btn-more').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const adminId = btn.getAttribute('data-id');
+                    showMoreMenu(adminId, e.currentTarget);
+                });
+            });
+        }
+
+        /**
+         * 绑定页面事件
+         */
+        function bindEvents() {
+            // "新增管理员"按钮
+            const createBtn = document.getElementById('createAdminBtn');
+            if (createBtn) {
+                createBtn.addEventListener('click', () => {
+                    adminModalMgr.openAdminForm('create');
+                });
+            }
+
+            // "我的创建"按钮
+            const myCreatedBtn = document.getElementById('myCreatedBtn');
+            if (myCreatedBtn) {
+                myCreatedBtn.addEventListener('click', () => {
+                    adminSearchMgr.showSidebar();
+                });
+            }
+        }
+
+        /**
+         * 显示更多菜单
+         */
+        function showMoreMenu(adminId, trigger) {
+            const menu = document.createElement('div');
+            menu.className = 'more-menu';
+            menu.innerHTML = `
+                <button class="menu-item" data-action="view">查看详情</button>
+                <button class="menu-item" data-action="permissions">权限管理</button>
+                <button class="menu-item" data-action="approve">审核身份标签</button>
+                <button class="menu-item" data-action="disable">禁用账号</button>
+                <button class="menu-item" data-action="audit">查看操作日志</button>
+            `;
+
+            // 定位菜单
+            const rect = trigger.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.bottom + 5) + 'px';
+            menu.style.left = (rect.right - 150) + 'px';
+            menu.style.zIndex = '1000';
+
+            document.body.appendChild(menu);
+
+            menu.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const action = e.target.getAttribute('data-action');
+                    handleAdminAction(adminId, action);
+                    menu.remove();
+                });
+            });
+
+            // 点击其他地方关闭菜单
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu() {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                });
+            }, 0);
+        }
+
+        /**
+         * 处理管理员操作
+         */
+        function handleAdminAction(adminId, action) {
+            const adminRow = document.querySelector(`.admin-row[data-admin-id="${adminId}"]`);
+            const adminName = adminRow?.getAttribute('data-admin-name') || '';
+            const suffix = adminRow?.getAttribute('data-identity-suffix') || '';
+            const suffixStatus = adminRow?.getAttribute('data-identity-suffix-status') || '';
+            switch (action) {
+                case 'view':
+                    adminModalMgr.openAdminDetailModal(adminId);
+                    break;
+                case 'approve':
+                    if (suffixStatus !== 'pending_review' || !suffix) {
+                        alert('该管理员没有待审核的身份后缀');
+                        return;
+                    }
+                    adminModalMgr.openIdentitySuffixReviewModal(adminId, adminName || `管理员#${adminId}`, suffix);
+                    break;
+                case 'permissions':
+                    adminModalMgr.openPermissionManageModal(adminId);
+                    break;
+                case 'disable':
+                    if (confirm('确定禁用此管理员吗？')) {
+                        disableAdmin(adminId);
+                    }
+                    break;
+                case 'audit':
+                    adminModalMgr.openAuditLogModal(adminId);
+                    break;
+            }
+        }
+
+        /**
+         * 禁用管理员
+         */
+        function disableAdmin(adminId) {
+            const token = localStorage.getItem('adminToken');
+            const positionId = localStorage.getItem('adminActivePositionId');
+
+            fetch(`/api/admin/${adminId}/disable`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Active-Position-Id': positionId,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('禁用成功');
+                        loadAdminList();
+                    } else {
+                        alert('禁用失败：' + data.message);
+                    }
+                })
+                .catch(err => {
+                    alert('请求失败：' + err.message);
+                });
+        }
+
+        /**
+         * 获取 mock 管理员树
+         */
+        function getMockAdminTree() {
+            return [
+                {
+                    type: 'school',
+                    id: 1,
+                    name: '一饭',
+                    merchantCount: 2,
+                    children: [
+                        {
+                            type: 'merchant',
+                            id: 10,
+                            name: '楼层A',
+                            stallCount: 3,
+                            children: [
+                                {
+                                    type: 'stall',
+                                    id: 100,
+                                    name: '麻辣烫档',
+                                    adminCount: 2,
+                                    admins: [
+                                        {
+                                            type: 'admin',
+                                            id: 1001,
+                                            name: '张三',
+                                            identityLabel: '教职工',
+                                            identitySuffix: '工作室主任',
+                                            identitySuffixStatus: 'approved',
+                                            position: '档口管理员',
+                                            status: 'active'
+                                        },
+                                        {
+                                            type: 'admin',
+                                            id: 1002,
+                                            name: '李四',
+                                            identityLabel: '工作人员',
+                                            position: '档口员工',
+                                            status: 'active'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ];
+        }
+    </script>
+</body>
+</html>

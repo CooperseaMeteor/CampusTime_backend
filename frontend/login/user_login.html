@@ -1,241 +1,242 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校园食光 - 用户登录</title>
-    <style>
-        /* 基础样式重置 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #fff5eb, #f8f9fa);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        /* 登录卡片样式 */
-        .login-container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.2);
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        /* Logo和标题 */
-        .logo {
-            font-size: 32px;
-            color: #FF6B35;
-            margin-bottom: 15px;
-        }
-        
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .subtitle {
-            color: #777;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        /* 表单样式 */
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-control:focus {
-            border-color: #FF6B35;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
-        }
-        
-        /* 记住我和忘记密码 */
-        .extra-options {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-        }
-        
-        .remember-me input {
-            margin-right: 5px;
-        }
-        
-        .forgot-password a {
-            color: #FF6B35;
-            text-decoration: none;
-        }
-        
-        /* 按钮样式 */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background-color: #FF6B35;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #e55a2a;
-        }
-        
-        /* 底部链接 */
-        .register-link {
-            margin-top: 20px;
-            color: #777;
-            font-size: 14px;
-        }
-        
-        .register-link a {
-            color: #FF6B35;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        /* 管理员入口 */
-        .admin-link {
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        
-        .admin-link a {
-            color: #1890FF;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 20px;
-                margin: 10px;
-            }
-        }
-    </style>
-    <script src="/config.js"></script>
-    <script src="/router.js"></script>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo">🍽️</div>
-        <h1 class="title">校园食光</h1>
-        <p class="subtitle">发现校园里的每一处美食</p>
-        
-        <form id="userLoginForm">
-            <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
-            </div>
-            
-            <div class="extra-options">
-                <div class="remember-me">
-                    <input type="checkbox" id="remember">
-                    <label for="remember">记住我</label>
-                </div>
-                <div class="forgot-password">
-                    <a href="#">忘记密码?</a>
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">登录</button>
-        </form>
-        
-        <div class="register-link">
-            还没有账号？<a href="javascript:void(0)" onclick="Router.toRegister()">立即注册</a>
-        </div>
-        
-        <div class="admin-link">
-            <a href="javascript:void(0)" onclick="Router.toAdminLogin()">食堂管理员登录</a>
-        </div>
-    </div>
-
-    <script>
-        // 真实的登录验证
-        document.getElementById('userLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (password.length < 6) {
-                alert('密码至少需要6位字符！');
-                return;
-            }
-            
-            try {
-                const data = await Router.apiCall(API_ENDPOINTS.LOGIN, {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
-                
-                if (data && data.code === 200) {
-                    Router.saveUserData(data.data);
-                    alert('登录成功！即将跳转到首页');
-                    
-                    if (data.data.role === 'admin') {
-                        Router.toAdminIndex();
-                    } else {
-                        Router.toUserIndex();
-                    }
-                } else {
-                    alert((data && data.message) || '登录失败');
-                }
-            } catch (error) {
-                console.error('登录错误:', error);
-                alert('登录失败，请检查网络连接');
-            }
-        });
-    </script>
-</body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园食光 - 用户登录</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff5eb, #f8f9fa);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* 登录卡片样式 */
+        .login-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        /* Logo和标题 */
+        .logo {
+            font-size: 32px;
+            color: #FF6B35;
+            margin-bottom: 15px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #FF6B35;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+        
+        /* 记住我和忘记密码 */
+        .extra-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember-me input {
+            margin-right: 5px;
+        }
+        
+        .forgot-password a {
+            color: #FF6B35;
+            text-decoration: none;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #FF6B35;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #e55a2a;
+        }
+        
+        /* 底部链接 */
+        .register-link {
+            margin-top: 20px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* 管理员入口 */
+        .admin-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .admin-link a {
+            color: #1890FF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🍽️</div>
+        <h1 class="title">校园食光</h1>
+        <p class="subtitle">发现校园里的每一处美食</p>
+        
+        <form id="userLoginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
+            </div>
+            
+            <div class="extra-options">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">记住我</label>
+                </div>
+                <div class="forgot-password">
+                    <a href="#">忘记密码?</a>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">登录</button>
+        </form>
+        
+        <div class="register-link">
+            还没有账号？<a href="javascript:void(0)" onclick="Router.toRegister()">立即注册</a>
+        </div>
+        
+        <div class="admin-link">
+            <a href="javascript:void(0)" onclick="Router.toAdminLogin()">食堂管理员登录</a>
+        </div>
+    </div>
+
+    <script>
+        // 真实的登录验证
+        document.getElementById('userLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (password.length < 6) {
+                alert('密码至少需要6位字符！');
+                return;
+            }
+            
+            try {
+                const data = await Router.apiCall(API_ENDPOINTS.LOGIN, {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (data && data.code === 200) {
+                    console.log('登录成功，返回数据:', data.data);
+                    Router.saveUserData(data.data);
+                    console.log('保存后的localStorage:', {
+                        role: localStorage.getItem('userRole'),
+                        token: localStorage.getItem('token'),
+                        userId: localStorage.getItem('userId')
+                    });
+                    alert('登录成功！即将跳转到首页');
+                    Router.toUserIndex();
+                } else {
+                    alert((data && data.message) || '登录失败');
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                alert('登录失败，请检查网络连接');
+            }
+        });
+    </script>
+</body>
 </html>

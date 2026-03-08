@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>内容审核 - 校园食光</title>
+
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    
+
+    <!-- 字体图标 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+
+    <style>
+
+        /* 全局样式 - 与现有页面保持一致 */
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 15px;
+
+            --spacing-large: 20px;
+
+            --border-radius: 4px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            --role-super-admin: #e60012;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+        .embedded-shell .global-nav,
+        .embedded-shell .main-nav {
+            display: none;
+        }
+
+        .embedded-shell .admin-main {
+            padding-top: var(--spacing-large);
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 - 与现有页面保持一致 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        /* 主导航 - 使用动态导航栏 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            position: sticky;
+
+            top: 45px;
+
+            z-index: 999;
+
+        }
+
+        
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none;
+
+            padding: 0 15px;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 主要内容区域 */
+
+        .admin-main {
+
+            padding: var(--spacing-large) 0 60px;
+
+        }
+
+        
+
+        /* 页面标题 */
+
+        .page-header {
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .page-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .page-title i {
+
+            margin-right: 10px;
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-subtitle {
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 审核统计卡片 */
+
+        .stats-section {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .stat-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-large);
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+            border-left: 4px solid var(--primary-color);
+
+        }
+
+        
+
+        .stat-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            color: var(--primary-color);
+
+            margin-bottom: 8px;
+
+        }
+
+        
+
+        .stat-label {
+
+            font-size: 14px;
+
+            color: var(--text-dark);
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .stat-change {
+
+            font-size: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .trend-up {
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .trend-down {
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        /* 搜索和筛选栏 */
+
+        .filter-section {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-medium);
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+            align-items: center;
+
+        }
+
+        
+
+        .search-box {
+
+            position: relative;
+
+            flex: 1;
+
+            min-width: 250px;
+
+        }
+
+        
+
+        .search-input {
+
+            width: 100%;
+
+            padding: 10px 15px 10px 40px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            background-color: white;
+
+        }
+
+        
+
+        .search-icon {
+
+            position: absolute;
+
+            left: 12px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .filter-group {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-small);
+
+        }
+
+        
+
+        .filter-label {
+
+            font-size: 14px;
+
+            color: var(--text-dark);
+
+            margin-right: var(--spacing-small);
+
+        }
+
+        
+
+        .filter-select {
+
+            padding: 8px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            background-color: white;
+
+            min-width: 150px;
+
+        }
+
+        
+
+        .action-btn {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            white-space: nowrap;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background-color: #cc0010;
+
+        }
+
+        
+
+        /* 敏感词预警 */
+
+        .sensitive-words {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .section-header {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+        
+
+        .section-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .section-more {
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            opacity: 0.8;
+
+            transition: opacity 0.3s;
+
+        }
+
+        
+
+        .section-more:hover {
+
+            opacity: 1;
+
+        }
+
+        
+
+        .sensitive-words-list {
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+        }
+
+        
+
+        .sensitive-word {
+
+            padding: 5px 12px;
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+            border-radius: 20px;
+
+            font-size: 13px;
+
+            font-weight: 500;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .word-count {
+
+            background-color: var(--status-closed);
+
+            color: white;
+
+            border-radius: 10px;
+
+            padding: 2px 8px;
+
+            font-size: 12px;
+
+        }
+
+        
+
+        /* 内容列表 */
+
+        .content-list {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .content-item {
+
+            padding: var(--spacing-medium);
+
+            border-bottom: 1px solid var(--border-color);
+
+            transition: background-color 0.3s;
+
+        }
+
+        
+
+        .content-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .content-item:hover {
+
+            background-color: #fafafa;
+
+        }
+
+        
+
+        .content-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            margin-bottom: 12px;
+
+        }
+
+        
+
+        .content-info {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+        
+
+        .content-avatar {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            background-color: #f5f5f5;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: var(--primary-color);
+
+            font-weight: bold;
+
+            flex-shrink: 0;
+
+        }
+
+        
+
+        .content-meta {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 3px;
+
+        }
+
+        
+
+        .content-author {
+
+            font-weight: 500;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .content-time {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .content-status {
+
+            padding: 3px 8px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            margin-left: 10px;
+
+        }
+
+        
+
+        .status-pending {
+
+            background-color: rgba(255, 193, 7, 0.1);
+
+            color: var(--rating-color);
+
+        }
+
+        
+
+        .status-approved {
+
+            background-color: rgba(82, 196, 26, 0.1);
+
+            color: #52c41a;
+
+        }
+
+        
+
+        .status-rejected {
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .content-body {
+
+            margin-bottom: 12px;
+
+        }
+
+        
+
+        .content-text {
+
+            font-size: 14px;
+
+            line-height: 1.6;
+
+            margin-bottom: 10px;
+
+        }
+
+        
+
+        .content-images {
+
+            display: flex;
+
+            gap: 8px;
+
+            margin-bottom: 10px;
+
+            flex-wrap: wrap;
+
+        }
+
+        
+
+        .content-image {
+
+            width: 80px;
+
+            height: 80px;
+
+            border-radius: var(--border-radius);
+
+            object-fit: cover;
+
+            cursor: pointer;
+
+            transition: transform 0.3s;
+
+        }
+
+        
+
+        .content-image:hover {
+
+            transform: scale(1.05);
+
+        }
+
+        
+
+        .content-tags {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 6px;
+
+            margin-bottom: 10px;
+
+        }
+
+        
+
+        .content-tag {
+
+            padding: 3px 8px;
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--tag-blue);
+
+            border-radius: 12px;
+
+            font-size: 12px;
+
+        }
+
+        
+
+        .content-actions {
+
+            display: flex;
+
+            gap: 8px;
+
+            justify-content: flex-end;
+
+        }
+
+        
+
+        .action-btn-small {
+
+            padding: 6px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            background-color: white;
+
+            font-size: 13px;
+
+            color: var(--text-dark);
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .action-btn-small:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .action-btn-small.approve {
+
+            border-color: var(--status-open);
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .action-btn-small.approve:hover {
+
+            background-color: var(--status-open);
+
+            color: white;
+
+        }
+
+        
+
+        .action-btn-small.reject {
+
+            border-color: var(--status-closed);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .action-btn-small.reject:hover {
+
+            background-color: var(--status-closed);
+
+            color: white;
+
+        }
+
+        
+
+        /* 分页器 */
+
+        .pagination {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 5px;
+
+            margin-top: 30px;
+
+        }
+
+        
+
+        .page-btn {
+
+            width: 36px;
+
+            height: 36px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            background-color: white;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .page-btn:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-btn.active {
+
+            background-color: var(--primary-color);
+
+            border-color: var(--primary-color);
+
+            color: white;
+
+        }
+
+        
+
+        /* 敏感词管理模态框 */
+
+        .modal-overlay {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background-color: rgba(0, 0, 0, 0.5);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            z-index: 1001;
+
+            opacity: 0;
+
+            transition: opacity 0.3s;
+
+        }
+
+        
+
+        .modal-overlay.show {
+
+            opacity: 1;
+
+        }
+
+        
+
+        .modal-content {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            width: 90%;
+
+            max-width: 600px;
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+        }
+
+        
+
+        .modal-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: var(--spacing-medium);
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .modal-title {
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+        }
+
+        
+
+        .modal-close {
+
+            background: none;
+
+            border: none;
+
+            font-size: 24px;
+
+            cursor: pointer;
+
+            color: var(--text-light);
+
+            transition: color 0.3s;
+
+        }
+
+        
+
+        .modal-close:hover {
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .modal-body {
+
+            padding: var(--spacing-large);
+
+        }
+
+        
+
+        .form-group {
+
+            margin-bottom: 20px;
+
+        }
+
+        
+
+        .form-label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: 500;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .form-input {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-input:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-textarea {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            min-height: 100px;
+
+            resize: vertical;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-textarea:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-actions {
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid var(--border-color);
+
+        }
+
+        
+
+        /* 响应式调整 */
+
+        @media (max-width: 992px) {
+
+            .stats-section {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-medium);
+
+            }
+
+            
+
+            .page-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            
+
+            .filter-section {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: var(--spacing-medium);
+
+            }
+
+            
+
+            .search-box {
+
+                min-width: 100%;
+
+            }
+
+            
+
+            .content-header {
+
+                flex-direction: column;
+
+                gap: 10px;
+
+            }
+
+            
+
+            .content-info {
+
+                width: 100%;
+
+            }
+
+            
+
+            .content-actions {
+
+                width: 100%;
+
+                justify-content: flex-start;
+
+            }
+
+            
+
+            .nav-tabs {
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .nav-tab {
+
+                flex: 0 0 auto;
+
+                padding: 0 15px;
+
+                font-size: 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    
+    <!-- 主要内容 -->
+
+    <main class="container admin-main">
+
+        <!-- 页面标题 -->
+
+        <div class="page-header">
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+
+                <button class="action-btn" onclick="navigateBackToConsole()">
+
+                    <i class="fas fa-arrow-left"></i> 返回控制台
+
+                </button>
+
+                <div>
+
+                    <h1 class="page-title">
+
+                        <i class="fas fa-shield-alt"></i> 内容审核
+
+                    </h1>
+
+                    <p class="page-subtitle">平台级违规内容处理，AI敏感词预警</p>
+
+                </div>
+
+            </div>
+
+            <button class="action-btn" onclick="openSensitiveWordsModal()">
+
+                <i class="fas fa-plus"></i> 管理敏感词
+
+            </button>
+
+        </div>
+
+        
+
+        <!-- 审核统计卡片 -->
+
+        <section class="stats-section">
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="pendingContent">12</div>
+
+                <div class="stat-label">待审核内容</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>3</span>
+
+                    <span>较昨日</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="approvedContent">156</div>
+
+                <div class="stat-label">今日已通过</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>12%</span>
+
+                    <span>较昨日</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="rejectedContent">8</div>
+
+                <div class="stat-label">今日已拒绝</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-down trend-down"></i>
+
+                    <span>2</span>
+
+                    <span>较昨日</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="sensitiveWords">35</div>
+
+                <div class="stat-label">敏感词库</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>2</span>
+
+                    <span>本周新增</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 敏感词预警 -->
+
+        <section class="sensitive-words">
+
+            <div class="section-header">
+
+                <div class="section-title">AI敏感词预警</div>
+
+                <div class="section-more" onclick="viewAllSensitiveWords()">查看全部</div>
+
+            </div>
+
+            <div class="sensitive-words-list" id="sensitiveWordsList">
+
+                <!-- 敏感词数据将通过JavaScript动态生成 -->
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 搜索和筛选栏 -->
+
+        <section class="filter-section">
+
+            <div class="search-box">
+
+                <i class="fas fa-search search-icon"></i>
+
+                <input type="text" class="search-input" placeholder="搜索内容、作者..." id="searchInput">
+
+            </div>
+
+            
+
+            <div class="filter-group">
+
+                <label class="filter-label">状态:</label>
+
+                <select class="filter-select" id="statusFilter">
+
+                    <option value="">全部状态</option>
+
+                    <option value="pending">待审核</option>
+
+                    <option value="approved">已通过</option>
+
+                    <option value="rejected">已拒绝</option>
+
+                </select>
+
+            </div>
+
+            
+
+            <div class="filter-group">
+
+                <label class="filter-label">类型:</label>
+
+                <select class="filter-select" id="typeFilter">
+
+                    <option value="">全部类型</option>
+
+                    <option value="post">动态</option>
+
+                    <option value="comment">评论</option>
+
+                    <option value="review">评价</option>
+
+                </select>
+
+            </div>
+
+            
+
+            <button class="action-btn" onclick="applyFilters()">
+
+                <i class="fas fa-filter"></i> 筛选
+
+            </button>
+
+        </section>
+
+        
+
+        <!-- 内容列表 -->
+
+        <section class="content-list">
+
+            <div class="section-header">
+
+                <div class="section-title">内容审核列表</div>
+
+                <div class="section-more" onclick="batchApprove()">批量通过</div>
+
+            </div>
+
+            <div id="contentList">
+
+                <!-- 内容数据将通过JavaScript动态生成 -->
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 分页器 -->
+
+        <div class="pagination" id="pagination">
+
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+
+        </div>
+
+    </main>
+
+    
+
+    <!-- 敏感词管理模态框 -->
+
+    <div class="modal-overlay" id="sensitiveWordsModal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div class="modal-title">敏感词管理</div>
+
+                <button class="modal-close" onclick="closeSensitiveWordsModal()">&times;</button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <form id="sensitiveWordsForm">
+
+                    <div class="form-group">
+
+                        <label class="form-label">添加敏感词</label>
+
+                        <input type="text" class="form-input" id="newSensitiveWord" placeholder="输入敏感词，多个用逗号分隔">
+
+                    </div>
+
+                    
+
+                    <div class="form-group">
+
+                        <label class="form-label">敏感词列表</label>
+
+                        <textarea class="form-textarea" id="sensitiveWordsList" rows="10" placeholder="每行一个敏感词"></textarea>
+
+                    </div>
+
+                    
+
+                    <div class="form-actions">
+
+                        <button type="button" class="action-btn" style="background-color: white; color: var(--text-dark); border: 1px solid var(--border-color);" onclick="closeSensitiveWordsModal()">取消</button>
+
+                        <button type="submit" class="action-btn">保存</button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/admin/admin-permission.js"></script>
+
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+
+    
+
+    <script>
+
+        // 页面初始化
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                window.DynamicNavbar.updateNavbar('super_admin_audit.html');
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+            
+
+            // 加载敏感词数据
+
+            loadSensitiveWords();
+
+            
+
+            // 加载内容数据
+
+            loadContentData();
+
+            
+
+            // 初始化分页
+
+            initPagination();
+
+            
+
+            // 表单提交处理
+
+            document.getElementById('sensitiveWordsForm').addEventListener('submit', handleSensitiveWordsSubmit);
+
+        });
+
+        
+
+        // 模拟敏感词数据
+
+        const sensitiveWordsData = [
+
+            { word: '垃圾', count: 15 },
+
+            { word: '骗子', count: 8 },
+
+            { word: '差评', count: 6 },
+
+            { word: '难吃', count: 5 },
+
+            { word: '服务差', count: 4 },
+
+            { word: '价格贵', count: 3 },
+
+            { word: '不推荐', count: 2 },
+
+            { word: '卫生差', count: 2 }
+
+        ];
+
+        
+
+        // 模拟内容数据
+
+        const contentData = [
+
+            {
+
+                id: 1,
+
+                author: '张三',
+
+                avatar: 'Z',
+
+                time: '2024-12-20 14:32',
+
+                type: 'post',
+
+                status: 'pending',
+
+                text: '今天在食堂吃饭发现了一个问题，希望学校能够重视。食堂的卫生状况需要改善，特别是餐具清洁方面。',
+
+                images: [
+
+                    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80',
+
+                    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80'
+
+                ],
+
+                tags: ['食堂', '卫生', '建议'],
+
+                sensitiveWords: ['卫生']
+
+            },
+
+            {
+
+                id: 2,
+
+                author: '李四',
+
+                avatar: 'L',
+
+                time: '2024-12-20 13:15',
+
+                type: 'comment',
+
+                status: 'pending',
+
+                text: '这个档口的服务态度真的太差了，排队等了半小时，结果还是这个态度，太让人失望了。',
+
+                images: [],
+
+                tags: ['服务', '投诉'],
+
+                sensitiveWords: ['差', '失望']
+
+            },
+
+            {
+
+                id: 3,
+
+                author: '王五',
+
+                avatar: 'W',
+
+                time: '2024-12-20 12:45',
+
+                type: 'review',
+
+                status: 'approved',
+
+                text: '食堂的麻辣香锅味道不错，价格也合理，推荐大家尝试。环境整洁，服务员态度也很好。',
+
+                images: [
+
+                    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80'
+
+                ],
+
+                tags: ['麻辣香锅', '推荐'],
+
+                sensitiveWords: []
+
+            },
+
+            {
+
+                id: 4,
+
+                author: '赵六',
+
+                avatar: 'Z',
+
+                time: '2024-12-20 11:30',
+
+                type: 'post',
+
+                status: 'rejected',
+
+                text: '这个平台就是个垃圾，用户体验太差了，根本不好用，建议大家都不要用。',
+
+                images: [],
+
+                tags: ['投诉', '建议'],
+
+                sensitiveWords: ['垃圾', '差']
+
+            },
+
+            {
+
+                id: 5,
+
+                author: '钱七',
+
+                avatar: 'Q',
+
+                time: '2024-12-20 10:20',
+
+                type: 'comment',
+
+                status: 'pending',
+
+                text: '食堂的早餐种类太少，希望学校能够增加一些选择，比如包子、豆浆等传统早餐。',
+
+                images: [],
+
+                tags: ['早餐', '建议'],
+
+                sensitiveWords: []
+
+            }
+
+        ];
+
+        
+
+        let filteredData = [...contentData];
+
+        let currentPage = 1;
+
+        const itemsPerPage = 10;
+
+        
+
+        // 加载敏感词数据
+
+        function loadSensitiveWords() {
+
+            const wordsHTML = sensitiveWordsData.map(item => `
+
+                <div class="sensitive-word">
+
+                    <span>${item.word}</span>
+
+                    <span class="word-count">${item.count}</span>
+
+                </div>
+
+            `).join('');
+
+            
+
+            document.getElementById('sensitiveWordsList').innerHTML = wordsHTML;
+
+        }
+
+        
+
+        // 加载内容数据
+
+        function loadContentData() {
+            const params = new URLSearchParams();
+            params.append('page', currentPage);
+            params.append('limit', itemsPerPage);
+            
+            fetch(`${CONFIG.API_BASE_URL}/content/pending?${params}`, {
+                headers: {'Authorization': `Bearer ${localStorage.getItem('adminToken')}`}
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (result.code === 200 && result.data.contents) {
+                    contentData = result.data.contents;
+                    filteredData = contentData;
+                    totalItems = result.data.pagination?.total || 0;
+                    totalPages = Math.ceil(totalItems / itemsPerPage);
+                    renderContentList();
+                    renderPagination();
+                } else {
+                    console.error('加载内容失败:', result.message);
+                    alert('加载内容失败');
+                }
+            })
+            .catch(error => {
+                console.error('加载内容错误:', error);
+                alert('加载内容出错');
+            });
+        }
+
+        
+
+        // 渲染内容列表
+
+        function renderContentList() {
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+
+            const endIndex = startIndex + itemsPerPage;
+
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            
+
+            const contentHTML = pageData.map(item => {
+
+                const statusClass = item.status === 'pending' ? 'status-pending' : 
+
+                                  item.status === 'approved' ? 'status-approved' : 'status-rejected';
+
+                const statusText = item.status === 'pending' ? '待审核' : 
+
+                                 item.status === 'approved' ? '已通过' : '已拒绝';
+
+                
+
+                const imagesHTML = item.images.map(img => `
+
+                    <img src="${img}" alt="内容图片" class="content-image">
+
+                `).join('');
+
+                
+
+                const tagsHTML = item.tags.map(tag => `
+
+                    <span class="content-tag">${tag}</span>
+
+                `).join('');
+
+                
+
+                const sensitiveWordsHTML = item.sensitiveWords.length > 0 ? 
+
+                    `<div style="color: var(--status-closed); font-size: 13px; margin-top: 5px;">
+
+                        <i class="fas fa-exclamation-triangle"></i> 敏感词: ${item.sensitiveWords.join(', ')}
+
+                    </div>` : '';
+
+                
+
+                return `
+
+                    <div class="content-item">
+
+                        <div class="content-header">
+
+                            <div class="content-info">
+
+                                <div class="content-avatar">${item.avatar}</div>
+
+                                <div class="content-meta">
+
+                                    <div class="content-author">${item.author}</div>
+
+                                    <div class="content-time">${item.time}</div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="content-status ${statusClass}">${statusText}</div>
+
+                        </div>
+
+                        <div class="content-body">
+
+                            <div class="content-text">${item.text}</div>
+
+                            ${imagesHTML ? `<div class="content-images">${imagesHTML}</div>` : ''}
+
+                            ${tagsHTML ? `<div class="content-tags">${tagsHTML}</div>` : ''}
+
+                            ${sensitiveWordsHTML}
+
+                        </div>
+
+                        <div class="content-actions">
+
+                            ${item.status === 'pending' ? 
+
+                                `<button class="action-btn-small approve" onclick="approveContent(${item.id})">
+
+                                    <i class="fas fa-check"></i> 通过
+
+                                </button>
+
+                                <button class="action-btn-small reject" onclick="rejectContent(${item.id})">
+
+                                    <i class="fas fa-times"></i> 拒绝
+
+                                </button>` :
+
+                                `<button class="action-btn-small" onclick="viewContent(${item.id})">
+
+                                    <i class="fas fa-eye"></i> 查看
+
+                                </button>`
+
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join('');
+
+            
+
+            document.getElementById('contentList').innerHTML = contentHTML;
+
+        }
+
+        
+
+        // 初始化分页
+
+        function initPagination() {
+
+            renderPagination();
+
+        }
+
+        
+
+        // 渲染分页器
+
+        function renderPagination() {
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+            
+
+            let paginationHTML = '';
+
+            
+
+            // 上一页按钮
+
+            if (currentPage > 1) {
+
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">
+
+                    <i class="fas fa-chevron-left"></i>
+
+                </button>`;
+
+            }
+
+            
+
+            // 页码按钮
+
+            const startPage = Math.max(1, currentPage - 2);
+
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            
+
+            for (let i = startPage; i <= endPage; i++) {
+
+                if (i > 0 && i <= totalPages) {
+
+                    paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+
+                }
+
+            }
+
+            
+
+            // 下一页按钮
+
+            if (currentPage < totalPages) {
+
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">
+
+                    <i class="fas fa-chevron-right"></i>
+
+                </button>`;
+
+            }
+
+            
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+
+        }
+
+        
+
+        // 切换页面
+
+        function changePage(page) {
+
+            currentPage = page;
+
+            renderContentList();
+
+            renderPagination();
+
+        }
+
+        
+
+        // 应用筛选
+
+        function applyFilters() {
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const typeFilter = document.getElementById('typeFilter').value;
+
+            
+
+            filteredData = contentData.filter(item => {
+
+                const matchSearch = !searchTerm || 
+
+                                   item.text.toLowerCase().includes(searchTerm) || 
+
+                                   item.author.toLowerCase().includes(searchTerm);
+
+                
+
+                const matchStatus = !statusFilter || item.status === statusFilter;
+
+                const matchType = !typeFilter || item.type === typeFilter;
+
+                
+
+                return matchSearch && matchStatus && matchType;
+
+            });
+
+            
+
+            currentPage = 1;
+
+            renderContentList();
+
+            renderPagination();
+
+        }
+
+        
+
+        // 通过内容
+
+        function approveContent(contentId) {
+
+            const content = contentData.find(c => c.id === contentId);
+
+            if (!content) return;
+
+            
+
+            if (confirm(`确定要通过这条内容吗？\n\n作者: ${content.author}\n内容: ${content.text ? content.text.substring(0, 50) : ''}...`)) {
+
+                fetch(`${CONFIG.API_BASE_URL}/content/${contentId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notes: '已批准' })
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.code === 200) {
+                        alert('内容已批准');
+                        loadContentData();
+                    } else {
+                        alert('批准失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('批准错误:', error);
+                    alert('操作失败');
+                });
+
+            }
+
+        }
+
+        
+
+        // 拒绝内容
+
+        function rejectContent(contentId) {
+
+            const content = contentData.find(c => c.id === contentId);
+
+            if (!content) return;
+
+            
+
+            const reason = prompt('请输入拒绝理由:');
+
+            if (reason === null) return;
+
+            
+
+            if (confirm(`确定要拒绝这条内容吗？\n\n作者: ${content.author}\n内容: ${content.text ? content.text.substring(0, 50) : ''}...\n\n拒绝理由: ${reason}`)) {
+
+                fetch(`${CONFIG.API_BASE_URL}/content/${contentId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason })
+                })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.code === 200) {
+                        alert('内容已拒绝');
+                        loadContentData();
+                    } else {
+                        alert('拒绝失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('拒绝错误:', error);
+                    alert('操作失败');
+                });
+
+            }
+
+        }
+
+        
+
+        // 查看内容
+
+        function viewContent(contentId) {
+
+            const content = contentData.find(c => c.id === contentId);
+
+            if (!content) return;
+
+            
+
+            alert(`查看内容详情:\n\n作者: ${content.author}\n时间: ${content.time}\n状态: ${content.status}\n\n内容: ${content.text}`);
+
+        }
+
+        
+
+        // 批量通过
+
+        function batchApprove() {
+
+            const pendingContent = contentData.filter(c => c.status === 'pending');
+
+            if (pendingContent.length === 0) {
+
+                alert('没有待审核的内容');
+
+                return;
+
+            }
+
+            
+
+            if (confirm(`确定要通过所有 ${pendingContent.length} 条待审核内容吗？`)) {
+
+                // 模拟API调用
+
+                console.log('批量通过内容:', pendingContent);
+
+                
+
+                // 更新本地数据
+
+                pendingContent.forEach(content => {
+
+                    content.status = 'approved';
+
+                });
+
+                
+
+                // 重新渲染
+
+                renderContentList();
+
+            }
+
+        }
+
+        
+
+        // 查看所有敏感词
+
+        function viewAllSensitiveWords() {
+
+            openSensitiveWordsModal();
+
+        }
+
+        
+
+        // 打开敏感词管理模态框
+
+        function openSensitiveWordsModal() {
+
+            const modal = document.getElementById('sensitiveWordsModal');
+
+            const wordsList = document.getElementById('sensitiveWordsList');
+
+            
+
+            // 填充敏感词列表
+
+            const words = sensitiveWordsData.map(item => item.word).join('\n');
+
+            wordsList.value = words;
+
+            
+
+            modal.classList.add('show');
+
+        }
+
+        
+
+        // 关闭敏感词管理模态框
+
+        function closeSensitiveWordsModal() {
+
+            document.getElementById('sensitiveWordsModal').classList.remove('show');
+
+        }
+
+        
+
+        // 处理敏感词表单提交
+
+        function handleSensitiveWordsSubmit(e) {
+
+            e.preventDefault();
+
+            
+
+            const newWord = document.getElementById('newSensitiveWord').value.trim();
+
+            const wordsList = document.getElementById('sensitiveWordsList').value;
+
+            
+
+            // 处理新添加的敏感词
+
+            if (newWord) {
+
+                const newWords = newWord.split(',').map(word => word.trim()).filter(word => word);
+
+                newWords.forEach(word => {
+
+                    if (!sensitiveWordsData.find(item => item.word === word)) {
+
+                        sensitiveWordsData.push({ word, count: 0 });
+
+                    }
+
+                });
+
+            }
+
+            
+
+            // 更新敏感词列表
+
+            const allWords = wordsList.split('\n').map(word => word.trim()).filter(word => word);
+
+            sensitiveWordsData.length = 0; // 清空数组
+
+            allWords.forEach(word => {
+
+                const existingItem = sensitiveWordsData.find(item => item.word === word);
+
+                if (existingItem) {
+
+                    sensitiveWordsData.push(existingItem);
+
+                } else {
+
+                    sensitiveWordsData.push({ word, count: 0 });
+
+                }
+
+            });
+
+            
+
+            // 重新渲染
+
+            loadSensitiveWords();
+
+            
+
+            // 关闭模态框
+
+            closeSensitiveWordsModal();
+
+            
+
+            // 清空表单
+
+            document.getElementById('newSensitiveWord').value = '';
+
+            
+
+            alert('敏感词保存成功！');
+
+        }
+
+        // 返回控制台
+        function navigateBackToConsole() {
+            // 检查是否在iframe中
+            if (window.self !== window.top) {
+                // 在iframe中，重新加载控制台主页
+                window.location.href = '/main/admin/super_admin_index.html?shell=1';
+            } else {
+                // 不在iframe中，直接跳转
+                window.location.href = '/main/admin/super_admin_index.html';
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

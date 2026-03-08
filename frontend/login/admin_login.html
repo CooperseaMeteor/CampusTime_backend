@@ -1,208 +1,267 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校园食光 - 管理员登录</title>
-    <style>
-        /* 基础样式重置 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #e6f7ff, #f8f9fa);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        /* 登录卡片样式 */
-        .login-container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(24, 144, 255, 0.2);
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        /* Logo和标题 */
-        .logo {
-            font-size: 32px;
-            color: #1890FF;
-            margin-bottom: 15px;
-        }
-        
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .subtitle {
-            color: #777;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .admin-tag {
-            display: inline-block;
-            background-color: #1890FF;
-            color: white;
-            font-size: 12px;
-            padding: 3px 8px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        /* 表单样式 */
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-control:focus {
-            border-color: #1890FF;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
-        }
-        
-        /* 按钮样式 */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background-color: #1890FF;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #0c7cd5;
-        }
-        
-        /* 底部链接 */
-        .user-link {
-            margin-top: 25px;
-            font-size: 14px;
-        }
-        
-        .user-link a {
-            color: #FF6B35;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 20px;
-                margin: 10px;
-            }
-        }
-    </style>
-    <script src="/config.js"></script>
-    <script src="/router.js"></script>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo">🍽️</div>
-        <h1 class="title">校园食光</h1>
-        <p class="subtitle">食堂管理后台</p>
-        <div class="admin-tag">管理平台</div>
-        
-        <form id="adminLoginForm">
-            <div class="form-group">
-                <label for="adminId">管理员账号</label>
-                <input type="text" id="adminId" class="form-control" placeholder="请输入管理员账号" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">管理员登录</button>
-        </form>
-        
-        <div class="user-link">
-            <a href="javascript:void(0)" onclick="Router.toUserLogin()">返回普通用户登录</a>
-        </div>
-    </div>
-
-    <script>
-        // 管理员登录验证
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('adminId').value;
-            const password = document.getElementById('password').value;
-            
-            if (username.trim() === '') {
-                alert('请输入管理员账号');
-                return;
-            }
-            
-            if (password.length < 6) {
-                alert('密码至少需要6位字符！');
-                return;
-            }
-            
-            try {
-                const data = await Router.apiCall(API_ENDPOINTS.LOGIN, {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
-                
-                if (data && data.code === 200) {
-                    if (data.data.role !== 'admin') {
-                        alert('该账号不是管理员账号！');
-                        return;
-                    }
-                    
-                    Router.saveUserData(data.data);
-                    alert('管理员登录成功！即将跳转到管理后台');
-                    Router.toAdminIndex();
-                } else {
-                    alert('登录失败：' + ((data && data.message) || '账号或密码错误'));
-                }
-            } catch (error) {
-                console.error('登录请求失败:', error);
-                alert('登录失败，请检查网络连接或稍后重试');
-            }
-        });
-    </script>
-</body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园食光 - 管理员登录</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e6f7ff, #f8f9fa);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* 登录卡片样式 */
+        .login-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(24, 144, 255, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        /* Logo和标题 */
+        .logo {
+            font-size: 32px;
+            color: #1890FF;
+            margin-bottom: 15px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #777;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .admin-tag {
+            display: inline-block;
+            background-color: #1890FF;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1890FF;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1890FF;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0c7cd5;
+        }
+        
+        /* 底部链接 */
+        .user-link {
+            margin-top: 25px;
+            font-size: 14px;
+        }
+        
+        .user-link a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🍽️</div>
+        <h1 class="title">校园食光</h1>
+        <p class="subtitle">食堂管理后台</p>
+        <div class="admin-tag">管理平台</div>
+        
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label for="adminId">管理员账号</label>
+                <input type="text" id="adminId" class="form-control" placeholder="请输入管理员账号" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">管理员登录</button>
+        </form>
+        
+        <div class="user-link">
+            <a href="javascript:void(0)" onclick="Router.toUserLogin()">返回普通用户登录</a>
+        </div>
+    </div>
+
+    <!-- 职位选择弹窗 -->
+    <div id="positionModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 15px; padding: 30px; max-width: 500px; width: 90%;">
+            <h3 style="margin-bottom: 20px; color: #333;">选择您的职位</h3>
+            <div id="positionList" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 管理员登录验证（新版：支持多职位）
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminId').value;
+            const password = document.getElementById('password').value;
+            
+            if (username.trim() === '') {
+                alert('请输入管理员账号');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('密码至少需要6位字符！');
+                return;
+            }
+            
+            try {
+                // 使用Router.apiCall调用管理员登录接口
+                const data = await Router.apiCall(API_ENDPOINTS.ADMIN_LOGIN, {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (data && data.code === 200) {
+                    const { token, adminId, positions, adminInfo } = data.data;
+                    
+                    // 保存token和基本信息
+                    localStorage.setItem('adminToken', token);
+                    localStorage.setItem('adminId', adminId);
+                    localStorage.setItem('adminInfo', JSON.stringify(adminInfo));
+                    localStorage.setItem('adminPositions', JSON.stringify(positions));
+                    // 新增：从adminInfo里提取用户名，单独存成username和userName，兼容控制台原有逻辑
+                    localStorage.setItem('username', adminInfo.username);
+                    localStorage.setItem('userName', adminInfo.username);
+
+                    // 有职位统一进入通用入口页（职位切换）
+                    if (positions.length >= 1) {
+                        if (positions.length === 1) {
+                            localStorage.setItem('adminActivePositionId', positions[0].id);
+                        }
+                        const shellUrl = (ADMIN_ROUTES && typeof ADMIN_ROUTES.getAbsoluteAdminShell === 'function')
+                            ? ADMIN_ROUTES.getAbsoluteAdminShell()
+                            : `${CONFIG.getBaseUrl()}/main/admin/admin_shell.html`;
+                        window.location.href = shellUrl;
+                    } else {
+                        alert('该账号暂无分配职位，请联系上级管理员');
+                    }
+                } else {
+                    alert('登录失败：' + (data.message || '账号或密码错误'));
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                alert('登录失败，请检查网络连接或稍后重试');
+            }
+        });
+        
+        // 显示职位选择器
+        function showPositionSelector(positions) {
+            const modal = document.getElementById('positionModal');
+            const listDiv = document.getElementById('positionList');
+            
+            listDiv.innerHTML = positions.map(pos => `
+                <div onclick="selectPosition(${pos.id}, '${pos.target}')" 
+                     style="padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.3s;"
+                     onmouseover="this.style.borderColor='#1890FF'; this.style.backgroundColor='#f0f8ff'"
+                     onmouseout="this.style.borderColor='#ddd'; this.style.backgroundColor='white'">
+                    <div style="font-weight: bold; color: #333; margin-bottom: 5px;">${pos.label}</div>
+                    <div style="font-size: 12px; color: #999;">角色：${getRoleLabel(pos.role)}</div>
+                </div>
+            `).join('');
+            
+            modal.style.display = 'flex';
+        }
+        
+        // 选择职位并跳转
+        function selectPosition(positionId, target) {
+            localStorage.setItem('adminActivePositionId', positionId);
+            window.location.href = target;
+        }
+        
+        // 角色标签转换
+        function getRoleLabel(role) {
+            const labels = {
+                'super_admin': '平台超级管理员',
+                'school_admin': '学校管理员',
+                'merchant_admin': '商户管理员',
+                'stall_admin': '档口管理员'
+            };
+            return labels[role] || role;
+        }
+    </script>
+</body>
 </html>

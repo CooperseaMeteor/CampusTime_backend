@@ -6,6 +6,7 @@
     <title>首页 - 校园食光</title>
     <script src="/config.js"></script>
     <script src="/router.js"></script>
+    <script src="/main/user/navigation-manager.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* 全局样式 - 与"我的"界面完全一致 */
@@ -185,7 +186,7 @@
         
         /* 首页特有元素 */
         .main-content {
-            padding-top: var(--spacing-large);
+            padding-top: 80px;
             padding-bottom: 50px;
         }
         
@@ -236,8 +237,9 @@
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-card);
-            padding: var(--spacing-medium);
+            padding: var(--spacing-large);
             transition: transform 0.3s, box-shadow 0.3s;
+            margin-right: var(--spacing-large);
         }
         
         .ai-card:hover {
@@ -248,45 +250,45 @@
         .ai-header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .ai-icon {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(45deg, var(--primary-color), #ff5252);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 18px;
-            margin-right: 15px;
+            font-size: 20px;
+            margin-right: 20px;
         }
         
         .ai-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
         }
         
         .ai-subtitle {
             color: var(--text-light);
-            font-size: 13px;
+            font-size: 14px;
         }
         
         .ai-features {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
         .ai-feature {
             background-color: #f0f9ff;
             color: var(--tag-blue);
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 3px;
-            font-size: 13px;
+            font-size: 14px;
         }
         
         .ai-button {
@@ -294,17 +296,17 @@
             color: white;
             border: none;
             border-radius: 3px;
-            padding: 8px 15px;
+            padding: 10px 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            font-size: 14px;
+            font-size: 16px;
         }
         
         .ai-button i {
-            margin-right: 8px;
+            margin-right: 10px;
         }
         
         /* 快速入口卡片 */
@@ -313,53 +315,56 @@
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-card);
-            padding: var(--spacing-medium);
+            padding: var(--spacing-large);
         }
         
         .quick-title {
-            font-size: 16px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            margin-bottom: 20px;
             font-weight: bold;
         }
         
         .quick-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 15px;
         }
         
         .quick-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px;
-            border-radius: 3px;
+            padding: 15px;
+            border-radius: 6px;
             background-color: #f9f9f9;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
             text-decoration: none;
         }
         
         .quick-item:hover {
             background-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             text-decoration: none;
         }
         
         .quick-icon {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             background-color: var(--primary-color);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
         
         .quick-label {
-            font-size: 13px;
+            font-size: 14px;
+            font-weight: 500;
         }
         
         /* 动态筛选器 - 使用"我的"界面Tab样式 */
@@ -409,6 +414,7 @@
             margin-bottom: var(--spacing-large);
             overflow: hidden;
             transition: transform 0.3s, box-shadow 0.3s;
+            padding: var(--spacing-large);
         }
         
         .dynamic-card:hover {
@@ -417,11 +423,12 @@
         }
         
         .card-header {
-            padding: var(--spacing-medium);
+            padding-bottom: var(--spacing-medium);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: var(--spacing-medium);
         }
         
         .card-user {
@@ -457,7 +464,7 @@
         }
         
         .card-body {
-            padding: var(--spacing-medium);
+            margin-bottom: var(--spacing-medium);
         }
         
         .card-title {
@@ -506,7 +513,7 @@
         }
         
         .card-footer {
-            padding: var(--spacing-medium);
+            padding-top: var(--spacing-medium);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -546,17 +553,21 @@
             margin: 20px;
             font-size: 20px;
             margin-bottom: var(--spacing-medium);
-            display: flex;
-            align-items: center;
+            display: block; /* 修改为块级元素，确保独占一行 */
+            clear: both; /* 清除浮动影响 */
         }
         
         .section-title i {
+            display: inline-block; /* 图标保持行内块 */
             margin-right: 10px;
             color: var(--primary-color);
+            vertical-align: middle; /* 垂直对齐 */
         }
+
         
-        .recommend-wrapper { overflow-x: auto; display: flex; gap: 15px; padding-bottom: 10px; margin-bottom: var(--spacing-large); }
-        .recommend-card { flex: 0 0 300px; }
+        .recommend-wrapper { overflow-x: auto; display: flex; gap: 20px; padding-bottom: 15px; margin-bottom: var(--spacing-large); padding: var(--spacing-medium); background-color: white; border-radius: var(--border-radius); box-shadow: var(--shadow-card); }
+        .recommend-card { flex: 0 0 320px; background-color: white; border-radius: var(--border-radius); box-shadow: var(--shadow-card); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+        .recommend-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
         
         .recommend-card {
             background-color: white;
@@ -825,6 +836,119 @@
         }
         
         @media (max-width: 480px) {
+            .container {
+                padding: 0 var(--spacing-small);
+            }
+            
+            .home-header {
+                flex-direction: column;
+                gap: var(--spacing-medium);
+            }
+            
+            .ai-card, .quick-card {
+                width: 100%;
+            }
+            
+            .search-section {
+                padding: var(--spacing-small);
+            }
+            
+            .search-input-container {
+                padding: 0 var(--spacing-small);
+            }
+            
+            .search-btn {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+            
+            .filter-tabs {
+                padding: 0 var(--spacing-small);
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .filter-tab {
+                padding: 12px var(--spacing-medium);
+                font-size: 14px;
+                flex-shrink: 0;
+            }
+            
+            .card-images {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-small);
+            }
+            
+            .card-img {
+                height: 80px;
+                font-size: 11px;
+            }
+            
+            .card-tags {
+                gap: var(--spacing-small);
+            }
+            
+            .card-tag {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+            
+            .recommend-wrapper {
+                padding: 0 var(--spacing-small);
+            }
+            
+            .recommend-card {
+                min-width: 280px;
+            }
+            
+            .recommend-img {
+                height: 120px;
+            }
+            
+            .canteen-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-medium);
+            }
+            
+            .canteen-card {
+                margin-bottom: var(--spacing-medium);
+            }
+            
+            .canteen-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-small);
+            }
+            
+            .canteen-name {
+                font-size: 16px;
+            }
+            
+            .canteen-tags {
+                margin-bottom: var(--spacing-small);
+            }
+            
+            .canteen-desc {
+                font-size: 13px;
+                line-height: 1.4;
+            }
+            
+            .canteen-features {
+                flex-direction: column;
+                gap: var(--spacing-small);
+                align-items: flex-start;
+            }
+            
+            .discount-cards, .ranking-cards {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-medium);
+            }
+            
+            .discount-item, .ranking-item {
+                padding: var(--spacing-medium);
+            }
+            
             .quick-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -836,6 +960,46 @@
                 height: 50px;
                 font-size: 20px;
             }
+            
+            /* 评论对话框移动端适配 */
+            .comment-modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+            
+            .reply-modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            .comment-list {
+                max-height: 50vh;
+                padding: var(--spacing-small);
+            }
+            
+            .comment-item {
+                padding: 10px 0;
+            }
+            
+            .comment-avatar {
+                width: 28px;
+                height: 28px;
+            }
+            
+            #comment-text, #reply-text {
+                font-size: 16px; /* 移动端增大字体 */
+                padding: 15px;
+            }
+            
+            .comment-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            
+            .comment-actions .btn {
+                width: 100%;
+                padding: 12px;
+            }
         }
         
         /* 工具类 */
@@ -846,6 +1010,148 @@
         .modal.hidden { display:none; }
         .modal-content { background:white; border-radius:8px; padding:16px; width:90%; max-width:900px; position:relative; }
         .modal-close { position:absolute; top:8px; right:8px; border:none; background:transparent; font-size:20px; cursor:pointer; }
+        
+        /* 评论对话框样式 */
+        .comment-modal-content {
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .comment-list {
+            margin: 20px 0;
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-medium);
+            background-color: #f9f9f9;
+        }
+        
+        .comment-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .comment-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .comment-username {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        
+        .comment-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .comment-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+        
+        .comment-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+        
+        .comment-action {
+            font-size: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .comment-action:hover {
+            color: var(--primary-color);
+        }
+        
+        .comment-input-container {
+            margin-top: 20px;
+        }
+        
+        #comment-text {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+        
+        #comment-text:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.2);
+        }
+        
+        .comment-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: rgba(230, 0, 18, 0.1);
+        }
+        
+        /* 回复对话框样式 */
+        .reply-modal-content {
+            width: 90%;
+            max-width: 500px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .reply-to {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f0f9ff;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+        
+        .reply-to span {
+            font-weight: 500;
+            color: var(--tag-blue);
+        }
         
         .active-tab {
             display: block;
@@ -1038,50 +1344,9 @@
     </style>
     <script src="/config.js"></script>
     <script src="/router.js"></script>
+    <script src="/main/user/components/navigation-component.js"></script>
 </head>
 <body>
-    <!-- 全局导航栏 -->
-    <nav class="main-nav">
-        <div class="nav-tabs">
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteIndex())">
-                <i class="fas fa-home"></i>首页
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCommunity())">
-                <i class="fas fa-users"></i>社区
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCanteen())">
-                <i class="fas fa-store"></i>食堂
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteProfile())">
-                <i class="fas fa-user"></i>我的
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
-                <i class="fas fa-robot"></i>AI助手
-            </a>
-        </div>
-    </nav>
-    </nav>
-    
-    <!-- 主导航 - 已改为真正的超链接 -->
-    <nav class="main-nav">
-        <div class="nav-tabs">
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.toUserIndex()">
-                <i class="fas fa-home"></i>首页
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCommunity())">
-                <i class="fas fa-users"></i>社区
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCanteen())">
-                <i class="fas fa-store"></i>食堂
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteProfile())">
-                <i class="fas fa-user"></i>我的
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
-                <i class="fas fa-robot"></i>AI助手
-            </a>
-        </div>
-    </nav>
     
     <!-- 主内容区域 -->
     <div class="container">
@@ -1114,7 +1379,7 @@
                         <div class="ai-icon">
                             <i class="fas fa-robot"></i>
                         </div>
-                        <a href="./用户"ai助手"界面.html">
+                        <a href="javascript:void(0)" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
                             <div>
                                 <div class="ai-title">AI美食助手</div>
                                 <div class="ai-subtitle">智能推荐，解决你的选择困难症</div>
@@ -1128,7 +1393,7 @@
                         <span class="ai-feature">智能排序</span>
                         <span class="ai-feature">实时库存</span>
                     </div>
-                    <a href="./用户"ai助手"界面.html" class="ai-button">
+                    <a href="javascript:void(0)" class="ai-button" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
                         <i class="fas fa-comment"></i> 开始对话
                     </a>
                 </div>
@@ -1272,6 +1537,8 @@
             <h2 class="section-title">
                 <i class="fas fa-thumbs-up"></i> 智能推荐
             </h2>
+
+            <div class="recommend-wrapper">
             
                 <!-- 推荐菜品1 -->
                 <div class="recommend-card">
@@ -1623,6 +1890,42 @@
         </div>
     </div>
     
+    <!-- 评论对话框 -->
+    <div id="comment-modal" class="modal hidden">
+        <div class="modal-content comment-modal-content">
+            <button class="modal-close" onclick="closeCommentModal()">×</button>
+            <h3>评论</h3>
+            <div class="comment-list" id="comment-list">
+                <!-- 评论列表将通过JavaScript动态生成 -->
+            </div>
+            <div class="comment-input-container">
+                <textarea id="comment-text" placeholder="写下你的评论..." rows="3"></textarea>
+                <div class="comment-actions">
+                    <button class="btn btn-outline" onclick="closeCommentModal()">取消</button>
+                    <button class="btn" onclick="submitComment()">发布评论</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回复评论对话框 -->
+    <div id="reply-modal" class="modal hidden">
+        <div class="modal-content reply-modal-content">
+            <button class="modal-close" onclick="closeReplyModal()">×</button>
+            <h3>回复评论</h3>
+            <div class="reply-to">
+                回复给 <span id="reply-username">用户名</span>:
+            </div>
+            <div class="comment-input-container">
+                <textarea id="reply-text" placeholder="写下你的回复..." rows="3"></textarea>
+                <div class="comment-actions">
+                    <button class="btn btn-outline" onclick="closeReplyModal()">取消</button>
+                    <button class="btn" onclick="submitReply()">发布回复</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 校园地图弹窗 -->
     <div id="campus-map-modal" class="modal hidden">
         <div class="modal-content">
@@ -1638,6 +1941,7 @@
         <div class="container">
             <p>校园食光 - 多校AI美食社区平台</p>
             <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
         </div>
     </footer>
     
@@ -1647,11 +1951,37 @@
     </div>
     
     <script>
+        // ===== 登录检查函数 =====
+        // 检查用户是否已登录，如果未登录则显示登录模态框
+        function checkLoginAndProceed(action) {
+            const user = Router.getCurrentUser();
+            if (!user) {
+                // 向父窗口请求显示登录模态框
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'openLoginModal', tab: 'user' }, '*');
+                } else {
+                    alert('请先登录');
+                }
+                return false;
+            }
+            return true;
+        }
+
+        // 为所有需要登录的交互添加权限检查
+        function requireLogin(fn) {
+            return function(event) {
+                if (checkLoginAndProceed()) {
+                    fn.call(this, event);
+                }
+            };
+        }
+
         // 主导航现在已经是超链接，不需要JavaScript处理跳转
         // 只需要为AI助手按钮添加事件
         
         // 打开AI对话
         function openAIChat(event) {
+            if (!checkLoginAndProceed()) return;
             if(event) event.preventDefault();
             alert('打开AI对话弹窗...');
             // 实际项目中，这里会打开一个模态对话框
@@ -1706,6 +2036,7 @@
                 const icon = this.querySelector('i');
                 if(icon.classList.contains('fa-thumbs-up')) {
                     // 点赞功能
+                    if (!checkLoginAndProceed()) return;
                     const countSpan = this.querySelector('span');
                     let count = parseInt(countSpan.textContent);
                     if(!this.classList.contains('liked')) {
@@ -1720,9 +2051,10 @@
                     countSpan.textContent = count;
                 } else if(icon.classList.contains('fa-comment')) {
                     // 评论功能
-                    alert('打开评论对话框...');
+                    openCommentModal();
                 } else if(icon.classList.contains('fa-share')) {
                     // 分享功能
+                    if (!checkLoginAndProceed()) return;
                     alert('生成分享海报...');
                 }
             });
@@ -1765,6 +2097,307 @@
             });
         });
         
+        // 打开评论对话框
+        function openCommentModal() {
+            if (!checkLoginAndProceed()) return;
+            const modal = document.getElementById('comment-modal');
+            if(modal) {
+                modal.classList.remove('hidden');
+                loadComments();
+                // 防止背景滚动
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        // 关闭评论对话框
+        function closeCommentModal() {
+            const modal = document.getElementById('comment-modal');
+            if(modal) {
+                modal.classList.add('hidden');
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+                // 清空评论输入框
+                const commentText = document.getElementById('comment-text');
+                if(commentText) {
+                    commentText.value = '';
+                }
+            }
+        }
+        
+        // 加载评论列表
+        function loadComments() {
+            const commentList = document.getElementById('comment-list');
+            if(!commentList) return;
+            
+            // 模拟评论数据
+            const comments = [
+                {
+                    username: '王同学',
+                    time: '1小时前',
+                    content: '我也觉得这家烧鸭饭很好吃，已经吃了好几次了！'
+                },
+                {
+                    username: '张同学',
+                    time: '3小时前',
+                    content: '看起来不错，明天去试试！'
+                },
+                {
+                    username: '李同学',
+                    time: '5小时前',
+                    content: '第二食堂的麻辣烫也很不错，推荐大家试试'
+                }
+            ];
+            
+            // 清空现有评论
+            commentList.innerHTML = '';
+            
+            // 如果没有评论，显示提示
+            if(comments.length === 0) {
+                commentList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light);">暂无评论，快来抢沙发吧！</div>';
+                return;
+            }
+            
+            // 渲染评论列表
+            comments.forEach(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item';
+                commentItem.innerHTML = `
+                    <div class="comment-header">
+                        <div class="comment-user">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="comment-username">${comment.username}</span>
+                        </div>
+                        <span class="comment-time">${comment.time}</span>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                    <div class="comment-actions">
+                        <span class="comment-action" onclick="openReplyModal('${comment.username}', 'comment-${Date.now()}')">回复</span>
+                        <span class="comment-action">点赞 2</span>
+                    </div>
+                `;
+                commentList.appendChild(commentItem);
+            });
+        }
+        
+        // 提交评论
+        function submitComment() {
+            if (!checkLoginAndProceed()) return;
+            const commentText = document.getElementById('comment-text');
+            if(!commentText) return;
+            
+            const content = commentText.value.trim();
+            if(!content) {
+                // 输入框抖动效果
+                commentText.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    commentText.style.animation = '';
+                }, 500);
+                return;
+            }
+            
+            // 模拟提交评论
+            const currentUser = Router.getCurrentUser();
+            const newComment = {
+                username: currentUser ? currentUser.username : '匿名用户',
+                time: '刚刚',
+                content: content
+            };
+            
+            // 添加到评论列表开头
+            const commentList = document.getElementById('comment-list');
+            if(commentList) {
+                // 如果是第一条评论，清空提示信息
+                if(commentList.textContent.includes('暂无评论')) {
+                    commentList.innerHTML = '';
+                }
+                
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item';
+                commentItem.innerHTML = `
+                    <div class="comment-header">
+                        <div class="comment-user">
+                            <div class="comment-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="comment-username">${newComment.username}</span>
+                        </div>
+                        <span class="comment-time">${newComment.time}</span>
+                    </div>
+                    <div class="comment-content">${newComment.content}</div>
+                    <div class="comment-actions">
+                        <span class="comment-action" onclick="openReplyModal('${newComment.username}', 'comment-${Date.now()}')">回复</span>
+                        <span class="comment-action">点赞 0</span>
+                    </div>
+                `;
+                
+                // 添加到评论列表开头
+                commentList.insertBefore(commentItem, commentList.firstChild);
+                
+                // 显示成功提示
+                showSuccessMessage('评论发布成功！');
+                
+                // 清空输入框并关闭对话框
+                commentText.value = '';
+                closeCommentModal();
+                
+                // 更新评论数
+                updateCommentCount(1);
+            }
+        }
+        
+        // 更新评论数
+        function updateCommentCount(increment) {
+            // 找到触发评论的卡片
+            const commentBtns = document.querySelectorAll('.action-btn .fa-comment');
+            commentBtns.forEach(btn => {
+                const countSpan = btn.parentElement.querySelector('span');
+                if(countSpan) {
+                    let count = parseInt(countSpan.textContent) || 0;
+                    count += increment;
+                    countSpan.textContent = count;
+                }
+            });
+        }
+        
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            // 创建成功提示元素
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #52c41a;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                z-index: 1001;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            `;
+            
+            // 添加到页面
+            document.body.appendChild(successDiv);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+        
+        // 添加输入框抖动动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 点击模态框背景关闭
+        document.addEventListener('click', function(e) {
+            if(e.target.classList.contains('modal')) {
+                closeCommentModal();
+            }
+        });
+        
+        // ESC键关闭评论对话框
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'Escape') {
+                const modal = document.getElementById('comment-modal');
+                if(modal && !modal.classList.contains('hidden')) {
+                    closeCommentModal();
+                }
+            }
+        });
+        
+        // 打开回复对话框
+        function openReplyModal(username, commentId) {
+            if (!checkLoginAndProceed()) return;
+            const modal = document.getElementById('reply-modal');
+            const replyUsername = document.getElementById('reply-username');
+            
+            if(modal && replyUsername) {
+                replyUsername.textContent = username;
+                modal.classList.remove('hidden');
+                // 防止背景滚动
+                document.body.style.overflow = 'hidden';
+                // 保存当前回复的评论ID
+                modal.setAttribute('data-comment-id', commentId);
+            }
+        }
+        
+        // 关闭回复对话框
+        function closeReplyModal() {
+            const modal = document.getElementById('reply-modal');
+            if(modal) {
+                modal.classList.add('hidden');
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+                // 清空回复输入框
+                const replyText = document.getElementById('reply-text');
+                if(replyText) {
+                    replyText.value = '';
+                }
+            }
+        }
+        
+        // 提交回复
+        function submitReply() {
+            if (!checkLoginAndProceed()) return;
+            const replyText = document.getElementById('reply-text');
+            if(!replyText) return;
+            
+            const content = replyText.value.trim();
+            if(!content) {
+                // 输入框抖动效果
+                replyText.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    replyText.style.animation = '';
+                }, 500);
+                return;
+            }
+            
+            // 模拟提交回复
+            const currentUser = Router.getCurrentUser();
+            const newReply = {
+                username: currentUser ? currentUser.username : '匿名用户',
+                time: '刚刚',
+                content: content
+            };
+            
+            // 显示成功提示
+            showSuccessMessage('回复发布成功！');
+            
+            // 清空输入框并关闭对话框
+            replyText.value = '';
+            closeReplyModal();
+        }
+        
+        // 点击模态框背景关闭
+        document.addEventListener('click', function(e) {
+            if(e.target.classList.contains('modal')) {
+                closeCommentModal();
+                closeReplyModal();
+            }
+        });
+        
+        // ESC键关闭对话框
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'Escape') {
+                closeCommentModal();
+                closeReplyModal();
+            }
+        });
+        
         // 页面加载时，根据当前URL设置主导航激活状态（增强：支持编码/本地路径与标题回退匹配）
         document.addEventListener('DOMContentLoaded', function() {
             const currentPage = decodeURIComponent((window.location.pathname.split('/').pop() || 'index.html'));
@@ -1797,6 +2430,327 @@
 
             console.log('校园食光首页加载完成');
         });
+        
+        // 加载推荐食堂数据
+        async function loadRecommendedCanteens() {
+            try {
+                const response = await Router.apiCall(API_ENDPOINTS.MERCHANTS, {
+                    method: 'GET'
+                });
+                
+                if (response && response.code === 200) {
+                    const canteens = response.data || [];
+                    renderCanteens(canteens);
+                } else {
+                    console.error('加载推荐食堂失败:', response);
+                    // 显示错误提示
+                    showErrorMessage('加载推荐食堂失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('加载推荐食堂出错:', error);
+                showErrorMessage('网络错误，请检查网络连接');
+            }
+        }
+        
+        // 加载热门菜品数据
+        async function loadHotDishes() {
+            try {
+                const response = await Router.apiCall(API_ENDPOINTS.DISHES, {
+                    method: 'GET'
+                });
+                
+                if (response && response.code === 200) {
+                    const dishes = response.data || [];
+                    renderHotDishes(dishes);
+                } else {
+                    console.error('加载热门菜品失败:', response);
+                    showErrorMessage('加载热门菜品失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('加载热门菜品出错:', error);
+                showErrorMessage('网络错误，请检查网络连接');
+            }
+        }
+        
+        // 加载最新评价数据
+        async function loadRecentReviews() {
+            try {
+                const response = await Router.apiCall('/reviews', {
+                    method: 'GET'
+                });
+                
+                if (response && response.code === 200) {
+                    const reviews = response.data || [];
+                    renderRecentReviews(reviews);
+                } else {
+                    console.error('加载最新评价失败:', response);
+                    showErrorMessage('加载最新评价失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('加载最新评价出错:', error);
+                showErrorMessage('网络错误，请检查网络连接');
+            }
+        }
+        
+        // 渲染食堂数据
+        function renderCanteens(canteens) {
+            const canteenGrid = document.querySelector('.canteen-grid');
+            if (!canteenGrid) return;
+            
+            // 清空现有内容
+            canteenGrid.innerHTML = '';
+            
+            // 如果没有数据，显示提示
+            if (canteens.length === 0) {
+                canteenGrid.innerHTML = '<div class="no-data">暂无食堂数据</div>';
+                return;
+            }
+            
+            // 渲染食堂卡片
+            canteens.forEach(canteen => {
+                const card = createCanteenCard(canteen);
+                canteenGrid.appendChild(card);
+            });
+        }
+        
+        // 渲染热门菜品
+        function renderHotDishes(dishes) {
+            const hotDishesSection = document.getElementById('hot-dishes');
+            if (!hotDishesSection) return;
+            
+            // 清空现有内容
+            const existingCards = hotDishesSection.querySelectorAll('.recommend-card');
+            existingCards.forEach(card => card.remove());
+            
+            // 如果没有数据，显示提示
+            if (dishes.length === 0) {
+                const noDataMsg = document.createElement('div');
+                noDataMsg.className = 'no-data';
+                noDataMsg.textContent = '暂无热门菜品数据';
+                hotDishesSection.appendChild(noDataMsg);
+                return;
+            }
+            
+            // 只显示前3个热门菜品
+            const topDishes = dishes.slice(0, 3);
+            topDishes.forEach(dish => {
+                const card = createDishCard(dish);
+                hotDishesSection.appendChild(card);
+            });
+        }
+        
+        // 渲染最新评价
+        function renderRecentReviews(reviews) {
+            const dynamicSection = document.querySelector('.dynamic-section');
+            if (!dynamicSection) return;
+            
+            // 清空现有的动态卡片
+            const existingCards = dynamicSection.querySelectorAll('.dynamic-card');
+            existingCards.forEach(card => card.remove());
+            
+            // 如果没有数据，显示提示
+            if (reviews.length === 0) {
+                const noDataMsg = document.createElement('div');
+                noDataMsg.className = 'no-data';
+                noDataMsg.textContent = '暂无最新评价数据';
+                dynamicSection.appendChild(noDataMsg);
+                return;
+            }
+            
+            // 只显示前2条最新评价
+            const topReviews = reviews.slice(0, 2);
+            topReviews.forEach(review => {
+                const card = createReviewCard(review);
+                dynamicSection.appendChild(card);
+            });
+        }
+        
+        // 创建食堂卡片
+        function createCanteenCard(canteen) {
+            const card = document.createElement('div');
+            card.className = 'canteen-card';
+            
+            const statusClass = canteen.status === 'open' ? 'status-open' : 'status-closed';
+            const statusText = canteen.status === 'open' ? '营业中' : '已关闭';
+            
+            card.innerHTML = `
+                <div class="canteen-header">
+                    <div>
+                        <div class="canteen-name">${canteen.name || '未知食堂'}</div>
+                        <div class="canteen-meta">
+                            <span class="canteen-rating"><i class="fas fa-star"></i> ${canteen.rating || '暂无评分'}</span>
+                            <span class="canteen-review-count">(${canteen.reviewCount || 0}人评价)</span>
+                        </div>
+                    </div>
+                    <div class="canteen-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="canteen-body">
+                    <div class="canteen-tags">
+                        ${canteen.tags ? canteen.tags.map(tag => `<span class="canteen-tag">${tag}</span>`).join('') : ''}
+                    </div>
+                    <p class="canteen-desc">${canteen.description || '暂无描述'}</p>
+                </div>
+                <div class="canteen-footer">
+                    <div class="canteen-distance">
+                        <i class="fas fa-map-marker-alt"></i> ${canteen.location || '未知位置'}
+                    </div>
+                    <div>
+                        <a href="merchant_detail.html?id=${canteen.id}" class="btn">查看详情</a>
+                    </div>
+                </div>
+            `;
+            
+            // 添加点击事件
+            card.addEventListener('click', function(e) {
+                // 如果点击的是按钮或链接，不触发卡片点击事件
+                if(e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
+                // 跳转到食堂详情页
+                window.location.href = `merchant_detail.html?id=${canteen.id}`;
+            });
+            
+            return card;
+        }
+        
+        // 创建菜品卡片
+        function createDishCard(dish) {
+            const card = document.createElement('div');
+            card.className = 'recommend-card';
+            
+            const statusClass = dish.status === 'available' ? 'status-open' : 'status-closed';
+            const statusText = dish.status === 'available' ? '营业中' : '已售完';
+            
+            card.innerHTML = `
+                <div class="recommend-img">${dish.image ? `<img src="${dish.image}" alt="${dish.name}">` : '菜品图片'}</div>
+                <div class="recommend-info">
+                    <h3 class="recommend-title">${dish.name || '未知菜品'}<span class="campus-tag">${dish.canteen || '未知食堂'}</span></h3>
+                    <p class="recommend-desc">${dish.description || '暂无描述'}</p>
+                    <div class="recommend-meta">
+                        <div>
+                            <span class="recommend-rating"><i class="fas fa-star"></i> ${dish.rating || '暂无评分'}</span>
+                            <span> | 人均 ¥${dish.price || '未知'}</span>
+                        </div>
+                        <div class="recommend-status ${statusClass}">${statusText}</div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加点击事件
+            card.addEventListener('click', function() {
+                // 跳转到菜品详情页
+                window.location.href = `stall_menu.html?id=${dish.stallId || dish.id}`;
+            });
+            
+            return card;
+        }
+        
+        // 创建评价卡片
+        function createReviewCard(review) {
+            const card = document.createElement('div');
+            card.className = 'dynamic-card';
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-user">
+                        <div class="card-avatar">
+                            ${review.avatar ? `<img src="${review.avatar}" alt="${review.username}">` : '<i class="fas fa-user"></i>'}
+                        </div>
+                        <div class="card-user-info">
+                            <h4>${review.username || '匿名用户'}</h4>
+                            <p>${review.school || '未知学校'} · ${review.college || '未知学院'}</p>
+                        </div>
+                    </div>
+                    <div class="card-time">${formatTime(review.createdAt)}</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">${review.title || '无标题'}<span class="campus-tag">${review.campus || '未知校区'}</span></h3>
+                    <p class="card-content">${review.content || '无内容'}</p>
+                    
+                    <div class="card-tags">
+                        ${review.tags ? review.tags.map(tag => `<span class="card-tag">#${tag}</span>`).join('') : ''}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="card-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-thumbs-up"></i> 点赞 <span>${review.likeCount || 0}</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-comment"></i> 评论 <span>${review.commentCount || 0}</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-share"></i> 分享
+                        </div>
+                    </div>
+                    <div class="card-stats">
+                        <span><i class="fas fa-eye"></i> ${review.viewCount || 0} 浏览</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // 格式化时间
+        function formatTime(timestamp) {
+            if (!timestamp) return '未知时间';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            // 小于1分钟
+            if (diff < 60000) {
+                return '刚刚';
+            }
+            // 小于1小时
+            else if (diff < 3600000) {
+                return Math.floor(diff / 60000) + '分钟前';
+            }
+            // 小于1天
+            else if (diff < 86400000) {
+                return Math.floor(diff / 3600000) + '小时前';
+            }
+            // 小于7天
+            else if (diff < 604800000) {
+                return Math.floor(diff / 86400000) + '天前';
+            }
+            // 超过7天，显示具体日期
+            else {
+                return date.toLocaleDateString();
+            }
+        }
+        
+        // 显示错误信息
+        function showErrorMessage(message) {
+            // 创建错误提示元素
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #ff4d4f;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                z-index: 1000;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            `;
+            
+            // 添加到页面
+            document.body.appendChild(errorDiv);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 3000);
+        }
 
         // 食堂区域筛选（示例）
         function filterArea(area) {
@@ -1848,24 +2802,36 @@
     </script>
 
     <script>
-    // 在页面加载时显示内嵌的管理员模式提示（若为管理员）。开发时若未设置身份则默认设为管理员。
+    // 在页面加载时显示内嵌的管理员模式提示（若为管理员）。
     document.addEventListener('DOMContentLoaded', function(){
       try{
-        if(!localStorage.getItem('userRole')){ try{ localStorage.setItem('userRole','admin'); }catch(e){} }
-        const userRole = localStorage.getItem('userRole');
+        const user = Router.getCurrentUser();
+        const userRole = Router.getUserRole();
         const adminNotice = document.getElementById('admin-mode-notice');
         const adminMenuItem = document.getElementById('admin-workbench-item');
         const username = document.getElementById('username');
-        if(userRole === 'admin'){
-          if(adminNotice) adminNotice.classList.remove('hidden');
-          if(adminMenuItem) adminMenuItem.classList.remove('hidden');
-          if(username) username.innerHTML = '张老师 <span class="admin-badge">管理员</span>';
+        
+        if (user) {
+            // 显示真实用户信息
+            if (username) {
+                username.innerHTML = user.username + (userRole === 'admin' ? ' <span class="admin-badge">管理员</span>' : '');
+            }
+            
+            if(userRole === 'admin'){
+              if(adminNotice) adminNotice.classList.remove('hidden');
+              if(adminMenuItem) adminMenuItem.classList.remove('hidden');
+            }
         }
       }catch(e){}
     });
 
     // 进入工作台（通用实现，优先使用 sessionStorage.lastAdminUrl 回跳）
     function enterWorkbench() {
+      // 检查用户角色，只有管理员才能进入工作台
+      if (Router.getUserRole() !== 'admin') {
+        alert('只有管理员才能进入工作台！');
+        return;
+      }
       try{
         const last = sessionStorage.getItem('lastAdminUrl');
         if(last && typeof last === 'string'){
@@ -1873,7 +2839,7 @@
           return;
         }
       }catch(e){}
-    Router.toAdminIndex();
+      Router.toAdminIndex();
     }
     </script>
 </body>

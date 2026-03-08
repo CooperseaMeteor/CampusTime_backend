@@ -1,1766 +1,5500 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>AI助手 - 校园食光</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* 全局样式 - 遵循设计规范 */
-        :root {
-            --primary-color: #e60012; /* 大众点评红 */
-            --bg-gray: #f8f8f8; /* 背景灰 */
-            --border-color: #e5e5e5; /* 浅灰边框 */
-            --text-dark: #333; /* 深灰文字 */
-            --text-light: #999; /* 浅灰文字 */
-            --status-open: #52c41a; /* 营业中 */
-            --status-closed: #ff4d4f; /* 已关闭 */
-            --rating-color: #ffc107; /* 评分金色 */
-            --tag-blue: #1890ff; /* 标签蓝 */
-            --ai-primary: #6a11cb; /* AI主题色 - 紫色 */
-            --ai-secondary: #2575fc; /* AI辅助色 - 蓝色 */
-            --spacing-small: 8px;
-            --spacing-medium: 15px;
-            --spacing-large: 20px;
-            --border-radius: 4px;
-            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-        }
-        
-        body {
-            background-color: var(--bg-gray);
-            color: var(--text-dark);
-            line-height: 1.5;
-            font-size: 14px;
-        }
-        
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        ul {
-            list-style: none;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--spacing-large);
-        }
-        
-        /* 顶部导航栏 */
-        .global-nav {
-            background-color: var(--primary-color);
-            height: 45px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            color: white;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-        }
-        
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .logo i {
-            margin-right: 8px;
-        }
-        
-        .nav-right {
-            display: flex;
-            align-items: center;
-        }
-        
-        .nav-item {
-            margin-left: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            position: relative;
-            padding: 5px 0;
-        }
-        
-        .nav-item:hover {
-            opacity: 0.9;
-        }
-        
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: white;
-        }
-        
-        /* 主导航 - 改为超链接样式 */
-        .main-nav {
-            background-color: white;
-            height: 50px;
-            margin-top: 45px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        
-        .nav-tabs {
-            display: flex;
-            height: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* 主导航项改为a标签样式 */
-        .nav-tab {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 15px;
-            color: var(--text-dark);
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-            text-decoration: none; /* 移除下划线 */
-        }
-        
-        /* 悬停状态 */
-        .nav-tab:hover {
-            color: var(--primary-color);
-            text-decoration: none; /* 确保悬停时没有下划线 */
-        }
-        
-        /* 当前页面激活状态 */
-        .nav-tab.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .nav-tab i {
-            margin-right: 5px;
-            font-size: 14px;
-        }
-        
-        /* AI助手特殊按钮样式 */
-        .ai-nav-btn {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 15px;
-            color: var(--text-dark);
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-            background: none;
-            border: none;
-            font-family: inherit;
-            padding: 0;
-        }
-        
-        .ai-nav-btn:hover {
-            color: var(--primary-color);
-        }
-        
-        /* AI助手页面特有样式 */
-        .main-content {
-            margin-top: var(--spacing-large);
-            padding-bottom: 50px;
-        }
-        
-        /* AI助手头部 */
-        .ai-header {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-large);
-            margin-bottom: var(--spacing-large);
-            box-shadow: var(--shadow-card);
-            text-align: center;
-        }
-        
-        .ai-icon-large {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        
-        .ai-title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .ai-subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-            margin-bottom: 20px;
-        }
-        
-        /* AI助手主区域 */
-        .ai-main {
-            display: flex;
-            gap: var(--spacing-large);
-        }
-        
-        /* AI对话区域 */
-        .ai-chat-area {
-            flex: 2;
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-card);
-            display: flex;
-            flex-direction: column;
-            height: 600px;
-        }
-        
-        .chat-header {
-            padding: var(--spacing-medium);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .chat-title {
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
-        .chat-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-action-btn {
-            background-color: #f5f5f5;
-            border: none;
-            border-radius: 3px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.2s;
-        }
-        
-        .chat-action-btn:hover {
-            background-color: #e9e9e9;
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: var(--spacing-medium);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .message {
-            display: flex;
-            max-width: 80%;
-        }
-        
-        .message.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-        
-        .message.ai {
-            align-self: flex-start;
-        }
-        
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        
-        .message.user .message-avatar {
-            background-color: var(--primary-color);
-            color: white;
-            margin-left: 10px;
-        }
-        
-        .message.ai .message-avatar {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            color: white;
-            margin-right: 10px;
-        }
-        
-        .message-content {
-            background-color: #f5f5f5;
-            border-radius: 18px;
-            padding: 12px 16px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        
-        .message.user .message-content {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 18px 18px 4px 18px;
-        }
-        
-        .message.ai .message-content {
-            background-color: #f0f0f0;
-            color: var(--text-dark);
-            border-radius: 18px 18px 18px 4px;
-        }
-        
-        .message-time {
-            font-size: 11px;
-            color: var(--text-light);
-            margin-top: 5px;
-            text-align: right;
-        }
-        
-        .message.ai .message-time {
-            text-align: left;
-        }
-        
-        .chat-input-area {
-            padding: var(--spacing-medium);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 12px 18px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        .chat-input:focus {
-            border-color: var(--ai-primary);
-        }
-        
-        .chat-send-btn {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-        }
-        
-        .chat-send-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .input-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .input-action-btn {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-            font-size: 18px;
-            transition: color 0.2s;
-        }
-        
-        .input-action-btn:hover {
-            color: var(--ai-primary);
-        }
-        
-        /* AI功能侧边栏 */
-        .ai-sidebar {
-            flex: 1;
-        }
-        
-        /* AI功能卡片 */
-        .ai-feature-card {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-medium);
-            box-shadow: var(--shadow-card);
-            margin-bottom: var(--spacing-large);
-        }
-        
-        .feature-card-title {
-            font-size: 16px;
-            margin-bottom: var(--spacing-medium);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .feature-card-title i {
-            color: var(--ai-primary);
-        }
-        
-        .feature-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .feature-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background-color: #f9f9f9;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .feature-item:hover {
-            background-color: #f0f0f0;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-card);
-        }
-        
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        
-        .feature-info {
-            flex: 1;
-        }
-        
-        .feature-name {
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-        
-        .feature-desc {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-        
-        /* AI能力展示 */
-        .ai-capabilities {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-medium);
-            box-shadow: var(--shadow-card);
-            margin-bottom: var(--spacing-large);
-        }
-        
-        .capabilities-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .capability-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: var(--border-radius);
-        }
-        
-        .capability-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .capability-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-        
-        .capability-desc {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-        
-        /* 历史记录 */
-        .ai-history {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-medium);
-            box-shadow: var(--shadow-card);
-        }
-        
-        .history-list {
-            margin-top: 15px;
-        }
-        
-        .history-item {
-            padding: 12px;
-            border-bottom: 1px solid #f5f5f5;
-            cursor: pointer;
-        }
-        
-        .history-item:last-child {
-            border-bottom: none;
-        }
-        
-        .history-question {
-            font-weight: 500;
-            margin-bottom: 5px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2; /* 标准属性补充，用于兼容性 */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .history-answer {
-            font-size: 12px;
-            color: var(--text-light);
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            line-clamp: 1; /* 标准属性补充，用于兼容性 */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-        
-        .history-time {
-            font-size: 11px;
-            color: var(--text-light);
-        }
-        
-        /* 快速问答卡片 */
-        .quick-questions {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-medium);
-            box-shadow: var(--shadow-card);
-            margin-top: var(--spacing-large);
-        }
-        
-        .questions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .question-btn {
-            padding: 10px;
-            background-color: #f5f5f5;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 13px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        
-        .question-btn:hover {
-            background-color: #e9e9e9;
-            transform: translateY(-2px);
-        }
-        
-        /* AI推荐菜品展示 */
-        .ai-recommendations {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-medium);
-            box-shadow: var(--shadow-card);
-            margin-top: var(--spacing-large);
-        }
-        
-        .recommendation-slider {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding: 15px 0;
-            margin-top: 10px;
-        }
-        
-        .recommendation-item {
-            flex: 0 0 200px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .recommendation-item:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-        }
-        
-        .recommendation-img {
-            height: 120px;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-light);
-        }
-        
-        .recommendation-info {
-            padding: 12px;
-        }
-        
-        .recommendation-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-        
-        .recommendation-canteen {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
-        
-        .recommendation-rating {
-            color: var(--rating-color);
-            font-size: 12px;
-        }
-        
-        /* 语音输入指示器 */
-        .voice-indicator {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            border-radius: 50%;
-            width: 150px;
-            height: 150px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-        }
-        
-        .voice-indicator.active {
-            display: flex;
-        }
-        
-        .voice-pulse {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: var(--ai-primary);
-            animation: pulse 1.5s infinite;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 20px rgba(106, 17, 203, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(106, 17, 203, 0);
-            }
-        }
-        
-        /* 页脚 */
-        .footer {
-            background-color: white;
-            padding: var(--spacing-large) 0;
-            text-align: center;
-            color: var(--text-light);
-            font-size: 13px;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        /* AI悬浮按钮 */
-        .ai-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, var(--primary-color), #ff5252);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(230, 0, 18, 0.3);
-            z-index: 100;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .ai-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(230, 0, 18, 0.4);
-        }
-        
-        /* 按钮样式 */
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        
-        .btn:hover {
-            background-color: #d5000f;
-            color: white;
-            text-decoration: none;
-        }
-        
-        .btn-ai {
-            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-            color: white;
-        }
-        
-        .btn-ai:hover {
-            background: linear-gradient(135deg, #5a0db4, #1c6cfc);
-            color: white;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 992px) {
-            .ai-main {
-                flex-direction: column;
-            }
-            
-            .capabilities-grid, .questions-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 var(--spacing-medium);
-            }
-            
-            .nav-tabs {
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            .nav-tab, .ai-nav-btn {
-                min-width: 100px;
-                font-size: 14px;
-            }
-            
-            .capabilities-grid, .questions-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .chat-input-area {
-                flex-direction: column;
-            }
-            
-            .input-actions {
-                justify-content: center;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .ai-fab {
-                bottom: 20px;
-                right: 20px;
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            
-            .message {
-                max-width: 90%;
-            }
-            
-            .ai-chat-area {
-                height: 500px;
-            }
-        }
-        
-        /* 工具类 */
-        .hidden {
-            display: none !important;
-        }
-        .modal { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); z-index:1000; }
-        .modal.hidden { display:none; }
-        .modal-content { background:white; border-radius:8px; padding:16px; width:90%; max-width:900px; position:relative; }
-        .modal-close { position:absolute; top:8px; right:8px; border:none; background:transparent; font-size:20px; cursor:pointer; }
-        
-        .active-tab {
-            display: block;
-        }
-        
-        /* 统一校区选择器样式 */
-        .school-selector {
-            margin-right: 8px;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .school-selector select {
-            padding: 6px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background: white;
-        }
-        
-        .text-red {
-            color: var(--primary-color);
-        }
-        
-        .text-green {
-            color: var(--status-open);
-        }
-        
-        /* 加载指示器 */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 10px;
-        }
-        
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #ccc;
-            border-radius: 50%;
-            animation: typing 1.5s infinite ease-in-out;
-        }
-        
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-8px); }
-        }
-        
-        /* 校区标签 */
-        .campus-tag {
-            background-color: #f0f9ff;
-            color: var(--tag-blue);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
-            margin-left: 5px;
-        }
-        
-        /* 管理员模式切换提示 */
-        .admin-mode-notice {
-            background-color: rgba(230, 0, 18, 0.1);
-            border: 1px solid rgba(230, 0, 18, 0.3);
-            border-radius: var(--border-radius);
-            padding: 12px 16px;
-            margin-bottom: var(--spacing-large);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .admin-mode-notice .notice-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .admin-mode-notice .admin-badge {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-    </style>
+
     <script src="/config.js"></script>
+
     <script src="/router.js"></script>
+
+    <script src="/main/user/navigation-manager.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+
+        /* 全局样式 - 遵循设计规范 */
+
+        :root {
+
+            /* 主色调系统 */
+
+            --primary-color: #e60012; /* 大众点评红 */
+
+            --bg-gray: #f8f8f8; /* 背景灰 */
+
+            --border-color: #e5e5e5; /* 浅灰边框 */
+
+            --text-dark: #333; /* 深灰文字 */
+
+            --text-light: #999; /* 浅灰文字 */
+
+            --status-open: #52c41a; /* 营业中 */
+
+            --status-closed: #ff4d4f; /* 已关闭 */
+
+            --rating-color: #ffc107; /* 评分金色 */
+
+            --tag-blue: #1890ff; /* 标签蓝 */
+
+            
+
+            /* AI主题色系统 */
+
+            --ai-primary: #6a11cb; /* AI主题色 - 紫色 */
+
+            --ai-secondary: #2575fc; /* AI辅助色 - 蓝色 */
+
+            --ai-gradient: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+
+            --ai-gradient-horizontal: linear-gradient(90deg, var(--ai-primary), var(--ai-secondary));
+
+            --ai-light: rgba(106, 17, 203, 0.1);
+
+            --ai-light-hover: rgba(106, 17, 203, 0.15);
+
+            --ai-dark: rgba(106, 17, 203, 0.8);
+
+            
+
+            /* 间距系统 */
+
+            --spacing-xs: 4px;
+
+            --spacing-sm: 8px;
+
+            --spacing-md: 16px;
+
+            --spacing-lg: 24px;
+
+            --spacing-xl: 32px;
+
+            --spacing-2xl: 48px;
+
+            
+
+            /* 边框半径系统 */
+
+            --radius-sm: 4px;
+
+            --radius-md: 8px;
+
+            --radius-lg: 12px;
+
+            --radius-xl: 16px;
+
+            --radius-2xl: 24px;
+
+            --radius-full: 50%;
+
+            
+
+            /* 阴影系统 */
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+            --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-lg: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            --shadow-xl: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+            --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+            --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+            
+
+            /* 动画系统 */
+
+            --transition-fast: 0.2s ease;
+
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+            --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+            
+
+            /* 字体系统 */
+
+            --font-size-xs: 11px;
+
+            --font-size-sm: 12px;
+
+            --font-size-md: 14px;
+
+            --font-size-lg: 16px;
+
+            --font-size-xl: 18px;
+
+            --font-size-2xl: 24px;
+
+            --font-size-3xl: 28px;
+
+            --font-size-4xl: 36px;
+
+            --font-size-5xl: 48px;
+
+            
+
+            --line-height-tight: 1.2;
+
+            --line-height-normal: 1.5;
+
+            --line-height-relaxed: 1.6;
+
+            --line-height-loose: 1.8;
+
+            
+
+            /* 字重系统 */
+
+            --font-weight-light: 300;
+
+            --font-weight-normal: 400;
+
+            --font-weight-medium: 500;
+
+            --font-weight-semibold: 600;
+
+            --font-weight-bold: 700;
+
+            --font-weight-extrabold: 800;
+
+            
+
+            /* 字体家族 */
+
+            --font-family-sans: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+            --font-family-mono: 'Courier New', Courier, monospace;
+
+            --font-family-serif: 'SimSun', serif;
+
+            
+
+            /* 其他系统 */
+
+            --blur-sm: blur(4px);
+
+            --blur-md: blur(8px);
+
+            --blur-lg: blur(16px);
+
+            --opacity-disabled: 0.6;
+
+            --z-index-dropdown: 1000;
+
+            --z-index-sticky: 1020;
+
+            --z-index-fixed: 1030;
+
+            --z-index-modal-backdrop: 1040;
+
+            --z-index-modal: 1050;
+
+            --z-index-popover: 1060;
+
+            --z-index-tooltip: 1070;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: var(--font-family-sans);
+
+            font-weight: var(--font-weight-normal);
+
+        }
+
+        
+
+        /* 滚动条全局样式 */
+
+        ::-webkit-scrollbar {
+
+            width: 8px;
+
+            height: 8px;
+
+        }
+
+        
+
+        ::-webkit-scrollbar-track {
+
+            background: var(--bg-gray);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        ::-webkit-scrollbar-thumb {
+
+            background: var(--ai-light);
+
+            border-radius: var(--radius-full);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        ::-webkit-scrollbar-thumb:hover {
+
+            background: var(--ai-primary);
+
+        }
+
+        
+
+        /* 平滑滚动 */
+
+        html {
+
+            scroll-behavior: smooth;
+
+        }
+
+        
+
+        /* 选择文本样式 */
+
+        ::selection {
+
+            background-color: var(--ai-light);
+
+            color: var(--ai-dark);
+
+        }
+
+        
+
+        /* 禁用文本选择 */
+
+        .no-select {
+
+            user-select: none;
+
+        }
+
+        
+
+        /* 焦点样式 */
+
+        *:focus-visible {
+
+            outline: 2px solid var(--ai-primary);
+
+            outline-offset: 2px;
+
+            border-radius: var(--radius-sm);
+
+        }
+
+        
+
+        /* 按钮通用样式 */
+
+        button {
+
+            font-family: inherit;
+
+            font-size: inherit;
+
+            cursor: pointer;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        button:disabled {
+
+            opacity: var(--opacity-disabled);
+
+            cursor: not-allowed;
+
+        }
+
+        
+
+        /* 输入框通用样式 */
+
+        input, textarea {
+
+            font-family: inherit;
+
+            font-size: inherit;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        /* 链接通用样式 */
+
+        a {
+
+            color: inherit;
+
+            text-decoration: none;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        /* 卡片通用样式 */
+
+        .card {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .card:hover {
+
+            box-shadow: var(--shadow-lg);
+
+            transform: translateY(-2px);
+
+        }
+
+        
+
+        /* 动画类 */
+
+        .fade-in {
+
+            animation: fadeIn 0.5s ease-in-out;
+
+        }
+
+        
+
+        @keyframes fadeIn {
+
+            from {
+
+                opacity: 0;
+
+                transform: translateY(20px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform: translateY(0);
+
+            }
+
+        }
+
+        
+
+        .slide-in-left {
+
+            animation: slideInLeft 0.5s ease-out;
+
+        }
+
+        
+
+        @keyframes slideInLeft {
+
+            from {
+
+                opacity: 0;
+
+                transform: translateX(-30px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform: translateX(0);
+
+            }
+
+        }
+
+        
+
+        .slide-in-right {
+
+            animation: slideInRight 0.5s ease-out;
+
+        }
+
+        @keyframes slideInRight {
+
+            from {
+
+                opacity: 0;
+
+                transform: translateX(30px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform: translateX(0);
+
+            }
+
+        }
+
+        
+
+        .pulse {
+
+            animation: pulse 2s infinite;
+
+        }
+
+        
+
+        @keyframes pulse {
+
+            0%, 100% {
+
+                opacity: 1;
+
+            }
+
+            50% {
+
+                opacity: 0.7;
+
+            }
+
+        }
+
+        
+
+        .float {
+
+            animation: float 3s ease-in-out infinite;
+
+        }
+
+        
+
+        @keyframes float {
+
+            0%, 100% {
+
+                transform: translateY(0);
+
+            }
+
+            50% {
+
+                transform: translateY(-10px);
+
+            }
+
+        }
+
+        
+
+        /* 渐变文字 */
+
+        .gradient-text {
+
+            background: var(--ai-gradient);
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+
+            background-clip: text;
+
+            font-weight: bold;
+
+        }
+
+        
+
+        /* 毛玻璃效果 */
+
+        .glass {
+
+            background: rgba(255, 255, 255, 0.7);
+
+            backdrop-filter: blur(10px);
+
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+        }
+
+        
+
+        /* 按钮变体 */
+
+        .btn {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: var(--spacing-sm);
+
+            padding: var(--spacing-sm) var(--spacing-lg);
+
+            border-radius: var(--radius-md);
+
+            font-weight: 500;
+
+            transition: var(--transition-normal);
+
+            border: none;
+
+            cursor: pointer;
+
+            font-family: inherit;
+
+            font-size: var(--font-size-md);
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .btn-primary {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+        }
+
+        
+
+        .btn-primary:hover {
+
+            background-color: #d5000f;
+
+            transform: translateY(-2px);
+
+            box-shadow: var(--shadow-lg);
+
+        }
+
+        
+
+        .btn-ai {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+        }
+
+        
+
+        .btn-ai:hover {
+
+            background: linear-gradient(135deg, #5a0db4, #1c6cfc);
+
+            transform: translateY(-2px);
+
+            box-shadow: var(--shadow-lg);
+
+        }
+
+        
+
+        .btn-outline {
+
+            background-color: transparent;
+
+            color: var(--ai-primary);
+
+            border: 2px solid var(--ai-primary);
+
+        }
+
+        
+
+        .btn-outline:hover {
+
+            background-color: var(--ai-light);
+
+            transform: translateY(-2px);
+
+        }
+
+        
+
+        .btn-sm {
+
+            padding: var(--spacing-xs) var(--spacing-md);
+
+            font-size: var(--font-size-sm);
+
+        }
+
+        
+
+        .btn-lg {
+
+            padding: var(--spacing-md) var(--spacing-xl);
+
+            font-size: var(--font-size-lg);
+
+        }
+
+        
+
+        .btn-icon {
+
+            width: 44px;
+
+            height: 44px;
+
+            padding: 0;
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        /* 输入框变体 */
+
+        .input {
+
+            width: 100%;
+
+            padding: var(--spacing-sm) var(--spacing-md);
+
+            border: 2px solid var(--border-color);
+
+            border-radius: var(--radius-md);
+
+            font-size: var(--font-size-md);
+
+            transition: var(--transition-normal);
+
+            background-color: white;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .input:focus {
+
+            border-color: var(--ai-primary);
+
+            box-shadow: 0 0 0 3px var(--ai-light);
+
+            outline: none;
+
+            transform: translateY(-1px);
+
+            box-shadow: var(--shadow-md);
+
+        }
+
+        
+
+        .input::placeholder {
+
+            color: var(--text-light);
+
+            font-style: italic;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .input:focus::placeholder {
+
+            color: var(--ai-primary);
+
+            transform: translateX(4px);
+
+        }
+
+        
+
+        .input-sm {
+
+            padding: var(--spacing-xs) var(--spacing-sm);
+
+            font-size: var(--font-size-sm);
+
+        }
+
+        
+
+        .input-lg {
+
+            padding: var(--spacing-md) var(--spacing-lg);
+
+            font-size: var(--font-size-lg);
+
+        }
+
+        
+
+        /* 聊天输入框特殊样式 */
+
+        .chat-input {
+
+            width: 100%;
+
+            border: 2px solid var(--border-color);
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md) var(--spacing-lg);
+
+            font-size: var(--font-size-md);
+
+            outline: none;
+
+            transition: var(--transition-normal);
+
+            background-color: white;
+
+            min-height: 52px;
+
+            resize: none;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .chat-input:focus {
+
+            border-color: var(--ai-primary);
+
+            box-shadow: 0 0 0 3px var(--ai-light);
+
+            transform: translateY(-1px);
+
+            box-shadow: var(--shadow-md);
+
+        }
+
+        
+
+        .chat-input::placeholder {
+
+            color: var(--text-light);
+
+            font-style: italic;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .chat-input:focus::placeholder {
+
+            color: var(--ai-primary);
+
+            transform: translateX(4px);
+
+        }
+
+        
+
+        /* 输入框自动高度调整 */
+
+        .chat-input {
+
+            min-height: 52px;
+
+            max-height: 200px;
+
+            overflow-y: auto;
+
+            transition: min-height 0.3s ease;
+
+        }
+
+        
+
+        .chat-input::-webkit-scrollbar {
+
+            width: 4px;
+
+        }
+
+        
+
+        .chat-input::-webkit-scrollbar-track {
+
+            background: transparent;
+
+        }
+
+        
+
+        .chat-input::-webkit-scrollbar-thumb {
+
+            background: var(--ai-light);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: var(--line-height-normal);
+
+            font-size: var(--font-size-md);
+
+            font-family: var(--font-family-sans);
+
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        .nav-item.active::after {
+
+            content: '';
+
+            position: absolute;
+
+            bottom: 0;
+
+            left: 0;
+
+            right: 0;
+
+            height: 2px;
+
+            background-color: white;
+
+        }
+
+        
+
+        /* 主导航 - 改为超链接样式 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+        }
+
+        
+
+        .nav-tabs {
+
+            display: flex;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+        }
+
+        
+
+        /* 主导航项改为a标签样式 */
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none; /* 移除下划线 */
+
+        }
+
+        
+
+        /* 悬停状态 */
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none; /* 确保悬停时没有下划线 */
+
+        }
+
+        
+
+        /* 当前页面激活状态 */
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* AI助手特殊按钮样式 */
+
+        .ai-nav-btn {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            background: none;
+
+            border: none;
+
+            font-family: inherit;
+
+            padding: 0;
+
+        }
+
+        
+
+        .ai-nav-btn:hover {
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        /* AI助手页面特有样式 */
+
+        .main-content {
+
+            margin-top: 70px;
+
+            padding-bottom: 50px;
+
+        }
+
+        
+
+        /* AI助手头部 */
+
+        .ai-header {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-xl);
+
+            margin-bottom: var(--spacing-lg);
+
+            box-shadow: var(--shadow-lg);
+
+            text-align: center;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .ai-header::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: -50%;
+
+            left: -50%;
+
+            width: 200%;
+
+            height: 200%;
+
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+
+            background-size: 20px 20px;
+
+            animation: float 20s linear infinite;
+
+        }
+
+        
+
+        @keyframes float {
+
+            0% { transform: translate(0, 0); }
+
+            100% { transform: translate(20px, 20px); }
+
+        }
+
+        
+
+        .ai-icon-large {
+
+            font-size: 64px;
+
+            margin-bottom: var(--spacing-md);
+
+            position: relative;
+
+            z-index: 1;
+
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+        }
+
+        
+
+        .ai-title {
+
+            font-size: var(--font-size-3xl);
+
+            font-weight: var(--font-weight-bold);
+
+            margin-bottom: var(--spacing-sm);
+
+            position: relative;
+
+            z-index: 1;
+
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+            line-height: var(--line-height-tight);
+
+        }
+
+        
+
+        .ai-subtitle {
+
+            font-size: var(--font-size-lg);
+
+            font-weight: var(--font-weight-medium);
+
+            opacity: 0.9;
+
+            margin-bottom: var(--spacing-lg);
+
+            position: relative;
+
+            z-index: 1;
+
+            line-height: var(--line-height-relaxed);
+
+        }
+
+        
+
+        /* AI助手主区域 */
+
+        .ai-main {
+
+            display: grid;
+
+            grid-template-columns: 1fr 400px;
+
+            gap: var(--spacing-lg);
+
+            margin-bottom: var(--spacing-lg);
+
+        }
+
+        
+
+        /* AI对话区域 */
+
+        .ai-chat-area {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            box-shadow: var(--shadow-md);
+
+            display: flex;
+
+            flex-direction: column;
+
+            min-height: 600px;
+
+            height: 70vh;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .chat-header {
+
+            padding: var(--spacing-md);
+
+            border-bottom: 1px solid var(--border-color);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            background-color: #fafafa;
+
+        }
+
+        
+
+        .chat-title {
+
+            font-size: var(--font-size-xl);
+
+            font-weight: var(--font-weight-semibold);
+
+            color: var(--text-dark);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-sm);
+
+            line-height: var(--line-height-tight);
+
+        }
+
+        
+
+        .chat-title::before {
+
+            content: '';
+
+            width: 8px;
+
+            height: 8px;
+
+            border-radius: var(--radius-full);
+
+            background-color: var(--ai-primary);
+
+            animation: pulse 2s infinite;
+
+        }
+
+        
+
+        @keyframes pulse {
+
+            0%, 100% { opacity: 1; }
+
+            50% { opacity: 0.5; }
+
+        }
+
+        
+
+        .chat-actions {
+
+            display: flex;
+
+            gap: var(--spacing-sm);
+
+        }
+
+        
+
+        .chat-action-btn {
+
+            background-color: var(--ai-light);
+
+            border: 1px solid transparent;
+
+            border-radius: var(--radius-md);
+
+            padding: var(--spacing-sm) var(--spacing-md);
+
+            cursor: pointer;
+
+            font-size: var(--font-size-sm);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-xs);
+
+            transition: var(--transition-normal);
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .chat-action-btn:hover {
+
+            background-color: rgba(106, 17, 203, 0.15);
+
+            border-color: var(--ai-primary);
+
+            transform: translateY(-1px);
+
+        }
+
+        
+
+        .chat-action-btn i {
+
+            color: var(--ai-primary);
+
+        }
+
+        
+
+        .chat-messages {
+
+            flex: 1;
+
+            padding: var(--spacing-md);
+
+            overflow-y: auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-md);
+
+            background-color: #fafafa;
+
+            scroll-behavior: smooth;
+
+            transition: scroll-top 0.3s ease;
+
+        }
+
+        
+
+        .chat-messages::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+        
+
+        .chat-messages::-webkit-scrollbar-track {
+
+            background: var(--border-color);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        .chat-messages::-webkit-scrollbar-thumb {
+
+            background: var(--ai-primary);
+
+            border-radius: var(--radius-full);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+
+            background: var(--ai-secondary);
+
+            transform: scale(1.1);
+
+        }
+
+        
+
+        /* 消息滚动动画 */
+
+        @keyframes scrollToBottom {
+
+            from {
+
+                scroll-behavior: auto;
+
+            }
+
+            to {
+
+                scroll-behavior: smooth;
+
+            }
+
+        }
+
+        
+
+        .chat-messages.scrolling {
+
+            animation: scrollToBottom 0.5s ease-out;
+
+        }
+
+        
+
+        /* 消息加载动画增强 */
+
+        .typing-indicator {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 12px 16px;
+
+            background-color: rgba(255, 255, 255, 0.8);
+
+            border-radius: var(--radius-lg);
+
+            border: 1px solid var(--border-color);
+
+            box-shadow: var(--shadow-sm);
+
+        }
+
+        
+
+        .typing-indicator span {
+
+            width: 8px;
+
+            height: 8px;
+
+            background-color: var(--ai-primary);
+
+            border-radius: 50%;
+
+            animation: typing 1.5s infinite ease-in-out;
+
+        }
+
+        
+
+        .typing-indicator span:nth-child(2) {
+
+            animation-delay: 0.2s;
+
+        }
+
+        
+
+        .typing-indicator span:nth-child(3) {
+
+            animation-delay: 0.4s;
+
+        }
+
+        
+
+        @keyframes typing {
+
+            0%, 60%, 100% {
+
+                transform: translateY(0);
+
+                opacity: 0.6;
+
+            }
+
+            30% {
+
+                transform: translateY(-8px);
+
+                opacity: 1;
+
+            }
+
+        }
+
+        
+
+        .message {
+
+            display: flex;
+
+            max-width: 85%;
+
+            animation: messageSlideIn 0.3s ease-out;
+
+        }
+
+        
+
+        @keyframes messageSlideIn {
+
+            from {
+
+                opacity: 0;
+
+                transform: translateY(10px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform: translateY(0);
+
+            }
+
+        }
+
+        
+
+        .message.user {
+
+            align-self: flex-end;
+
+            flex-direction: row-reverse;
+
+        }
+
+        
+
+        .message.ai {
+
+            align-self: flex-start;
+
+        }
+
+        
+
+        .message-avatar {
+
+            width: 44px;
+
+            height: 44px;
+
+            border-radius: var(--radius-full);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            flex-shrink: 0;
+
+            box-shadow: var(--shadow-sm);
+
+            position: relative;
+
+        }
+
+        
+
+        .message.user .message-avatar {
+
+            background: linear-gradient(135deg, var(--primary-color), #ff5252);
+
+            color: white;
+
+            margin-left: var(--spacing-sm);
+
+        }
+
+        
+
+        .message.ai .message-avatar {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            margin-right: var(--spacing-sm);
+
+        }
+
+        
+
+        .message.ai .message-avatar::after {
+
+            content: '';
+
+            position: absolute;
+
+            bottom: 2px;
+
+            right: 2px;
+
+            width: 10px;
+
+            height: 10px;
+
+            border-radius: var(--radius-full);
+
+            background-color: var(--status-open);
+
+            border: 2px solid white;
+
+        }
+
+        
+
+        .message-content-wrapper {
+
+            display: flex;
+
+            flex-direction: column;
+
+            max-width: calc(100% - 56px);
+
+        }
+
+        
+
+        .message-content {
+
+            background-color: #f5f5f5;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            font-size: var(--font-size-md);
+
+            font-weight: var(--font-weight-normal);
+
+            line-height: var(--line-height-relaxed);
+
+            box-shadow: var(--shadow-sm);
+
+            position: relative;
+
+        }
+
+        
+
+        .message-content strong {
+
+            font-weight: var(--font-weight-semibold);
+
+        }
+
+        
+
+        .message-content em {
+
+            font-style: italic;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .message.user .message-content {
+
+            background: linear-gradient(135deg, var(--primary-color), #ff5252);
+
+            color: white;
+
+            border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+
+        }
+
+        
+
+        .message.ai .message-content {
+
+            background-color: white;
+
+            color: var(--text-dark);
+
+            border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm);
+
+            border: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .message-content p {
+
+            margin-bottom: var(--spacing-sm);
+
+        }
+
+        
+
+        .message-content p:last-child {
+
+            margin-bottom: 0;
+
+        }
+
+        
+
+        .message-content strong {
+
+            font-weight: 600;
+
+        }
+
+        
+
+        .message-content br {
+
+            margin-bottom: var(--spacing-xs);
+
+        }
+
+        
+
+        .message-time {
+
+            font-size: var(--font-size-xs);
+
+            color: var(--text-light);
+
+            margin-top: var(--spacing-xs);
+
+            text-align: right;
+
+            padding: 0 var(--spacing-sm);
+
+        }
+
+        
+
+        .message.ai .message-time {
+
+            text-align: left;
+
+        }
+
+        
+
+        .chat-input-area {
+
+            padding: var(--spacing-md);
+
+            border-top: 1px solid var(--border-color);
+
+            display: flex;
+
+            align-items: flex-end;
+
+            gap: var(--spacing-sm);
+
+            background-color: #fafafa;
+
+        }
+
+        
+
+        .input-actions {
+
+            display: flex;
+
+            flex-direction: row;
+
+            align-items: center;
+
+            gap: var(--spacing-sm);
+
+        }
+
+        
+
+        .input-action-btn {
+
+            background: var(--ai-light);
+
+            border: 1px solid transparent;
+
+            border-radius: var(--radius-full);
+
+            color: var(--ai-primary);
+
+            cursor: pointer;
+
+            font-size: var(--font-size-lg);
+
+            width: 40px;
+
+            height: 40px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .input-action-btn:hover {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            transform: scale(1.1);
+
+            box-shadow: var(--shadow-sm);
+
+        }
+
+        
+
+        .chat-input-container {
+
+            flex: 1;
+
+            position: relative;
+
+        }
+
+        
+
+        .chat-input {
+
+            width: 100%;
+
+            border: 2px solid var(--border-color);
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md) var(--spacing-lg);
+
+            font-size: var(--font-size-md);
+
+            outline: none;
+
+            transition: var(--transition-normal);
+
+            background-color: white;
+
+            min-height: 52px;
+
+            resize: none;
+
+        }
+
+        
+
+        .chat-input:focus {
+
+            border-color: var(--ai-primary);
+
+            box-shadow: 0 0 0 3px var(--ai-light);
+
+        }
+
+        
+
+        .chat-input::placeholder {
+
+            color: var(--text-light);
+
+            font-style: italic;
+
+        }
+
+        
+
+        .chat-send-btn {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--radius-full);
+
+            width: 52px;
+
+            height: 52px;
+
+            cursor: pointer;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            transition: var(--transition-normal);
+
+            box-shadow: var(--shadow-sm);
+
+            flex-shrink: 0;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .chat-send-btn:hover {
+
+            transform: scale(1.1) translateY(-2px);
+
+            box-shadow: var(--shadow-lg);
+
+        }
+
+        
+
+        .chat-send-btn:active {
+
+            transform: scale(0.95);
+
+        }
+
+        
+
+        .chat-send-btn i {
+
+            font-size: var(--font-size-lg);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .chat-send-btn:hover i {
+
+            transform: scale(1.2) rotate(90deg);
+
+        }
+
+        
+
+        /* 发送按钮脉冲效果 */
+
+        .chat-send-btn::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 50%;
+
+            width: 0;
+
+            height: 0;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.3);
+
+            transform: translate(-50%, -50%);
+
+            transition: width 0.6s, height 0.6s;
+
+        }
+
+        
+
+        .chat-send-btn:active::before {
+
+            width: 300px;
+
+            height: 300px;
+
+        }
+
+        
+
+        /* 输入动作按钮增强 */
+
+        .input-action-btn {
+
+            background: var(--ai-light);
+
+            border: 1px solid transparent;
+
+            border-radius: var(--radius-full);
+
+            color: var(--ai-primary);
+
+            cursor: pointer;
+
+            font-size: var(--font-size-lg);
+
+            width: 40px;
+
+            height: 40px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            transition: var(--transition-normal);
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .input-action-btn:hover {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            transform: scale(1.1) translateY(-2px);
+
+            box-shadow: var(--shadow-md);
+
+        }
+
+        
+
+        .input-action-btn i {
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .input-action-btn:hover i {
+
+            transform: scale(1.2);
+
+        }
+
+        
+
+        /* 语音输入激活效果 */
+
+        .input-action-btn.active {
+
+            background: var(--ai-gradient);
+
+            color: white;
+
+            animation: pulse 1.5s infinite;
+
+        }
+
+        
+
+        .input-action-btn.active i {
+
+            animation: rotate 2s linear infinite;
+
+        }
+
+        
+
+        @keyframes rotate {
+
+            from { transform: rotate(0deg); }
+
+            to { transform: rotate(360deg); }
+
+        }
+
+        
+
+        /* AI功能侧边栏 */
+
+        .ai-sidebar {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-md);
+
+            max-height: 70vh;
+
+            overflow-y: auto;
+
+        }
+
+        
+
+        .ai-sidebar::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+        
+
+        .ai-sidebar::-webkit-scrollbar-track {
+
+            background: var(--border-color);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        .ai-sidebar::-webkit-scrollbar-thumb {
+
+            background: var(--ai-primary);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        /* AI功能卡片 */
+
+        .ai-feature-card {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .ai-feature-card:hover {
+
+            box-shadow: var(--shadow-lg);
+
+            transform: translateY(-2px);
+
+        }
+
+        
+
+        .feature-card-title {
+
+            font-size: var(--font-size-lg);
+
+            margin-bottom: var(--spacing-md);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-sm);
+
+            font-weight: var(--font-weight-semibold);
+
+            color: var(--text-dark);
+
+            line-height: var(--line-height-tight);
+
+        }
+
+        
+
+        .feature-card-title i {
+
+            color: var(--ai-primary);
+
+            font-size: var(--font-size-xl);
+
+        }
+
+        
+
+        .feature-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-sm);
+
+        }
+
+        
+
+        .feature-item {
+
+            display: flex;
+
+            align-items: center;
+
+            padding: var(--spacing-md);
+
+            background-color: var(--ai-light);
+
+            border-radius: var(--radius-md);
+
+            cursor: pointer;
+
+            transition: var(--transition-normal);
+
+            border: 1px solid transparent;
+
+        }
+
+        
+
+        .feature-item:hover {
+
+            background-color: rgba(106, 17, 203, 0.15);
+
+            transform: translateY(-2px);
+
+            box-shadow: var(--shadow-sm);
+
+            border-color: var(--ai-primary);
+
+        }
+
+        
+
+        .feature-icon {
+
+            width: 48px;
+
+            height: 48px;
+
+            border-radius: var(--radius-full);
+
+            background: var(--ai-gradient);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: white;
+
+            margin-right: var(--spacing-md);
+
+            flex-shrink: 0;
+
+            box-shadow: var(--shadow-sm);
+
+        }
+
+        
+
+        .feature-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .feature-name {
+
+            font-weight: 600;
+
+            margin-bottom: var(--spacing-xs);
+
+            font-size: var(--font-size-md);
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .feature-desc {
+
+            font-size: var(--font-size-sm);
+
+            color: var(--text-light);
+
+            line-height: var(--line-height-normal);
+
+        }
+
+        
+
+        /* AI能力展示 */
+
+        .ai-capabilities {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .capabilities-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: var(--spacing-md);
+
+            margin-top: var(--spacing-md);
+
+        }
+
+        
+
+        .capability-item {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            text-align: center;
+
+            padding: var(--spacing-md);
+
+            background-color: var(--ai-light);
+
+            border-radius: var(--radius-md);
+
+            transition: var(--transition-normal);
+
+            border: 1px solid transparent;
+
+        }
+
+        
+
+        .capability-item:hover {
+
+            background-color: rgba(106, 17, 203, 0.15);
+
+            transform: translateY(-2px);
+
+            box-shadow: var(--shadow-sm);
+
+            border-color: var(--ai-primary);
+
+        }
+
+        
+
+        .capability-icon {
+
+            width: 56px;
+
+            height: 56px;
+
+            border-radius: var(--radius-full);
+
+            background: var(--ai-gradient);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: white;
+
+            font-size: var(--font-size-xl);
+
+            margin-bottom: var(--spacing-sm);
+
+            box-shadow: var(--shadow-sm);
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .capability-item:hover .capability-icon {
+
+            transform: scale(1.1);
+
+        }
+
+        
+
+        .capability-name {
+
+            font-weight: 600;
+
+            margin-bottom: var(--spacing-xs);
+
+            font-size: var(--font-size-md);
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .capability-desc {
+
+            font-size: var(--font-size-sm);
+
+            color: var(--text-light);
+
+            line-height: var(--line-height-normal);
+
+        }
+
+        
+
+        /* 历史记录 */
+
+        .ai-history {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .history-list {
+
+            margin-top: var(--spacing-md);
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: var(--spacing-xs);
+
+        }
+
+        
+
+        .history-item {
+
+            padding: var(--spacing-md);
+
+            border-bottom: 1px solid var(--border-color);
+
+            cursor: pointer;
+
+            transition: var(--transition-normal);
+
+            border-radius: var(--radius-md);
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .history-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .history-item:hover {
+
+            background-color: var(--ai-light);
+
+            transform: translateX(4px);
+
+            box-shadow: var(--shadow-sm);
+
+        }
+
+        
+
+        .history-item::before {
+
+            content: '';
+
+            position: absolute;
+
+            left: 0;
+
+            top: 0;
+
+            bottom: 0;
+
+            width: 3px;
+
+            background-color: var(--ai-primary);
+
+            transform: scaleY(0);
+
+            transform-origin: top;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .history-item:hover::before {
+
+            transform: scaleY(1);
+
+        }
+
+        
+
+        .history-question {
+
+            font-weight: 600;
+
+            margin-bottom: var(--spacing-xs);
+
+            display: -webkit-box;
+
+            -webkit-line-clamp: 2;
+
+            line-clamp: 2;
+
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+
+            font-size: var(--font-size-md);
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .history-answer {
+
+            font-size: var(--font-size-sm);
+
+            color: var(--text-light);
+
+            display: -webkit-box;
+
+            -webkit-line-clamp: 1;
+
+            line-clamp: 1;
+
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+
+            margin-bottom: var(--spacing-xs);
+
+        }
+
+        
+
+        .history-time {
+
+            font-size: var(--font-size-xs);
+
+            color: var(--text-light);
+
+            font-style: italic;
+
+        }
+
+        
+
+        /* 快速问答卡片 */
+
+        .quick-questions {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+            margin-top: var(--spacing-lg);
+
+        }
+
+        
+
+        .questions-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: var(--spacing-sm);
+
+            margin-top: var(--spacing-md);
+
+        }
+
+        
+
+        .question-btn {
+
+            padding: var(--spacing-md);
+
+            background-color: var(--ai-light);
+
+            border: 1px solid transparent;
+
+            border-radius: var(--radius-md);
+
+            font-size: var(--font-size-md);
+
+            cursor: pointer;
+
+            text-align: center;
+
+            transition: var(--transition-normal);
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .question-btn:hover {
+
+            background-color: rgba(106, 17, 203, 0.15);
+
+            transform: translateY(-2px);
+
+            box-shadow: var(--shadow-sm);
+
+            border-color: var(--ai-primary);
+
+        }
+
+        
+
+        .question-btn::before {
+
+            content: '?';
+
+            position: absolute;
+
+            top: -10px;
+
+            right: -10px;
+
+            width: 30px;
+
+            height: 30px;
+
+            border-radius: var(--radius-full);
+
+            background-color: var(--ai-primary);
+
+            color: white;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-size: var(--font-size-sm);
+
+            font-weight: bold;
+
+            opacity: 0.7;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .question-btn:hover::before {
+
+            opacity: 1;
+
+            transform: scale(1.1);
+
+        }
+
+        
+
+        /* AI推荐菜品展示 */
+
+        .ai-recommendations {
+
+            background-color: white;
+
+            border-radius: var(--radius-lg);
+
+            padding: var(--spacing-md);
+
+            box-shadow: var(--shadow-md);
+
+            border: 1px solid var(--border-color);
+
+            margin-top: var(--spacing-lg);
+
+        }
+
+        
+
+        .recommendation-slider {
+
+            display: flex;
+
+            gap: var(--spacing-md);
+
+            overflow-x: auto;
+
+            padding: var(--spacing-md) 0;
+
+            margin-top: var(--spacing-sm);
+
+            scrollbar-width: thin;
+
+            scrollbar-color: var(--ai-primary) var(--border-color);
+
+        }
+
+        
+
+        .recommendation-slider::-webkit-scrollbar {
+
+            height: 6px;
+
+        }
+
+        
+
+        .recommendation-slider::-webkit-scrollbar-track {
+
+            background: var(--border-color);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        .recommendation-slider::-webkit-scrollbar-thumb {
+
+            background: var(--ai-primary);
+
+            border-radius: var(--radius-full);
+
+        }
+
+        
+
+        .recommendation-item {
+
+            flex: 0 0 220px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--radius-lg);
+
+            overflow: hidden;
+
+            cursor: pointer;
+
+            transition: var(--transition-normal);
+
+            background-color: white;
+
+            position: relative;
+
+        }
+
+        
+
+        .recommendation-item:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow: var(--shadow-xl);
+
+            border-color: var(--ai-primary);
+
+        }
+
+        
+
+        .recommendation-item::before {
+
+            content: 'AI推荐';
+
+            position: absolute;
+
+            top: var(--spacing-sm);
+
+            left: var(--spacing-sm);
+
+            padding: var(--spacing-xs) var(--spacing-sm);
+
+            background-color: var(--ai-primary);
+
+            color: white;
+
+            border-radius: var(--radius-sm);
+
+            font-size: var(--font-size-xs);
+
+            font-weight: bold;
+
+            z-index: 2;
+
+        }
+
+        
+
+        .recommendation-img {
+
+            height: 140px;
+
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: var(--text-light);
+
+            font-size: var(--font-size-lg);
+
+            font-weight: 600;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .recommendation-img::after {
+
+            content: '';
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background: var(--ai-gradient);
+
+            opacity: 0;
+
+            transition: var(--transition-normal);
+
+        }
+
+        
+
+        .recommendation-item:hover .recommendation-img::after {
+
+            opacity: 0.1;
+
+        }
+
+        
+
+        .recommendation-info {
+
+            padding: var(--spacing-md);
+
+            position: relative;
+
+            z-index: 1;
+
+        }
+
+        
+
+        .recommendation-name {
+
+            font-weight: 600;
+
+            margin-bottom: var(--spacing-xs);
+
+            font-size: var(--font-size-md);
+
+            color: var(--text-dark);
+
+            display: -webkit-box;
+
+            -webkit-line-clamp: 1;
+
+            line-clamp: 1;
+
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .recommendation-canteen {
+
+            font-size: var(--font-size-sm);
+
+            color: var(--text-light);
+
+            margin-bottom: var(--spacing-xs);
+
+        }
+
+        
+
+        .recommendation-rating {
+
+            color: var(--rating-color);
+
+            font-size: var(--font-size-sm);
+
+            font-weight: 600;
+
+        }
+
+        
+
+        .recommendation-rating::before {
+
+            content: '⭐ ';
+
+        }
+
+        
+
+        /* 语音输入指示器 */
+
+        .voice-indicator {
+
+            display: none;
+
+            position: fixed;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            background-color: rgba(0, 0, 0, 0.8);
+
+            color: white;
+
+            border-radius: 50%;
+
+            width: 150px;
+
+            height: 150px;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 1001;
+
+        }
+
+        
+
+        .voice-indicator.active {
+
+            display: flex;
+
+        }
+
+        
+
+        .voice-pulse {
+
+            width: 80px;
+
+            height: 80px;
+
+            border-radius: 50%;
+
+            background-color: var(--ai-primary);
+
+            animation: pulse 1.5s infinite;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-size: 24px;
+
+        }
+
+        
+
+        @keyframes pulse {
+
+            0% {
+
+                box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7);
+
+            }
+
+            70% {
+
+                box-shadow: 0 0 0 20px rgba(106, 17, 203, 0);
+
+            }
+
+            100% {
+
+                box-shadow: 0 0 0 0 rgba(106, 17, 203, 0);
+
+            }
+
+        }
+
+        
+
+        /* 页脚 */
+
+        .footer {
+
+            background-color: white;
+
+            padding: var(--spacing-large) 0;
+
+            text-align: center;
+
+            color: var(--text-light);
+
+            font-size: 13px;
+
+            border-top: 1px solid var(--border-color);
+
+        }
+
+        
+
+        /* AI悬浮按钮 */
+
+        .ai-fab {
+
+            position: fixed;
+
+            bottom: 30px;
+
+            right: 30px;
+
+            width: 60px;
+
+            height: 60px;
+
+            background: linear-gradient(45deg, var(--primary-color), #ff5252);
+
+            border-radius: 50%;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: white;
+
+            font-size: 24px;
+
+            cursor: pointer;
+
+            box-shadow: 0 4px 12px rgba(230, 0, 18, 0.3);
+
+            z-index: 100;
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+        }
+
+        
+
+        .ai-fab:hover {
+
+            transform: scale(1.1);
+
+            box-shadow: 0 6px 16px rgba(230, 0, 18, 0.4);
+
+        }
+
+        
+
+        /* 按钮样式 */
+
+        .btn {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: 3px;
+
+            padding: 8px 16px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            transition: background-color 0.2s;
+
+            text-decoration: none;
+
+            display: inline-block;
+
+            text-align: center;
+
+        }
+
+        
+
+        .btn:hover {
+
+            background-color: #d5000f;
+
+            color: white;
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .btn-ai {
+
+            background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+
+            color: white;
+
+        }
+
+        
+
+        .btn-ai:hover {
+
+            background: linear-gradient(135deg, #5a0db4, #1c6cfc);
+
+            color: white;
+
+        }
+
+        
+
+        /* 响应式设计 */
+
+        @media (max-width: 1200px) {
+
+            .ai-main {
+
+                grid-template-columns: 1fr 350px;
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 992px) {
+
+            .ai-main {
+
+                grid-template-columns: 1fr;
+
+                gap: var(--spacing-md);
+
+            }
+
+            
+
+            .ai-sidebar {
+
+                max-height: none;
+
+                flex-direction: row;
+
+                overflow-x: auto;
+
+                padding-bottom: var(--spacing-sm);
+
+            }
+
+            
+
+            .ai-feature-card, .ai-capabilities, .ai-history {
+
+                flex: 0 0 300px;
+
+                margin-bottom: 0;
+
+            }
+
+            
+
+            .capabilities-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .questions-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-md);
+
+            }
+
+            
+
+            .ai-header {
+
+                padding: var(--spacing-lg);
+
+            }
+
+            
+
+            .ai-title {
+
+                font-size: var(--font-size-2xl);
+
+            }
+
+            
+
+            .ai-icon-large {
+
+                font-size: 48px;
+
+            }
+
+            
+
+            .ai-chat-area {
+
+                height: 60vh;
+
+            }
+
+            
+
+            .ai-sidebar {
+
+                flex-direction: column;
+
+                overflow-x: hidden;
+
+            }
+
+            
+
+            .ai-feature-card, .ai-capabilities, .ai-history {
+
+                flex: none;
+
+                width: 100%;
+
+            }
+
+            
+
+            .capabilities-grid, .questions-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .chat-input-area {
+
+                flex-direction: column;
+
+                align-items: stretch;
+
+            }
+
+            
+
+            .input-actions {
+
+                flex-direction: row;
+
+                justify-content: center;
+
+                margin-bottom: var(--spacing-sm);
+
+            }
+
+            
+
+            .chat-send-btn {
+
+                align-self: center;
+
+                margin-top: var(--spacing-sm);
+
+            }
+
+            
+
+            .recommendation-item {
+
+                flex: 0 0 180px;
+
+            }
+
+            
+
+            .recommendation-img {
+
+                height: 120px;
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 480px) {
+
+            .container {
+
+                padding: 0 var(--spacing-sm);
+
+            }
+
+            
+
+            .ai-header {
+
+                padding: var(--spacing-md);
+
+            }
+
+            
+
+            .ai-title {
+
+                font-size: var(--font-size-xl);
+
+            }
+
+            
+
+            .ai-icon-large {
+
+                font-size: 36px;
+
+            }
+
+            
+
+            .ai-chat-area {
+
+                height: 50vh;
+
+            }
+
+            
+
+            .message {
+
+                max-width: 95%;
+
+            }
+
+            
+
+            .message-avatar {
+
+                width: 36px;
+
+                height: 36px;
+
+            }
+
+            
+
+            .chat-input {
+
+                min-height: 44px;
+
+                padding: var(--spacing-sm) var(--spacing-md);
+
+            }
+
+            
+
+            .chat-send-btn {
+
+                width: 44px;
+
+                height: 44px;
+
+            }
+
+            
+
+            .input-action-btn {
+
+                width: 36px;
+
+                height: 36px;
+
+                font-size: var(--font-size-md);
+
+            }
+
+            
+
+            .recommendation-item {
+
+                flex: 0 0 150px;
+
+            }
+
+            
+
+            .recommendation-img {
+
+                height: 100px;
+
+                font-size: var(--font-size-md);
+
+            }
+
+            
+
+            .recommendation-info {
+
+                padding: var(--spacing-sm);
+
+            }
+
+            
+
+            .questions-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+        
+
+        /* 打印样式 */
+
+        @media print {
+
+            .ai-sidebar, .quick-questions, .ai-recommendations, .ai-fab {
+
+                display: none;
+
+            }
+
+            
+
+            .ai-main {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .ai-chat-area {
+
+                box-shadow: none;
+
+                border: none;
+
+            }
+
+        }
+
+        
+
+        /* 工具类 */
+
+        .hidden {
+
+            display: none !important;
+
+        }
+
+        .modal { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); z-index:1000; }
+
+        .modal.hidden { display:none; }
+
+        .modal-content { background:white; border-radius:8px; padding:16px; width:90%; max-width:900px; position:relative; }
+
+        .modal-close { position:absolute; top:8px; right:8px; border:none; background:transparent; font-size:20px; cursor:pointer; }
+
+        
+
+        .active-tab {
+
+            display: block;
+
+        }
+
+        
+
+        /* 统一校区选择器样式 */
+
+        .school-selector {
+
+            margin-right: 8px;
+
+            display: inline-block;
+
+            vertical-align: middle;
+
+        }
+
+        .school-selector select {
+
+            padding: 6px 8px;
+
+            border-radius: 4px;
+
+            border: 1px solid var(--border-color);
+
+            background: white;
+
+        }
+
+        
+
+        .text-red {
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .text-green {
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        /* 加载指示器 */
+
+        .typing-indicator {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            padding: 10px;
+
+        }
+
+        
+
+        .typing-dot {
+
+            width: 8px;
+
+            height: 8px;
+
+            background-color: #ccc;
+
+            border-radius: 50%;
+
+            animation: typing 1.5s infinite ease-in-out;
+
+        }
+
+        
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        
+
+        @keyframes typing {
+
+            0%, 60%, 100% { transform: translateY(0); }
+
+            30% { transform: translateY(-8px); }
+
+        }
+
+        
+
+        /* 校区标签 */
+
+        .campus-tag {
+
+            background-color: #f0f9ff;
+
+            color: var(--tag-blue);
+
+            padding: 2px 6px;
+
+            border-radius: 3px;
+
+            font-size: 11px;
+
+            margin-left: 5px;
+
+        }
+
+        
+
+        /* 管理员模式切换提示 */
+
+        .admin-mode-notice {
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            border: 1px solid rgba(230, 0, 18, 0.3);
+
+            border-radius: var(--border-radius);
+
+            padding: 12px 16px;
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+        }
+
+        
+
+        .admin-mode-notice .notice-text {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .admin-mode-notice .admin-badge {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            padding: 3px 8px;
+
+            border-radius: 3px;
+
+            font-size: 12px;
+
+        }
+
+    </style>
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/user/components/navigation-component.js"></script>
+
 </head>
-<script src="/config.js"></script>
-<script src="/router.js"></script>
+
 <body>
-    <!-- 全局导航栏 -->
-    <nav class="global-nav">
-        <div class="container nav-container">
-            <div class="logo">
-                <i class="fas fa-utensils"></i>
-                <span>校园食光</span>
-            </div>
-            <div class="nav-right">
-                <div class="school-selector">
-                    <select onchange="switchSchool(this.value)">
-                        <option>东莞理工学院</option>
-                        <option>广东科技学院</option>
-                    </select>
-                </div>
-                <div class="nav-item" onclick="ensureLoginModal(openLoginModal)">登录</div>
-                <div class="nav-item">消息</div>
-                <!-- <div class="nav-item">个人中心</div> -->
-                <div class="nav-item">退出</div>
-            </div>
-        </div>
-    </nav>
+
     
-    <!-- 主导航 - 已改为真正的超链接 -->
-    <nav class="main-nav">
-        <div class="nav-tabs">
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.toUserIndex()">
-                <i class="fas fa-home"></i>首页
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCommunity())">
-                <i class="fas fa-users"></i>社区 
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteCanteen())">
-                <i class="fas fa-store"></i>食堂
-            </a>
-            <a href="javascript:void(0)" class="nav-tab" onclick="Router.navigate(USER_ROUTES.getAbsoluteProfile())">
-                <i class="fas fa-user"></i>我的
-            </a>
-            <a href="javascript:void(0)" class="nav-tab active" onclick="Router.navigate(USER_ROUTES.getAbsoluteAIAssistant())">
-                <i class="fas fa-robot"></i>AI助手
-            </a>
-        </div>
-    </nav>
-    
+
     <!-- 主内容区域 -->
+
     <div class="container">
+
         <!-- 管理员模式提示 -->
+
         <div id="admin-mode-notice" class="admin-mode-notice hidden">
+
             <div class="notice-text">
+
                 <i class="fas fa-user-shield"></i>
+
                 <span>您正在以管理员身份浏览普通用户界面</span>
+
                 <span class="admin-badge">管理员</span>
+
             </div>
+
             <button class="btn" onclick="enterWorkbench()">
+
                 <i class="fas fa-cubes"></i> 进入工作台
+
             </button>
+
         </div>
+
         <div class="main-content">
+
             <!-- AI助手头部 -->
+
             <div class="ai-header">
+
                 <div class="ai-icon-large">
+
                     <i class="fas fa-robot"></i>
+
                 </div>
+
                 <h1 class="ai-title">校园食光AI助手</h1>
+
                 <p class="ai-subtitle">智能美食推荐，解决你的选择困难症</p>
+
                 <button class="btn btn-ai" onclick="startVoiceInput()">
+
                     <i class="fas fa-microphone"></i> 语音对话
+
                 </button>
+
             </div>
+
             
+
             <!-- AI助手主区域 -->
+
             <div class="ai-main">
+
                 <!-- AI对话区域 -->
+
                 <div class="ai-chat-area">
+
                     <div class="chat-header">
+
                         <div class="chat-title">AI美食助手</div>
+
                         <div class="chat-actions">
+
                             <button class="chat-action-btn" onclick="clearChat()">
+
                                 <i class="fas fa-trash"></i> 清空
+
                             </button>
+
                             <button class="chat-action-btn" onclick="shareChat()">
+
                                 <i class="fas fa-share"></i> 分享
+
                             </button>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="chat-messages" id="chat-messages">
+
                         <!-- AI欢迎消息 -->
+
                         <div class="message ai">
+
                             <div class="message-avatar">
+
                                 <i class="fas fa-robot"></i>
+
                             </div>
+
                             <div>
+
                                 <div class="message-content">
+
                                     你好！我是校园食光AI助手，很高兴为你服务！😊
+
                                     <br><br>
+
                                     我可以帮你：
+
                                     <br>• 推荐食堂和菜品
+
                                     <br>• 识别菜品图片
+
                                     <br>• 规划健康饮食
+
                                     <br>• 查询食堂营业时间
+
                                     <br>• 解答各种校园美食问题
+
                                     <br><br>
+
                                     试试问我："今天中午吃什么？" 或者 "松山湖校区有什么好吃的？"
+
                                 </div>
+
                                 <div class="message-time">刚刚</div>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- 用户示例消息 -->
+
                         <div class="message user">
+
                             <div class="message-avatar">
+
                                 <i class="fas fa-user"></i>
+
                             </div>
+
                             <div>
+
                                 <div class="message-content">今天中午有什么推荐？</div>
+
                                 <div class="message-time">刚刚</div>
+
                             </div>
+
                         </div>
+
                         
+
                         <!-- AI回复消息 -->
+
                         <div class="message ai">
+
                             <div class="message-avatar">
+
                                 <i class="fas fa-robot"></i>
+
                             </div>
+
                             <div>
+
                                 <div class="message-content">
+
                                     根据你的饮食偏好（喜欢辣味、面食、预算适中），我推荐：
+
                                     <br><br>
+
                                     <strong>松山湖第二食堂 - 麻辣香锅</strong>
+
                                     <br>• 评分：4.8/5.0
+
                                     <br>• 人均：¥18-25
+
                                     <br>• 距离：450m（步行约6分钟）
+
                                     <br>• 特点：自选食材，多种辣度可选，出餐快
+
                                     <br><br>
+
                                     或者你想尝试其他类型的美食吗？
+
                                 </div>
+
                                 <div class="message-time">刚刚</div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="chat-input-area">
+
                         <div class="input-actions">
+
                             <button class="input-action-btn" onclick="toggleVoiceInput()" title="语音输入">
+
                                 <i class="fas fa-microphone"></i>
+
                             </button>
+
                             <button class="input-action-btn" onclick="openImageInput()" title="图片识别">
+
                                 <i class="fas fa-camera"></i>
+
                             </button>
+
                         </div>
+
                         <input type="text" class="chat-input" id="chat-input" placeholder="输入你的问题... (试试问：'今天吃什么？' 或 '推荐清淡的菜品')">
+
                         <button class="chat-send-btn" onclick="sendMessage()">
+
                             <i class="fas fa-paper-plane"></i>
+
                         </button>
+
                     </div>
+
                 </div>
+
                 
+
                 <!-- AI功能侧边栏 -->
+
                 <div class="ai-sidebar">
+
                     <!-- AI功能卡片 -->
+
                     <div class="ai-feature-card">
+
                         <h3 class="feature-card-title">
+
                             <i class="fas fa-magic"></i> AI功能
+
                         </h3>
+
                         <div class="feature-list">
+
                             <div class="feature-item" onclick="useFeature('image-recognition')">
+
                                 <div class="feature-icon">
+
                                     <i class="fas fa-camera"></i>
+
                                 </div>
+
                                 <div class="feature-info">
+
                                     <div class="feature-name">菜品图片识别</div>
+
                                     <div class="feature-desc">上传菜品图片，识别菜品信息</div>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="feature-item" onclick="useFeature('diet-plan')">
+
                                 <div class="feature-icon">
+
                                     <i class="fas fa-apple-alt"></i>
+
                                 </div>
+
                                 <div class="feature-info">
+
                                     <div class="feature-name">个性化饮食规划</div>
+
                                     <div class="feature-desc">根据你的身体状况定制饮食计划</div>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="feature-item" onclick="useFeature('nutrition-analysis')">
+
                                 <div class="feature-icon">
+
                                     <i class="fas fa-chart-pie"></i>
+
                                 </div>
+
                                 <div class="feature-info">
+
                                     <div class="feature-name">营养分析</div>
+
                                     <div class="feature-desc">分析菜品营养成分，健康饮食</div>
+
                                 </div>
+
                             </div>
+
                             
+
                             <div class="feature-item" onclick="useFeature('canteen-guide')">
+
                                 <div class="feature-icon">
+
                                     <i class="fas fa-map-marked-alt"></i>
+
                                 </div>
+
                                 <div class="feature-info">
+
                                     <div class="feature-name">食堂智能导航</div>
+
                                     <div class="feature-desc">实时食堂人流、排队情况</div>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- AI能力展示 -->
+
                     <div class="ai-capabilities">
+
                         <h3 class="feature-card-title">
+
                             <i class="fas fa-bolt"></i> AI能力
+
                         </h3>
+
                         <div class="capabilities-grid">
+
                             <div class="capability-item">
+
                                 <div class="capability-icon">
+
                                     <i class="fas fa-comments"></i>
+
                                 </div>
+
                                 <div class="capability-name">智能对话</div>
+
                                 <div class="capability-desc">自然语言对话，理解复杂需求</div>
+
                             </div>
+
                             
+
                             <div class="capability-item">
+
                                 <div class="capability-icon">
+
                                     <i class="fas fa-image"></i>
+
                                 </div>
+
                                 <div class="capability-name">视觉识别</div>
+
                                 <div class="capability-desc">识别菜品图片，分析成分</div>
+
                             </div>
+
                             
+
                             <div class="capability-item">
+
                                 <div class="capability-icon">
+
                                     <i class="fas fa-chart-line"></i>
+
                                 </div>
+
                                 <div class="capability-name">数据分析</div>
+
                                 <div class="capability-desc">分析饮食偏好，个性化推荐</div>
+
                             </div>
+
                             
+
                             <div class="capability-item">
+
                                 <div class="capability-icon">
+
                                     <i class="fas fa-clock"></i>
+
                                 </div>
+
                                 <div class="capability-name">实时信息</div>
+
                                 <div class="capability-desc">食堂营业状态、排队情况</div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                     
+
                     <!-- 历史记录 -->
+
                     <div class="ai-history">
+
                         <h3 class="feature-card-title">
+
                             <i class="fas fa-history"></i> 历史记录
+
                         </h3>
+
                         <div class="history-list">
+
                             <div class="history-item" onclick="loadHistory(1)">
+
                                 <div class="history-question">松山湖校区有什么好吃的早餐？</div>
+
                                 <div class="history-answer">推荐第二食堂的豆浆油条套餐，豆浆无糖可选...</div>
+
                                 <div class="history-time">今天 08:15</div>
+
                             </div>
+
                             
+
                             <div class="history-item" onclick="loadHistory(2)">
+
                                 <div class="history-question">适合健身的晚餐推荐</div>
+
                                 <div class="history-answer">推荐第三食堂的鸡胸肉沙拉，高蛋白低脂肪...</div>
+
                                 <div class="history-time">昨天 18:30</div>
+
                             </div>
+
                             
+
                             <div class="history-item" onclick="loadHistory(3)">
+
                                 <div class="history-question">第一食堂烧鸭饭的评价</div>
+
                                 <div class="history-answer">烧鸭饭评分4.8，皮脆肉嫩，酱汁浓郁...</div>
+
                                 <div class="history-time">昨天 12:45</div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
             
+
             <!-- 快速问答卡片 -->
+
             <div class="quick-questions">
+
                 <h3 class="feature-card-title">
+
                     <i class="fas fa-question-circle"></i> 快速提问
+
                 </h3>
+
                 <div class="questions-grid">
+
                     <button class="question-btn" onclick="quickQuestion('今天中午吃什么？')">今天中午吃什么？</button>
+
                     <button class="question-btn" onclick="quickQuestion('推荐清淡的菜品')">推荐清淡的菜品</button>
+
                     <button class="question-btn" onclick="quickQuestion('松山湖校区食堂推荐')">松山湖校区食堂推荐</button>
+
                     <button class="question-btn" onclick="quickQuestion('适合聚餐的食堂')">适合聚餐的食堂</button>
+
                     <button class="question-btn" onclick="quickQuestion('第二食堂营业时间')">第二食堂营业时间</button>
+
                     <button class="question-btn" onclick="quickQuestion('健康饮食建议')">健康饮食建议</button>
+
                     <button class="question-btn" onclick="quickQuestion('性价比高的菜品')">性价比高的菜品</button>
+
                     <button class="question-btn" onclick="quickQuestion('食堂排队情况')">食堂排队情况</button>
+
                 </div>
+
             </div>
+
             
+
             <!-- AI推荐菜品展示 -->
+
             <div class="ai-recommendations">
+
                 <h3 class="feature-card-title">
+
                     <i class="fas fa-thumbs-up"></i> AI为你推荐
+
                 </h3>
+
                 <div class="recommendation-slider">
+
                     <div class="recommendation-item" onclick="viewDishDetail('烧鸭饭')">
+
                         <div class="recommendation-img">烧鸭饭</div>
+
                         <div class="recommendation-info">
+
                             <div class="recommendation-name">烧鸭饭<span class="campus-tag">松山湖</span></div>
+
                             <div class="recommendation-canteen">第一食堂烧腊档</div>
+
                             <div class="recommendation-rating"><i class="fas fa-star"></i> 4.8 | 人均 ¥15</div>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="recommendation-item" onclick="viewDishDetail('麻辣香锅')">
+
                         <div class="recommendation-img">麻辣香锅</div>
+
                         <div class="recommendation-info">
+
                             <div class="recommendation-name">麻辣香锅<span class="campus-tag">松山湖</span></div>
+
                             <div class="recommendation-canteen">第二食堂特色窗口</div>
+
                             <div class="recommendation-rating"><i class="fas fa-star"></i> 4.7 | 人均 ¥22</div>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="recommendation-item" onclick="viewDishDetail('肠粉')">
+
                         <div class="recommendation-img">肠粉</div>
+
                         <div class="recommendation-info">
+
                             <div class="recommendation-name">鲜虾肠粉<span class="campus-tag">莞城</span></div>
+
                             <div class="recommendation-canteen">莞城食堂早茶档</div>
+
                             <div class="recommendation-rating"><i class="fas fa-star"></i> 4.8 | 人均 ¥12</div>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="recommendation-item" onclick="viewDishDetail('牛肉面')">
+
                         <div class="recommendation-img">牛肉面</div>
+
                         <div class="recommendation-info">
+
                             <div class="recommendation-name">牛肉面<span class="campus-tag">松山湖</span></div>
+
                             <div class="recommendation-canteen">第一食堂面食窗口</div>
+
                             <div class="recommendation-rating"><i class="fas fa-star"></i> 4.5 | 人均 ¥16</div>
+
                         </div>
+
                     </div>
+
                     
+
                     <div class="recommendation-item" onclick="viewDishDetail('煲仔饭')">
+
                         <div class="recommendation-img">煲仔饭</div>
+
                         <div class="recommendation-info">
+
                             <div class="recommendation-name">腊味煲仔饭<span class="campus-tag">松山湖</span></div>
+
                             <div class="recommendation-canteen">第三食堂特色窗口</div>
+
                             <div class="recommendation-rating"><i class="fas fa-star"></i> 4.7 | 人均 ¥18</div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
+
 
     <!-- 校园地图弹窗 -->
+
     <div id="campus-map-modal" class="modal hidden">
+
         <div class="modal-content">
+
             <button class="modal-close" onclick="closeCampusMap()">×</button>
+
             <div class="campus-map-container" style="height:70vh; display:flex; align-items:center; justify-content:center;">
+
                 <p>地图加载中（示例）</p>
+
             </div>
+
         </div>
+
     </div>
+
+
 
     <!-- 语音输入指示器 -->
+
     <div id="voice-indicator" class="voice-indicator">
+
         <div class="voice-pulse">
+
             <i class="fas fa-microphone"></i>
+
         </div>
+
         <div style="margin-top:15px; font-size:14px;">正在聆听...</div>
+
         <div style="margin-top:5px; font-size:12px; color:#ccc;">点击任意位置结束</div>
+
     </div>
+
+
 
     <!-- 页脚 -->
+
     <footer class="footer">
+
         <div class="container">
+
             <p>校园食光 - 多校AI美食社区平台</p>
+
             <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
         </div>
+
     </footer>
+
     
+
     <!-- AI悬浮按钮 -->
+
     <div class="ai-fab" onclick="scrollToChat()">
+
         <i class="fas fa-robot"></i>
+
     </div>
+
     
+
     <script>
-        // 主导航现在已经是超链接，不需要JavaScript处理跳转
+
+        // AI调用改为走后端代理，避免在前端暴露密钥
+        async function callBailianAI(userMessage) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/ai/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                let result = null;
+                try {
+                    result = await response.json();
+                } catch (e) {
+                    throw new Error(`接口返回不是JSON（HTTP ${response.status}）`);
+                }
+
+                if (!response.ok || !result || result.code !== 200) {
+                    const detail = result?.message || `HTTP ${response.status}`;
+                    throw new Error(detail);
+                }
+
+                const reply = result?.data?.reply;
+                if (!reply) {
+                    return '抱歉，我暂时无法理解这个问题。请换种方式提问。';
+                }
+
+                return reply;
+            } catch (error) {
+                console.error('调用后端AI代理失败:', error);
+                throw new Error(`AI服务暂时不可用: ${error.message.substring(0, 100)}`);
+            }
+        }
+
         
+
+        // 主导航现在已经是超链接，不需要JavaScript处理跳转
+
+        
+
         // 页面加载时，根据当前URL设置主导航激活状态
+
         document.addEventListener('DOMContentLoaded', function() {
+
+            // 初始化AI助手
+
+            initAIAssistant();
+
+            
+
             const currentPage = decodeURIComponent((window.location.pathname.split('/').pop() || 'index.html'));
+
             const navTabs = document.querySelectorAll('.nav-tab');
+
             let anyActive = false;
 
+
+
             navTabs.forEach(tab => {
+
                 // 获取超链接的href
+
                 const href = tab.getAttribute('href') || '';
+
                 const tabPage = decodeURIComponent(href.split('/').pop() || '');
+
                 // 如果是当前页面，添加active类
+
                 if(tabPage && tabPage === currentPage) {
+
                     tab.classList.add('active');
+
                     anyActive = true;
+
                 } else {
+
                     tab.classList.remove('active');
+
                 }
+
             });
+
+
 
             // 回退匹配：如果没有任何tab被激活，则根据可见文本或页面标题匹配"AI助手"关键词
+
             if(!anyActive) {
+
                 navTabs.forEach(tab => {
+
                     const text = (tab.textContent || '').trim();
+
                     if(text.startsWith('AI助手') || (document.title && document.title.includes('AI助手') && text.includes('AI助手'))) {
+
                         tab.classList.add('active');
+
                         anyActive = true;
+
                     }
+
                 });
+
             }
+
+            
 
             console.log('校园食光AI助手页面加载完成');
+
         });
+
+        
+
+        // 初始化AI助手
+
+        function initAIAssistant() {
+
+            // 清空聊天记录
+
+            const chatMessages = document.getElementById('chat-messages');
+
+            if (chatMessages) {
+
+                chatMessages.innerHTML = '';
+
+            }
+
+            
+
+            // 添加欢迎消息
+
+            addMessage('AI助手', '你好！我是校园食光的AI助手，我可以帮你推荐美食、解答问题、提供校园信息。有什么可以帮助你的吗？', 'ai');
+
+        }
+
+        
+
+
+
+        
+
+        // 添加消息（用于欢迎消息）
+
+        function addMessage(sender, content, type) {
+
+            const chatMessages = document.getElementById('chat-messages');
+
+            if (!chatMessages) return;
+
+            
+
+            const messageDiv = document.createElement('div');
+
+            messageDiv.className = `message ${type === 'ai' ? 'ai' : 'user'}`;
+
+            
+
+            const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+            
+
+            messageDiv.innerHTML = `
+
+                <div class="message-avatar">
+
+                    <i class="fas fa-${type === 'ai' ? 'robot' : 'user'}"></i>
+
+                </div>
+
+                <div>
+
+                    <div class="message-content">${content}</div>
+
+                    <div class="message-time">${time}</div>
+
+                </div>
+
+            `;
+
+            
+
+            chatMessages.appendChild(messageDiv);
+
+            scrollToBottom();
+
+        }
+
+        
+
+
+
+
 
         // 发送消息
-        function sendMessage() {
+
+        async function sendMessage() {
+
             const input = document.getElementById('chat-input');
+
             const message = input.value.trim();
+
             
+
             if(!message) {
+
                 alert('请输入消息');
+
                 return;
+
             }
+
             
+
             // 添加用户消息
+
             addUserMessage(message);
+
             
+
             // 清空输入框
+
             input.value = '';
+
             
-            // 模拟AI回复
+
+            // 调用AI回复（阿里云百炼智能体）
+
             simulateAIResponse(message);
+
         }
+
         
+
         // 添加用户消息
+
         function addUserMessage(message) {
+
             const chatMessages = document.getElementById('chat-messages');
+
+            if (!chatMessages) return;
+
             
+
             const messageElement = document.createElement('div');
+
             messageElement.className = 'message user';
+
+            
+
+            const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+            
+
             messageElement.innerHTML = `
+
                 <div class="message-avatar">
+
                     <i class="fas fa-user"></i>
+
                 </div>
+
                 <div>
+
                     <div class="message-content">${message}</div>
-                    <div class="message-time">刚刚</div>
+
+                    <div class="message-time">${time}</div>
+
                 </div>
+
             `;
+
             
+
+            // 添加动画类
+
+            messageElement.classList.add('slide-in-right');
+
+            
+
             chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            scrollToBottom();
+
         }
+
         
-        // 模拟AI回复
-        function simulateAIResponse(userMessage) {
+
+        // AI回复（调用阿里云百炼智能体）
+
+        async function simulateAIResponse(userMessage) {
+
             const chatMessages = document.getElementById('chat-messages');
+
+            if (!chatMessages) return;
+
             
+
             // 显示正在输入指示器
+
             const typingIndicator = document.createElement('div');
+
             typingIndicator.className = 'message ai';
+
             typingIndicator.innerHTML = `
+
                 <div class="message-avatar">
+
                     <i class="fas fa-robot"></i>
+
                 </div>
+
                 <div>
+
                     <div class="message-content">
+
                         <div class="typing-indicator">
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
-                            <div class="typing-dot"></div>
+
+                            <span></span>
+
+                            <span></span>
+
+                            <span></span>
+
                         </div>
+
                     </div>
+
                 </div>
+
             `;
+
             
+
             chatMessages.appendChild(typingIndicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            scrollToBottom();
+
             
-            // 模拟AI思考时间
-            setTimeout(() => {
+
+            try {
+
+                // 调用阿里云百炼API获取真实AI回复
+
+                const aiResponse = await callBailianAI(userMessage);
+
+                
+
                 // 移除正在输入指示器
-                chatMessages.removeChild(typingIndicator);
+
+                if (typingIndicator.parentNode) {
+
+                    chatMessages.removeChild(typingIndicator);
+
+                }
+
                 
+
                 // 添加AI回复
-                const aiResponse = generateAIResponse(userMessage);
+
                 const aiMessage = document.createElement('div');
+
                 aiMessage.className = 'message ai';
+
+                
+
+                const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                
+
                 aiMessage.innerHTML = `
+
                     <div class="message-avatar">
+
                         <i class="fas fa-robot"></i>
+
                     </div>
+
                     <div>
+
                         <div class="message-content">${aiResponse}</div>
-                        <div class="message-time">刚刚</div>
+
+                        <div class="message-time">${time}</div>
+
                     </div>
+
                 `;
+
                 
+
+                // 添加动画类
+
+                aiMessage.classList.add('slide-in-left');
+
+                
+
                 chatMessages.appendChild(aiMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1500);
-        }
-        
-        // 生成AI回复
-        function generateAIResponse(userMessage) {
-            const lowerMessage = userMessage.toLowerCase();
-            
-            // 根据用户消息生成不同的回复
-            if (lowerMessage.includes('中午') || lowerMessage.includes('午饭') || lowerMessage.includes('午餐')) {
-                return `根据你的饮食偏好（喜欢辣味、面食、预算适中），我推荐：
-                <br><br>
-                <strong>松山湖第二食堂 - 麻辣香锅</strong>
-                <br>• 评分：4.8/5.0
-                <br>• 人均：¥18-25
-                <br>• 距离：450m（步行约6分钟）
-                <br>• 特点：自选食材，多种辣度可选，出餐快
-                <br>• 实时状态：目前排队人数较少
-                <br><br>
-                或者你想尝试其他类型的美食吗？`;
-            } else if (lowerMessage.includes('早餐') || lowerMessage.includes('早上') || lowerMessage.includes('早饭')) {
-                return `早餐推荐：
-                <br><br>
-                <strong>1. 松山湖第二食堂 - 豆浆油条套餐</strong>
-                <br>• 评分：4.5/5.0
-                <br>• 人均：¥8-12
-                <br>• 营业时间：6:30-10:00
-                <br>• 特点：豆浆无糖可选，油条现炸酥脆
-                <br><br>
-                <strong>2. 莞城食堂 - 鲜虾肠粉</strong>
-                <br>• 评分：4.8/5.0
-                <br>• 人均：¥10-15
-                <br>• 营业时间：7:00-10:30
-                <br>• 特点：现蒸肠粉，鲜虾嫩滑
-                <br><br>
-                需要我帮你规划一周的早餐吗？`;
-            } else if (lowerMessage.includes('晚上') || lowerMessage.includes('晚饭') || lowerMessage.includes('晚餐')) {
-                return `晚餐推荐（考虑到健康饮食）：
-                <br><br>
-                <strong>1. 松山湖第三食堂 - 鸡胸肉沙拉</strong>
-                <br>• 评分：4.6/5.0
-                <br>• 人均：¥15-20
-                <br>• 特点：高蛋白低脂肪，适合健身人群
-                <br><br>
-                <strong>2. 松山湖第一食堂 - 番茄鸡蛋面</strong>
-                <br>• 评分：4.4/5.0
-                <br>• 人均：¥10-15
-                <br>• 特点：清淡健康，适合晚上消化
-                <br><br>
-                今晚想吃得丰盛一点还是清淡一点？`;
-            } else if (lowerMessage.includes('推荐') && lowerMessage.includes('食堂')) {
-                return `根据你的位置和偏好，推荐以下食堂：
-                <br><br>
-                <strong>1. 松山湖第一食堂（评分4.8）</strong>
-                <br>• 特色：烧腊、粤菜、经济实惠
-                <br>• 人均：¥10-20
-                <br>• 距离：200m
-                <br><br>
-                <strong>2. 松山湖第二食堂（评分4.6）</strong>
-                <br>• 特色：川湘菜、麻辣烫、风味小吃
-                <br>• 人均：¥12-25
-                <br>• 距离：450m
-                <br><br>
-                <strong>3. 莞城食堂（评分4.5）</strong>
-                <br>• 特色：肠粉、早茶、传统粤菜
-                <br>• 人均：¥8-20
-                <br>• 距离：1.2km
-                <br><br>
-                需要我详细介绍某个食堂吗？`;
-            } else if (lowerMessage.includes('营业时间') || lowerMessage.includes('几点开门') || lowerMessage.includes('几点关门')) {
-                return `各食堂营业时间：
-                <br><br>
-                <strong>松山湖校区：</strong>
-                <br>• 第一食堂：6:30-22:00
-                <br>• 第二食堂：6:30-22:30（夜宵至22:30）
-                <br>• 第三食堂：7:00-21:30
-                <br><br>
-                <strong>莞城校区：</strong>
-                <br>• 莞城食堂：7:00-21:00
-                <br><br>
-                当前时间所有食堂都在营业中。需要查询具体档口的营业时间吗？`;
-            } else if (lowerMessage.includes('健康') || lowerMessage.includes('营养') || lowerMessage.includes('减肥')) {
-                return `健康饮食建议：
-                <br><br>
-                <strong>1. 均衡搭配：</strong>每餐应包括蛋白质、碳水化合物和蔬菜
-                <br>• 推荐菜品：鸡胸肉沙拉、蒸鱼、蔬菜炒肉
-                <br><br>
-                <strong>2. 控制份量：</strong>适量为宜，避免过量
-                <br>• 建议：使用小碗盛饭，先喝汤再吃饭
-                <br><br>
-                <strong>3. 选择健康烹饪方式：</strong>优先选择蒸、煮、炖
-                <br>• 推荐食堂：第三食堂的蒸菜窗口
-                <br><br>
-                需要我为你制定个性化的健康饮食计划吗？`;
-            } else if (lowerMessage.includes('排队') || lowerMessage.includes('人多') || lowerMessage.includes('拥挤')) {
-                return `当前各食堂排队情况（实时更新）：
-                <br><br>
-                <strong>松山湖第一食堂：</strong>
-                <br>• 烧腊档：排队约5-8分钟
-                <br>• 快餐区：排队约3-5分钟
-                <br><br>
-                <strong>松山湖第二食堂：</strong>
-                <br>• 麻辣烫窗口：排队约8-12分钟
-                <br>• 其他窗口：排队约2-4分钟
-                <br><br>
-                <strong>松山湖第三食堂：</strong>
-                <br>• 煲仔饭窗口：排队约10-15分钟
-                <br>• 面食窗口：排队约5-8分钟
-                <br><br>
-                建议错峰就餐（11:30前或13:00后）。需要实时导航到人少的食堂吗？`;
-            } else {
-                return `我理解了你的问题："${userMessage}"
-                <br><br>
-                作为校园食光AI助手，我可以帮你：
-                <br>• 推荐食堂和菜品
-                <br>• 查询营业时间和排队情况
-                <br>• 规划健康饮食
-                <br>• 识别菜品图片
-                <br>• 解答校园美食相关问题
-                <br><br>
-                你可以尝试问我更具体的问题，比如：
-                <br>"今天中午吃什么？"
-                <br>"推荐清淡的菜品"
-                <br>"第二食堂有什么特色菜？"`;
-            }
-        }
-        
-        // 回车键发送消息
-        document.getElementById('chat-input').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-        
-        // 快速提问
-        function quickQuestion(question) {
-            document.getElementById('chat-input').value = question;
-            sendMessage();
-        }
-        
-        // 使用AI功能
-        function useFeature(feature) {
-            switch(feature) {
-                case 'image-recognition':
-                    alert('打开菜品图片识别功能...');
-                    // 在实际项目中，这里会打开图片上传对话框
-                    break;
-                case 'diet-plan':
-                    alert('打开个性化饮食规划功能...');
-                    break;
-                case 'nutrition-analysis':
-                    alert('打开营养分析功能...');
-                    break;
-                case 'canteen-guide':
-                    alert('打开食堂智能导航功能...');
-                    break;
-            }
-        }
-        
-        // 加载历史记录
-        function loadHistory(id) {
-            const historyItems = [
-                { question: "松山湖校区有什么好吃的早餐？", answer: "推荐第二食堂的豆浆油条套餐，豆浆无糖可选，油条现炸酥脆，搭配清爽小菜。人均消费约8元，营业时间6:30-10:00。" },
-                { question: "适合健身的晚餐推荐", answer: "推荐第三食堂的鸡胸肉沙拉，高蛋白低脂肪，搭配多种蔬菜。人均消费约15-20元，适合健身后的营养补充。" },
-                { question: "第一食堂烧鸭饭的评价", answer: "烧鸭饭评分4.8，皮脆肉嫩，酱汁浓郁，搭配青菜和米饭。价格实惠，只要15元，是学生日常用餐的热门选择。" }
-            ];
-            
-            if(id >= 1 && id <= historyItems.length) {
-                const history = historyItems[id-1];
-                document.getElementById('chat-input').value = history.question;
-                sendMessage();
-            }
-        }
-        
-        // 清空聊天
-        function clearChat() {
-            if(confirm('确定要清空聊天记录吗？')) {
-                const chatMessages = document.getElementById('chat-messages');
-                // 保留第一条AI欢迎消息
-                const welcomeMessage = chatMessages.children[0];
-                chatMessages.innerHTML = '';
-                chatMessages.appendChild(welcomeMessage);
-            }
-        }
-        
-        // 分享聊天
-        function shareChat() {
-            alert('生成聊天分享卡片...');
-            // 在实际项目中，这里会生成分享图片或链接
-        }
-        
-        // 查看菜品详情
-        function viewDishDetail(dishName) {
-            alert(`跳转到"${dishName}"菜品详情...`);
-            // 在实际项目中，这里会跳转到菜品详情页
-        }
-        
-        // 打开图片输入
-        function openImageInput() {
-            alert('打开图片选择器...');
-            // 在实际项目中，这里会打开文件选择对话框
-        }
-        
-        // 切换语音输入
-        let isVoiceInputActive = false;
-        
-        function toggleVoiceInput() {
-            if(isVoiceInputActive) {
-                stopVoiceInput();
-            } else {
-                startVoiceInput();
-            }
-        }
-        
-        function startVoiceInput() {
-            const voiceIndicator = document.getElementById('voice-indicator');
-            voiceIndicator.classList.add('active');
-            isVoiceInputActive = true;
-            
-            // 模拟语音识别
-            setTimeout(() => {
-                const recognizedText = "今天中午有什么推荐？";
-                document.getElementById('chat-input').value = recognizedText;
-                stopVoiceInput();
+
+                scrollToBottom();
+
+            } catch (error) {
+
+                // 移除正在输入指示器
+
+                if (typingIndicator.parentNode) {
+
+                    chatMessages.removeChild(typingIndicator);
+
+                }
+
                 
-                // 自动发送识别到的消息
-                setTimeout(() => {
-                    sendMessage();
-                }, 500);
-            }, 3000);
-        }
-        
-        function stopVoiceInput() {
-            const voiceIndicator = document.getElementById('voice-indicator');
-            voiceIndicator.classList.remove('active');
-            isVoiceInputActive = false;
-        }
-        
-        // 点击任意位置结束语音输入
-        document.getElementById('voice-indicator').addEventListener('click', function() {
-            stopVoiceInput();
-        });
-        
-        // 滚动到聊天区域
-        function scrollToChat() {
-            const chatArea = document.querySelector('.ai-chat-area');
-            if(chatArea) {
-                chatArea.scrollIntoView({ behavior: 'smooth' });
+
+                console.error('AI回复失败:', error);
+
+                
+
+                // 添加错误消息
+
+                const errorMessage = document.createElement('div');
+
+                errorMessage.className = 'message ai';
+
+                
+
+                const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                
+
+                errorMessage.innerHTML = `
+
+                    <div class="message-avatar">
+
+                        <i class="fas fa-robot"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="message-content">抱歉，AI服务暂时不可用：${error.message}</div>
+
+                        <div class="message-time">${time}</div>
+
+                    </div>
+
+                `;
+
+                
+
+                errorMessage.classList.add('slide-in-left');
+
+                chatMessages.appendChild(errorMessage);
+
+                scrollToBottom();
+
             }
+
         }
+
+        
+
+
+
+        
+
+        // 滚动到底部
+
+        function scrollToBottom() {
+
+            const chatMessages = document.getElementById('chat-messages');
+
+            if (chatMessages) {
+
+                chatMessages.classList.add('scrolling');
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                
+
+                // 移除滚动类
+
+                setTimeout(() => {
+
+                    chatMessages.classList.remove('scrolling');
+
+                }, 500);
+
+            }
+
+        }
+
+        
+
+        // 回车键发送消息
+
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+
+            if(e.key === 'Enter') {
+
+                sendMessage();
+
+            }
+
+        });
+
+        
+
+        // 快速提问
+
+        function quickQuestion(question) {
+
+            document.getElementById('chat-input').value = question;
+
+            sendMessage();
+
+        }
+
+        
+
+        // 使用AI功能
+
+        function useFeature(feature) {
+
+            switch(feature) {
+
+                case 'image-recognition':
+
+                    alert('打开菜品图片识别功能...');
+
+                    // 在实际项目中，这里会打开图片上传对话框
+
+                    break;
+
+                case 'diet-plan':
+
+                    alert('打开个性化饮食规划功能...');
+
+                    break;
+
+                case 'nutrition-analysis':
+
+                    alert('打开营养分析功能...');
+
+                    break;
+
+                case 'canteen-guide':
+
+                    alert('打开食堂智能导航功能...');
+
+                    break;
+
+            }
+
+        }
+
+        
+
+        // 加载历史记录
+
+        function loadHistory(id) {
+
+            const historyItems = [
+
+                { question: "松山湖校区有什么好吃的早餐？", answer: "推荐第二食堂的豆浆油条套餐，豆浆无糖可选，油条现炸酥脆，搭配清爽小菜。人均消费约8元，营业时间6:30-10:00。" },
+
+                { question: "适合健身的晚餐推荐", answer: "推荐第三食堂的鸡胸肉沙拉，高蛋白低脂肪，搭配多种蔬菜。人均消费约15-20元，适合健身后的营养补充。" },
+
+                { question: "第一食堂烧鸭饭的评价", answer: "烧鸭饭评分4.8，皮脆肉嫩，酱汁浓郁，搭配青菜和米饭。价格实惠，只要15元，是学生日常用餐的热门选择。" }
+
+            ];
+
+            
+
+            if(id >= 1 && id <= historyItems.length) {
+
+                const history = historyItems[id-1];
+
+                document.getElementById('chat-input').value = history.question;
+
+                sendMessage();
+
+            }
+
+        }
+
+        
+
+        // 清空聊天
+
+        function clearChat() {
+
+            if(confirm('确定要清空聊天记录吗？')) {
+
+                const chatMessages = document.getElementById('chat-messages');
+
+                // 保留第一条AI欢迎消息
+
+                const welcomeMessage = chatMessages.children[0];
+
+                chatMessages.innerHTML = '';
+
+                chatMessages.appendChild(welcomeMessage);
+
+            }
+
+        }
+
+        
+
+        // 分享聊天
+
+        function shareChat() {
+
+            alert('生成聊天分享卡片...');
+
+            // 在实际项目中，这里会生成分享图片或链接
+
+        }
+
+        
+
+        // 查看菜品详情
+
+        function viewDishDetail(dishName) {
+
+            alert(`跳转到"${dishName}"菜品详情...`);
+
+            // 在实际项目中，这里会跳转到菜品详情页
+
+        }
+
+        
+
+        // 打开图片输入
+
+        function openImageInput() {
+
+            alert('打开图片选择器...');
+
+            // 在实际项目中，这里会打开文件选择对话框
+
+        }
+
+        
+
+        // 切换语音输入
+
+        let isVoiceInputActive = false;
+
+        
+
+        function toggleVoiceInput() {
+
+            if(isVoiceInputActive) {
+
+                stopVoiceInput();
+
+            } else {
+
+                startVoiceInput();
+
+            }
+
+        }
+
+        
+
+        function startVoiceInput() {
+
+            const voiceIndicator = document.getElementById('voice-indicator');
+
+            voiceIndicator.classList.add('active');
+
+            isVoiceInputActive = true;
+
+            
+
+            // 模拟语音识别
+
+            setTimeout(() => {
+
+                const recognizedText = "今天中午有什么推荐？";
+
+                document.getElementById('chat-input').value = recognizedText;
+
+                stopVoiceInput();
+
+                
+
+                // 自动发送识别到的消息
+
+                setTimeout(() => {
+
+                    sendMessage();
+
+                }, 500);
+
+            }, 3000);
+
+        }
+
+        
+
+        function stopVoiceInput() {
+
+            const voiceIndicator = document.getElementById('voice-indicator');
+
+            voiceIndicator.classList.remove('active');
+
+            isVoiceInputActive = false;
+
+        }
+
+        
+
+        // 点击任意位置结束语音输入
+
+        document.getElementById('voice-indicator').addEventListener('click', function() {
+
+            stopVoiceInput();
+
+        });
+
+        
+
+        // 滚动到聊天区域
+
+        function scrollToChat() {
+
+            const chatArea = document.querySelector('.ai-chat-area');
+
+            if(chatArea) {
+
+                chatArea.scrollIntoView({ behavior: 'smooth' });
+
+            }
+
+        }
+
+
 
         // 切换学校（示例）
+
         function switchSchool(school) {
+
             alert('已切换到：' + school + '（示例）');
+
             // TODO：保存到 localStorage 或发送给后端
+
         }
+
+
 
         // 延迟加载并打开统一登录弹窗（从 login-modal.html 动态加载）
+
         function ensureLoginModal(callback) {
+
             if(document.getElementById('login-modal')) {
+
                 if(callback) callback();
+
                 return;
+
             }
+
             fetch('login-modal.html').then(r => r.text()).then(html => {
+
                 const container = document.createElement('div');
+
                 container.innerHTML = html;
+
                 document.body.appendChild(container);
+
                 if(callback) callback();
+
             }).catch(err => {
+
                 console.error('加载登录弹窗失败', err);
+
                 alert('无法加载登录弹窗（示例）');
+
             });
+
         }
+
+
 
         function openLoginModal() {
+
             ensureLoginModal(function(){
+
                 const modal = document.getElementById('login-modal');
+
                 if(modal) modal.classList.remove('hidden');
+
                 // call render state if available
+
                 if(typeof renderLoginState === 'function') renderLoginState();
+
             });
+
         }
+
+
 
         // 校园地图弹窗
+
         function openCampusMap() {
+
             const modal = document.getElementById('campus-map-modal');
+
             if(modal) modal.classList.remove('hidden');
+
         }
+
         
+
         function closeCampusMap() {
+
             const modal = document.getElementById('campus-map-modal');
+
             if(modal) modal.classList.add('hidden');
+
         }
+
     </script>
+
+
 
     <script>
+
     // 在页面加载时显示内嵌的管理员模式提示（若为管理员）。开发时若未设置身份则默认设为管理员。
+
     document.addEventListener('DOMContentLoaded', function(){
+
       try{
+
         if(!localStorage.getItem('userRole')){ try{ localStorage.setItem('userRole','admin'); }catch(e){} }
+
         const userRole = localStorage.getItem('userRole');
+
         const adminNotice = document.getElementById('admin-mode-notice');
+
         const adminMenuItem = document.getElementById('admin-workbench-item');
+
         const username = document.getElementById('username');
+
         if(userRole === 'admin'){
+
           if(adminNotice) adminNotice.classList.remove('hidden');
+
           if(adminMenuItem) adminMenuItem.classList.remove('hidden');
+
           if(username) username.innerHTML = '张老师 <span class="admin-badge">管理员</span>';
+
         }
+
       }catch(e){}
+
     });
 
+
+
     // 进入工作台（通用实现，优先使用 sessionStorage.lastAdminUrl 回跳）
+
     function enterWorkbench() {
+
       try{
+
         const last = sessionStorage.getItem('lastAdminUrl');
+
         if(last && typeof last === 'string'){
+
           window.location.href = last;
+
           return;
+
         }
+
       }catch(e){}
+
     Router.toAdminIndex();
+
     }
+
     </script>
+
 </body>
+
 </html>

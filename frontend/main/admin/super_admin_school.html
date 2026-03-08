@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学校管理 - 校园食光</title>
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            /* 状态颜色 */
+            --status-active: #52c41a;
+            --status-disabled: #fa8c16;
+            --status-pending: #1890ff;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        .page-header {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .page-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .action-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(230, 0, 18, 0.15);
+        }
+        .action-btn:hover {
+            background-color: #cc0010;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(230, 0, 18, 0.25);
+        }
+        .filter-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-medium);
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+            align-items: center;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+        }
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-right: var(--spacing-small);
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            min-width: 120px;
+        }
+        .schools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        .school-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .school-card:hover {
+            transform: translateY(-5px);
+        }
+        .school-header {
+            position: relative;
+            height: 160px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: var(--text-light);
+        }
+        .school-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            min-width: 100px;
+            text-align: center;
+        }
+        .school-status:hover {
+            opacity: 1;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        .status-active { background-color: var(--status-active); }
+        .status-disabled { background-color: var(--status-disabled); }
+        .status-pending { background-color: var(--status-pending); }
+        .school-body {
+            padding: var(--spacing-medium);
+        }
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .school-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .school-meta i {
+            width: 16px;
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        .school-actions {
+            display: flex;
+            gap: var(--spacing-small);
+        }
+        .action-btn-small {
+            padding: 10px 18px;
+            font-size: 14px;
+            flex: 1;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(230, 0, 18, 0.1);
+        }
+        .action-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 0, 18, 0.15);
+        }
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        .modal-body {
+            padding: var(--spacing-large);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-top: 40px;
+        }
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .search-box {
+                min-width: 100%;
+            }
+            .schools-grid {
+                grid-template-columns: 1fr;
+            }
+            /* 响应式状态按键 */
+            .school-status {
+                padding: 8px 16px;
+                font-size: 14px;
+                top: 16px;
+                right: 16px;
+                min-width: 90px;
+            }
+            /* 响应式操作按钮 */
+            .action-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+            .action-btn-small {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="page-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button class="action-btn" onclick="window.location.href='/main/admin/super_admin_index.html'">
+                    <i class="fas fa-arrow-left"></i> 返回控制台
+                </button>
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-university"></i> 学校管理
+                    </h1>
+                    <p class="page-subtitle">管理入驻学校信息，设置学校管理员</p>
+                </div>
+            </div>
+            <button class="action-btn" onclick="openAddSchoolModal()">
+                <i class="fas fa-plus"></i> 添加学校
+            </button>
+        </div>
+
+        <section class="filter-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="搜索学校名称、地址..." id="searchInput">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">状态:</label>
+                <select class="filter-select" id="statusFilter">
+                    <option value="">全部状态</option>
+                    <option value="active">已开放</option>
+                    <option value="disabled">未开放</option>
+                    <option value="pending">待审核</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">省份:</label>
+                <select class="filter-select" id="provinceFilter" onchange="loadCities(this.value)">
+                    <option value="">全部省份</option>
+                    <option value="beijing">北京市</option>
+                    <option value="tianjin">天津市</option>
+                    <option value="hebei">河北省</option>
+                    <option value="shanxi">山西省</option>
+                    <option value="neimenggu">内蒙古自治区</option>
+                    <option value="liaoning">辽宁省</option>
+                    <option value="jilin">吉林省</option>
+                    <option value="heilongjiang">黑龙江省</option>
+                    <option value="shanghai">上海市</option>
+                    <option value="jiangsu">江苏省</option>
+                    <option value="zhejiang">浙江省</option>
+                    <option value="anhui">安徽省</option>
+                    <option value="fujian">福建省</option>
+                    <option value="jiangxi">江西省</option>
+                    <option value="shandong">山东省</option>
+                    <option value="henan">河南省</option>
+                    <option value="hubei">湖北省</option>
+                    <option value="hunan">湖南省</option>
+                    <option value="guangdong">广东省</option>
+                    <option value="guangxi">广西壮族自治区</option>
+                    <option value="hainan">海南省</option>
+                    <option value="chongqing">重庆市</option>
+                    <option value="sichuan">四川省</option>
+                    <option value="guizhou">贵州省</option>
+                    <option value="yunnan">云南省</option>
+                    <option value="xizang">西藏自治区</option>
+                    <option value="shanxi1">陕西省</option>
+                    <option value="gansu">甘肃省</option>
+                    <option value="qinghai">青海省</option>
+                    <option value="ningxia">宁夏回族自治区</option>
+                    <option value="xinjiang">新疆维吾尔自治区</option>
+                    <option value="xianggang">香港特别行政区</option>
+                    <option value="aomen">澳门特别行政区</option>
+                    <option value="taiwan">台湾省</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">城市:</label>
+                <select class="filter-select" id="cityFilter">
+                    <option value="">全部城市</option>
+                </select>
+            </div>
+            <button class="action-btn" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> 筛选
+            </button>
+        </section>
+
+        <section class="schools-grid" id="schoolsGrid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>正在加载学校数据...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 添加学校弹窗 -->
+    <div class="modal-overlay" id="addSchoolModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">添加学校</div>
+                <button class="modal-close" onclick="closeAddSchoolModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addSchoolForm" onsubmit="handleAddSchool(event)">
+                    <div class="form-group">
+                        <label class="form-label">学校名称 *</label>
+                        <input type="text" class="form-input" id="addSchoolName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">省份 *</label>
+                        <select class="form-input" id="addProvince" onchange="loadAddCities(this.value)" required>
+                            <option value="">请选择省份</option>
+                            <option value="beijing">北京市</option>
+                            <option value="tianjin">天津市</option>
+                            <option value="hebei">河北省</option>
+                            <option value="shanxi">山西省</option>
+                            <option value="neimenggu">内蒙古自治区</option>
+                            <option value="liaoning">辽宁省</option>
+                            <option value="jilin">吉林省</option>
+                            <option value="heilongjiang">黑龙江省</option>
+                            <option value="shanghai">上海市</option>
+                            <option value="jiangsu">江苏省</option>
+                            <option value="zhejiang">浙江省</option>
+                            <option value="anhui">安徽省</option>
+                            <option value="fujian">福建省</option>
+                            <option value="jiangxi">江西省</option>
+                            <option value="shandong">山东省</option>
+                            <option value="henan">河南省</option>
+                            <option value="hubei">湖北省</option>
+                            <option value="hunan">湖南省</option>
+                            <option value="guangdong">广东省</option>
+                            <option value="guangxi">广西壮族自治区</option>
+                            <option value="hainan">海南省</option>
+                            <option value="chongqing">重庆市</option>
+                            <option value="sichuan">四川省</option>
+                            <option value="guizhou">贵州省</option>
+                            <option value="yunnan">云南省</option>
+                            <option value="xizang">西藏自治区</option>
+                            <option value="shanxi1">陕西省</option>
+                            <option value="gansu">甘肃省</option>
+                            <option value="qinghai">青海省</option>
+                            <option value="ningxia">宁夏回族自治区</option>
+                            <option value="xinjiang">新疆维吾尔自治区</option>
+                            <option value="xianggang">香港特别行政区</option>
+                            <option value="aomen">澳门特别行政区</option>
+                            <option value="taiwan">台湾省</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">城市 *</label>
+                        <select class="form-input" id="addCity" required>
+                            <option value="">请选择城市</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">详细地址</label>
+                        <input type="text" class="form-input" id="addAddress" placeholder="选填">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系电话 *</label>
+                        <input type="tel" class="form-input" id="addPhone" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="action-btn" style="background-color: white; color: var(--text-dark); border: 1px solid var(--border-color);" onclick="closeAddSchoolModal()">取消</button>
+                        <button type="submit" class="action-btn">创建学校</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑学校弹窗 -->
+    <div class="modal-overlay" id="editSchoolModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">编辑学校</div>
+                <button class="modal-close" onclick="closeEditSchoolModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editSchoolForm" onsubmit="handleEditSchoolSubmit(event)">
+                    <input type="hidden" id="editSchoolId">
+                    <div class="form-group">
+                        <label class="form-label">学校名称 *</label>
+                        <input type="text" class="form-input" id="editSchoolName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">省份 *</label>
+                        <select class="form-input" id="editProvince" onchange="loadEditCities(this.value)" required>
+                            <option value="">请选择省份</option>
+                            <option value="beijing">北京市</option>
+                            <option value="tianjin">天津市</option>
+                            <option value="hebei">河北省</option>
+                            <option value="shanxi">山西省</option>
+                            <option value="neimenggu">内蒙古自治区</option>
+                            <option value="liaoning">辽宁省</option>
+                            <option value="jilin">吉林省</option>
+                            <option value="heilongjiang">黑龙江省</option>
+                            <option value="shanghai">上海市</option>
+                            <option value="jiangsu">江苏省</option>
+                            <option value="zhejiang">浙江省</option>
+                            <option value="anhui">安徽省</option>
+                            <option value="fujian">福建省</option>
+                            <option value="jiangxi">江西省</option>
+                            <option value="shandong">山东省</option>
+                            <option value="henan">河南省</option>
+                            <option value="hubei">湖北省</option>
+                            <option value="hunan">湖南省</option>
+                            <option value="guangdong">广东省</option>
+                            <option value="guangxi">广西壮族自治区</option>
+                            <option value="hainan">海南省</option>
+                            <option value="chongqing">重庆市</option>
+                            <option value="sichuan">四川省</option>
+                            <option value="guizhou">贵州省</option>
+                            <option value="yunnan">云南省</option>
+                            <option value="xizang">西藏自治区</option>
+                            <option value="shanxi1">陕西省</option>
+                            <option value="gansu">甘肃省</option>
+                            <option value="qinghai">青海省</option>
+                            <option value="ningxia">宁夏回族自治区</option>
+                            <option value="xinjiang">新疆维吾尔自治区</option>
+                            <option value="xianggang">香港特别行政区</option>
+                            <option value="aomen">澳门特别行政区</option>
+                            <option value="taiwan">台湾省</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">城市 *</label>
+                        <select class="form-input" id="editCity" required>
+                            <option value="">请选择城市</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">详细地址</label>
+                        <input type="text" class="form-input" id="editAddress" placeholder="选填">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">联系电话 *</label>
+                        <input type="tel" class="form-input" id="editPhone" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="action-btn" style="background-color: white; color: var(--text-dark); border: 1px solid var(--border-color);" onclick="closeEditSchoolModal()">取消</button>
+                        <button type="submit" class="action-btn">更新学校</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div>
+            <p>校园食光 - 多校AI美食社区平台</p>
+            <p>© 2025 校园食光 版权所有</p>
+        </div>
+    </footer>
+
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/admin/admin-permission.js"></script>
+    <script>
+        // 全国34个省级行政区+对应城市完整数据（核心补充，无其他逻辑修改）
+        const areaData = {
+            "beijing": ["北京市"],
+            "tianjin": ["天津市"],
+            "hebei": ["石家庄市", "唐山市", "秦皇岛市", "邯郸市", "邢台市", "保定市", "张家口市", "承德市", "沧州市", "廊坊市", "衡水市"],
+            "shanxi": ["太原市", "大同市", "阳泉市", "长治市", "晋城市", "朔州市", "晋中市", "运城市", "忻州市", "临汾市", "吕梁市"],
+            "neimenggu": ["呼和浩特市", "包头市", "乌海市", "赤峰市", "通辽市", "鄂尔多斯市", "呼伦贝尔市", "巴彦淖尔市", "乌兰察布市", "兴安盟", "锡林郭勒盟", "阿拉善盟"],
+            "liaoning": ["沈阳市", "大连市", "鞍山市", "抚顺市", "本溪市", "丹东市", "锦州市", "营口市", "阜新市", "辽阳市", "盘锦市", "铁岭市", "朝阳市", "葫芦岛市"],
+            "jilin": ["长春市", "吉林市", "四平市", "辽源市", "通化市", "白山市", "松原市", "白城市", "延边朝鲜族自治州"],
+            "heilongjiang": ["哈尔滨市", "齐齐哈尔市", "鸡西市", "鹤岗市", "双鸭山市", "大庆市", "伊春市", "佳木斯市", "七台河市", "牡丹江市", "黑河市", "绥化市", "大兴安岭地区"],
+            "shanghai": ["上海市"],
+            "jiangsu": ["南京市", "无锡市", "徐州市", "常州市", "苏州市", "南通市", "连云港市", "淮安市", "盐城市", "扬州市", "镇江市", "泰州市", "宿迁市"],
+            "zhejiang": ["杭州市", "宁波市", "温州市", "嘉兴市", "湖州市", "绍兴市", "金华市", "衢州市", "舟山市", "台州市", "丽水市"],
+            "anhui": ["合肥市", "芜湖市", "蚌埠市", "淮南市", "马鞍山市", "淮北市", "铜陵市", "安庆市", "黄山市", "滁州市", "阜阳市", "宿州市", "六安市", "亳州市", "池州市", "宣城市"],
+            "fujian": ["福州市", "厦门市", "莆田市", "三明市", "泉州市", "漳州市", "南平市", "龙岩市", "宁德市"],
+            "jiangxi": ["南昌市", "景德镇市", "萍乡市", "九江市", "新余市", "鹰潭市", "赣州市", "吉安市", "宜春市", "抚州市", "上饶市"],
+            "shandong": ["济南市", "青岛市", "淄博市", "枣庄市", "东营市", "烟台市", "潍坊市", "济宁市", "泰安市", "威海市", "日照市", "临沂市", "德州市", "聊城市", "滨州市", "菏泽市"],
+            "henan": ["郑州市", "开封市", "洛阳市", "平顶山市", "安阳市", "鹤壁市", "新乡市", "焦作市", "濮阳市", "许昌市", "漯河市", "三门峡市", "南阳市", "商丘市", "信阳市", "周口市", "驻马店市"],
+            "hubei": ["武汉市", "黄石市", "十堰市", "宜昌市", "襄阳市", "鄂州市", "荆门市", "孝感市", "荆州市", "黄冈市", "咸宁市", "随州市", "恩施土家族苗族自治州", "仙桃市", "潜江市", "天门市"],
+            "hunan": ["长沙市", "株洲市", "湘潭市", "衡阳市", "邵阳市", "岳阳市", "常德市", "张家界市", "益阳市", "郴州市", "永州市", "怀化市", "娄底市", "湘西土家族苗族自治州"],
+            "guangdong": ["广州市", "韶关市", "深圳市", "珠海市", "汕头市", "佛山市", "江门市", "湛江市", "茂名市", "肇庆市", "惠州市", "梅州市", "汕尾市", "河源市", "阳江市", "清远市", "东莞市", "中山市", "潮州市", "揭阳市", "云浮市"],
+            "guangxi": ["南宁市", "柳州市", "桂林市", "梧州市", "北海市", "防城港市", "钦州市", "贵港市", "玉林市", "百色市", "贺州市", "河池市", "来宾市", "崇左市"],
+            "hainan": ["海口市", "三亚市", "三沙市", "儋州市", "五指山市", "文昌市", "琼海市", "万宁市", "东方市", "定安县", "屯昌县", "澄迈县", "临高县", "白沙黎族自治县", "昌江黎族自治县", "乐东黎族自治县", "陵水黎族自治县", "保亭黎族苗族自治县", "琼中黎族苗族自治县"],
+            "chongqing": ["重庆市"],
+            "sichuan": ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "眉山市", "宜宾市", "广安市", "达州市", "雅安市", "巴中市", "资阳市", "阿坝藏族羌族自治州", "甘孜藏族自治州", "凉山彝族自治州"],
+            "guizhou": ["贵阳市", "六盘水市", "遵义市", "安顺市", "毕节市", "铜仁市", "黔西南布依族苗族自治州", "黔东南苗族侗族自治州", "黔南布依族苗族自治州"],
+            "yunnan": ["昆明市", "曲靖市", "玉溪市", "保山市", "昭通市", "丽江市", "普洱市", "临沧市", "楚雄彝族自治州", "红河哈尼族彝族自治州", "文山壮族苗族自治州", "西双版纳傣族自治州", "大理白族自治州", "德宏傣族景颇族自治州", "怒江傈僳族自治州", "迪庆藏族自治州"],
+            "xizang": ["拉萨市", "日喀则市", "山南市", "林芝市", "昌都市", "那曲市", "阿里地区"],
+            "shanxi1": ["西安市", "铜川市", "宝鸡市", "咸阳市", "渭南市", "延安市", "汉中市", "榆林市", "安康市", "商洛市"],
+            "gansu": ["兰州市", "嘉峪关市", "金昌市", "白银市", "天水市", "武威市", "张掖市", "平凉市", "酒泉市", "庆阳市", "定西市", "陇南市", "临夏回族自治州", "甘南藏族自治州"],
+            "qinghai": ["西宁市", "海东市", "海北藏族自治州", "黄南藏族自治州", "海南藏族自治州", "果洛藏族自治州", "玉树藏族自治州", "海西蒙古族藏族自治州"],
+            "ningxia": ["银川市", "石嘴山市", "吴忠市", "固原市", "中卫市"],
+            "xinjiang": ["乌鲁木齐市", "克拉玛依市", "吐鲁番市", "哈密市", "昌吉回族自治州", "博尔塔拉蒙古自治州", "巴音郭楞蒙古自治州", "阿克苏地区", "克孜勒苏柯尔克孜自治州", "喀什地区", "和田地区", "伊犁哈萨克自治州", "塔城地区", "阿勒泰地区", "石河子市", "阿拉尔市", "图木舒克市", "五家渠市", "北屯市", "铁门关市", "双河市", "可克达拉市", "昆玉市", "胡杨河市", "新星市"],
+            "xianggang": ["香港特别行政区"],
+            "aomen": ["澳门特别行政区"],
+            "taiwan": ["台北市", "新北市", "桃园市", "台中市", "台南市", "高雄市", "基隆市", "新竹市", "嘉义市", "新竹县", "苗栗县", "彰化县", "南投县", "云林县", "嘉义县", "屏东县", "宜兰县", "花莲县", "台东县", "澎湖县"]
+        };
+        const provinceMap = {
+            "beijing": "北京市",
+            "tianjin": "天津市",
+            "hebei": "河北省",
+            "shanxi": "山西省",
+            "neimenggu": "内蒙古自治区",
+            "liaoning": "辽宁省",
+            "jilin": "吉林省",
+            "heilongjiang": "黑龙江省",
+            "shanghai": "上海市",
+            "jiangsu": "江苏省",
+            "zhejiang": "浙江省",
+            "anhui": "安徽省",
+            "fujian": "福建省",
+            "jiangxi": "江西省",
+            "shandong": "山东省",
+            "henan": "河南省",
+            "hubei": "湖北省",
+            "hunan": "湖南省",
+            "guangdong": "广东省",
+            "guangxi": "广西壮族自治区",
+            "hainan": "海南省",
+            "chongqing": "重庆市",
+            "sichuan": "四川省",
+            "guizhou": "贵州省",
+            "yunnan": "云南省",
+            "xizang": "西藏自治区",
+            "shanxi1": "陕西省",
+            "gansu": "甘肃省",
+            "qinghai": "青海省",
+            "ningxia": "宁夏回族自治区",
+            "xinjiang": "新疆维吾尔自治区",
+            "xianggang": "香港特别行政区",
+            "aomen": "澳门特别行政区",
+            "taiwan": "台湾省"
+        };
+        let allSchools = [];
+
+        function renderProvinceOptions(selectId, defaultValue = "") {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            select.innerHTML = `<option value="">${selectId.includes('add') || selectId.includes('edit') ? '请选择省份' : '全部省份'}</option>`;
+            Object.entries(provinceMap).forEach(([pinyin, name]) => {
+                const option = document.createElement('option');
+                option.value = pinyin;
+                option.textContent = name;
+                if (pinyin === defaultValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function loadCitiesByProvince(provincePinyin, targetCitySelectId, defaultValue = "") {
+            const citySelect = document.getElementById(targetCitySelectId);
+            if (!citySelect) return;
+            citySelect.innerHTML = `<option value="">${targetCitySelectId.includes('add') || targetCitySelectId.includes('edit') ? '请选择城市' : '全部城市'}</option>`;
+            if (provincePinyin && areaData[provincePinyin]) {
+                areaData[provincePinyin].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    if (city === defaultValue) {
+                        option.selected = true;
+                    }
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // 页面初始化（原有逻辑，无修改）
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProvinceOptions('provinceFilter');
+            renderProvinceOptions('addProvince');
+            renderProvinceOptions('editProvince');
+            loadSchoolsData();
+        });
+
+        // 加载学校数据（原有逻辑，无修改）
+        function loadSchoolsData() {
+            fetch(`${CONFIG.API_BASE_URL}/schools`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code === 200) {
+                    allSchools = result.data.schools || [];
+                    renderSchoolsGrid(allSchools);
+                } else throw new Error(result.message);
+            })
+            .catch(err => {
+                document.getElementById('schoolsGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
+                        <i class="fas fa-exclamation-circle" style="font-size: 24px; color: var(--status-disabled); margin-bottom: 10px;"></i>
+                        <p>${err.message}</p>
+                        <button class="action-btn" onclick="loadSchoolsData()" style="margin-top: 10px;">重新加载</button>
+                    </div>
+                `;
+            });
+        }
+
+        // 渲染学校列表（修复HTML标签，无功能逻辑修改）
+        function renderSchoolsGrid(schools) {
+            if (schools.length === 0) {
+                document.getElementById('schoolsGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
+                        <i class="fas fa-folder-open" style="font-size: 24px; margin-bottom: 10px;"></i>
+                        <p>暂无符合条件的学校数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = schools.map(school => {
+                // 状态显示（原有逻辑，无修改）
+                let statusClass = '', statusText = '';
+                if (school.status === 'active') { statusClass = 'status-active'; statusText = '已开放'; }
+                else if (school.status === 'disabled') { statusClass = 'status-disabled'; statusText = '未开放'; }
+                else { statusClass = 'status-pending'; statusText = '待审核'; }
+
+                // 地区显示（适配新的省市数据，无逻辑修改）
+                const provinceText = school.province ? (provinceMap[school.province] || '省份待完善') : '省份待完善';
+                const cityText = school.city || '城市待完善';
+
+                return `
+                    <div class="school-card">
+                        <div class="school-header">
+                            <i class="fas fa-university"></i>
+                            <div class="school-status ${statusClass}" onclick="toggleSchoolStatus(${school.id}, '${school.status}')">
+                                ${statusText}
+                            </div>
+                        </div>
+                        <div class="school-body">
+                            <div class="school-name">${school.name}</div>
+                            <div class="school-meta">
+                                <div><i class="fas fa-map-marker-alt"></i>${provinceText} ${cityText}</div>
+                                <div><i class="fas fa-map"></i>${school.address || '地址待完善'}</div>
+                                <div><i class="fas fa-phone"></i>${school.contact_phone}</div>
+                                <div><i class="fas fa-calendar"></i>入驻时间: ${new Date(school.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div class="school-actions">
+                                <button class="action-btn action-btn-small" onclick="openEditSchoolModal(${school.id})">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </button>
+                                <button class="action-btn action-btn-small" onclick="deleteSchool(${school.id})">
+                                    <i class="fas fa-trash"></i> 删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('schoolsGrid').innerHTML = html;
+        }
+
+        // 点击状态标签切换学校状态（原有逻辑，无修改）
+       // 修复后：完整的状态循环（待审核 → 已开放 → 未开放 → 待审核）
+function toggleSchoolStatus(schoolId, currentStatus) {
+            const newStatus = currentStatus === 'pending' ? 'active' : currentStatus === 'active' ? 'disabled' : 'pending';
+            
+            fetch(`${CONFIG.API_BASE_URL}/schools/${schoolId}/status`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code === 200) {
+                    loadSchoolsData();
+                } else throw new Error(result.message);
+            })
+            .catch(err => alert(err.message));
+        }
+
+
+        // 筛选用省市级联（原有逻辑，适配新的全国数据）
+        function loadCities(province) {
+            loadCitiesByProvince(province, 'cityFilter');
+        }
+
+        // 筛选功能（关键词+状态+省+市，原有逻辑，无修改）
+        function applyFilters() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const province = document.getElementById('provinceFilter').value;
+            const city = document.getElementById('cityFilter').value;
+
+            const filtered = allSchools.filter(school => {
+                const matchKeyword = keyword === '' || 
+                    (school.name && school.name.toLowerCase().includes(keyword)) || 
+                    (school.address && school.address.toLowerCase().includes(keyword));
+                const matchStatus = status === '' || school.status === status;
+                const matchProvince = province === '' || school.province === province;
+                const matchCity = city === '' || school.city === city;
+
+                return matchKeyword && matchStatus && matchProvince && matchCity;
+            });
+
+            renderSchoolsGrid(filtered);
+        }
+
+        // 添加学校-省市级联（原有逻辑，适配新的全国数据）
+        function loadAddCities(province) {
+            loadCitiesByProvince(province, 'addCity');
+        }
+
+        // 编辑学校-省市级联（原有逻辑，适配新的全国数据）
+        function loadEditCities(province) {
+            loadCitiesByProvince(province, 'editCity');
+        }
+
+        // 添加学校相关方法（原有逻辑，地址非必填，无修改）
+        function openAddSchoolModal() {
+            document.getElementById('addSchoolForm').reset();
+            document.getElementById('addSchoolModal').classList.add('show');
+        }
+        function closeAddSchoolModal() {
+            document.getElementById('addSchoolModal').classList.remove('show');
+        }
+        function handleAddSchool(e) {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('addSchoolName').value.trim(),
+                province: document.getElementById('addProvince').value,
+                city: document.getElementById('addCity').value,
+                address: document.getElementById('addAddress').value.trim() || '',
+                contact_phone: document.getElementById('addPhone').value.trim()
+            };
+            fetch(`${CONFIG.API_BASE_URL}/schools`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code === 200) {
+                    alert('添加成功');
+                    closeAddSchoolModal();
+                    loadSchoolsData();
+                } else throw new Error(result.message);
+            })
+            .catch(err => alert(err.message));
+        }
+
+        // 编辑学校相关方法（原有逻辑，地址非必填，无修改）
+        function openEditSchoolModal(schoolId) {
+            fetch(`${CONFIG.API_BASE_URL}/schools/${schoolId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code !== 200) throw new Error(result.message);
+                const school = result.data;
+                document.getElementById('editSchoolId').value = school.id;
+                document.getElementById('editSchoolName').value = school.name;
+                renderProvinceOptions('editProvince', school.province);
+                loadCitiesByProvince(school.province, 'editCity', school.city);
+                document.getElementById('editAddress').value = school.address || '';
+                document.getElementById('editPhone').value = school.contact_phone;
+                document.getElementById('editSchoolModal').classList.add('show');
+            })
+            .catch(err => alert(err.message));
+        }
+        function closeEditSchoolModal() {
+            document.getElementById('editSchoolModal').classList.remove('show');
+        }
+        function handleEditSchoolSubmit(e) {
+            e.preventDefault();
+            const schoolId = document.getElementById('editSchoolId').value;
+            const formData = {
+                name: document.getElementById('editSchoolName').value.trim(),
+                province: document.getElementById('editProvince').value,
+                city: document.getElementById('editCity').value,
+                address: document.getElementById('editAddress').value.trim() || '',
+                contact_phone: document.getElementById('editPhone').value.trim()
+            };
+            fetch(`${CONFIG.API_BASE_URL}/schools/${schoolId}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code === 200) {
+                    alert('更新成功');
+                    closeEditSchoolModal();
+                    loadSchoolsData();
+                } else throw new Error(result.message);
+            })
+            .catch(err => alert(err.message));
+        }
+
+        // 删除学校（原有逻辑，无修改）
+        function deleteSchool(schoolId) {
+            if (!confirm('确定删除该学校？')) return;
+            fetch(`${CONFIG.API_BASE_URL}/schools/${schoolId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.code === 200) {
+                    loadSchoolsData();
+                } else throw new Error(result.message);
+            })
+            .catch(err => alert(err.message));
+        }
+    </script>
+</body>
+</html>

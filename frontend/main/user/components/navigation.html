@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导航栏组件 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/navigation-manager.js"></script>
+    <script src="/main/user/components/navigation-scroll-manager.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 导航栏样式 */
+        :root {
+            --primary-color: #e60012; /* 大众点评红 */
+            --bg-gray: #f8f8f8; /* 背景灰 */
+            --border-color: #e5e5e5; /* 浅灰边框 */
+            --text-dark: #333; /* 深灰文字 */
+            --text-light: #999; /* 浅灰文字 */
+            --status-open: #52c41a; /* 营业中 */
+            --status-closed: #ff4d4f; /* 已关闭 */
+            --rating-color: #ffc107; /* 评分金色 */
+            --tag-blue: #1890ff; /* 标签蓝 */
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+
+        /* 主导航 */
+        .main-nav {
+            background-color: white !important;
+            height: 60px !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 1000 !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            transition: all 0.3s ease !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 3px solid transparent;
+            font-weight: 400;
+        }
+        
+        .nav-tab:hover {
+            color: var(--primary-color);
+            background-color: rgba(230, 0, 18, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-tab i {
+            margin-right: 8px;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover i {
+            transform: scale(1.1);
+        }
+        
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .main-nav {
+                height: 50px;
+            }
+            
+            .nav-tabs {
+                padding: 0 var(--spacing-small);
+            }
+            
+            .nav-tab {
+                font-size: 14px;
+            }
+            
+            .nav-tab i {
+                font-size: 14px;
+                margin-right: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主导航 -->
+    <nav class="main-nav">
+        <div class="nav-tabs">
+            <a href="javascript:void(0)" class="nav-tab" data-page="index" onclick="navigateToPage('index')">
+                <i class="fas fa-home"></i>首页
+            </a>
+            <a href="javascript:void(0)" class="nav-tab" data-page="community" onclick="navigateToPage('community')">
+                <i class="fas fa-users"></i>社区
+            </a>
+            <a href="javascript:void(0)" class="nav-tab" data-page="canteen" onclick="navigateToPage('canteen')">
+                <i class="fas fa-store"></i>食堂
+            </a>
+            <a href="javascript:void(0)" class="nav-tab" data-page="profile" onclick="navigateToPage('profile')">
+                <i class="fas fa-user"></i>我的
+            </a>
+            <a href="javascript:void(0)" class="nav-tab" data-page="ai-assistant" onclick="navigateToPage('ai-assistant')">
+                <i class="fas fa-robot"></i>AI助手
+            </a>
+        </div>
+    </nav>
+    
+    <script>
+        // 页面加载时设置当前活动导航项
+        document.addEventListener('DOMContentLoaded', function() {
+            setActiveNavItem();
+            
+            // 恢复导航栏滚动位置
+            if (typeof restoreNavigationScrollPosition === 'function') {
+                restoreNavigationScrollPosition();
+            }
+        });
+        
+        // 监听页面卸载事件，保存滚动位置
+        window.addEventListener('beforeunload', function() {
+            if (typeof saveNavigationScrollPosition === 'function') {
+                saveNavigationScrollPosition();
+            }
+        });
+        
+        // 根据当前页面URL设置活动导航项
+        function setActiveNavItem() {
+            const currentPath = window.location.pathname;
+            let activePage = 'index'; // 默认为首页
+            
+            // 根据路径判断当前页面
+            if (currentPath.includes('user_index.html') || currentPath.endsWith('/')) {
+                activePage = 'index';
+            } else if (currentPath.includes('user_community.html')) {
+                activePage = 'community';
+            } else if (currentPath.includes('user_canteen.html')) {
+                activePage = 'canteen';
+            } else if (currentPath.includes('user_profile.html')) {
+                activePage = 'profile';
+            } else if (currentPath.includes('user_ai_assistant.html')) {
+                activePage = 'ai-assistant';
+            }
+            
+            // 设置活动导航项
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-page') === activePage) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        // 导航到指定页面
+        function navigateToPage(page) {
+            // “我的”要求登录：未登录时不跳转页面，只弹窗提示
+            if (page === 'profile' && !Router.isLoggedIn()) {
+                const shouldLogin = window.confirm('请先登录后再进入“我的”。\n\n点击“确定”立即登录，点击“取消”留在当前页。');
+                if (shouldLogin) {
+                    if (window.parent && window.parent !== window && typeof window.parent.showLoginModal === 'function') {
+                        window.parent.showLoginModal('user');
+                    } else if (window.parent && window.parent !== window && typeof window.parent.openLoginModal === 'function') {
+                        window.parent.openLoginModal('user');
+                    } else if (typeof window.showLoginModal === 'function') {
+                        window.showLoginModal('user');
+                    } else if (typeof window.openLoginModal === 'function') {
+                        window.openLoginModal('user');
+                    } else {
+                        alert('未找到可用的登录弹窗入口，请刷新页面后重试。');
+                    }
+                }
+                return;
+            }
+
+            // 保存当前滚动位置
+            if (typeof saveNavigationScrollPosition === 'function') {
+                saveNavigationScrollPosition();
+            }
+            
+            switch(page) {
+                case 'index':
+                    Router.toUserIndex();
+                    break;
+                case 'community':
+                    Router.navigate(USER_ROUTES.getAbsoluteCommunity());
+                    break;
+                case 'canteen':
+                    Router.navigate(USER_ROUTES.getAbsoluteCanteen());
+                    break;
+                case 'profile':
+                    Router.navigate(USER_ROUTES.getAbsoluteProfile());
+                    break;
+                case 'ai-assistant':
+                    Router.navigate(USER_ROUTES.getAbsoluteAIAssistant());
+                    break;
+            }
+        }
+        
+        // 切换学校
+        function switchSchool(school) {
+            console.log('切换学校到:', school);
+            // 这里可以添加切换学校的逻辑
+            // 例如：重新加载页面数据、更新配置等
+        }
+        
+        // 确保登录模态框
+        function ensureLoginModal(callback) {
+            if (typeof openLoginModal === 'function') {
+                openLoginModal();
+            } else {
+                console.warn('openLoginModal 函数未定义');
+            }
+        }
+    </script>
+</body>
+</html>

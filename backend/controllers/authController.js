@@ -4,20 +4,30 @@ const crypto = require('crypto');
 const pool = require('../config/database');
 require('dotenv').config();
 
+// 帮助函数：安全获取连接并释放
+async function withConnection(handler) {
+    const conn = await pool.getConnection();
+    try {
+        return await handler(conn);
+    } finally {
+        conn.release();
+    }
+}
+
 // 注册用户
 exports.register = async (req, res) => {
     try {
         const { 
             username, 
             password, 
-            isAdmin,
             realName,
             studentId,
+            school, // 新增的school参数
             college,
             major,
             grade,
             phone
-        } = req.body;
+        } = req.body; // 已删掉isAdmin解构
 
         // 验证输入
         if (!username || !password) {
@@ -69,10 +79,10 @@ exports.register = async (req, res) => {
         // 加密密码
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // 确定角色
-        const role = isAdmin ? 'admin' : 'user';
+        // 确定角色 - 只允许注册普通用户（固定为user，无管理员入口）
+        const role = 'user'; // users.role 枚举仅支持 user/admin
 
-        // 插入用户记录
+        // 插入用户记录（含school+college，已和数据库对应）
         const [result] = await connection.execute(
             `INSERT INTO users (
                 username, 
@@ -81,11 +91,12 @@ exports.register = async (req, res) => {
                 status,
                 real_name,
                 student_id,
+                school,
                 college,
                 major,
                 grade,
                 phone
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 username, 
                 passwordHash, 
@@ -93,6 +104,7 @@ exports.register = async (req, res) => {
                 'active',
                 realName || null,
                 studentId || null,
+                school || null,
                 college || null,
                 major || null,
                 grade || null,
@@ -143,8 +155,11 @@ exports.login = async (req, res) => {
             [username]
         );
 
+        console.log('[login] db=', process.env.DB_NAME || 'campus_food', 'username=', username, 'found=', users.length);
+
         if (users.length === 0) {
             connection.release();
+            console.warn('[login] user not found:', username);
             return res.status(401).json({
                 code: 401,
                 message: '用户名或密码错误'
@@ -167,6 +182,7 @@ exports.login = async (req, res) => {
 
         if (!isPasswordValid) {
             connection.release();
+            console.warn('[login] password mismatch:', username);
             return res.status(401).json({
                 code: 401,
                 message: '用户名或密码错误'
@@ -220,6 +236,42 @@ exports.login = async (req, res) => {
     }
 };
 
+// 更新用户资料
+exports.updateUserProfile = async (req, res) => {
+    try {
+        const { realName, phone, major, avatar } = req.body;
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({ code: 401, message: '未登录' });
+        }
+
+        const fields = [];
+        const values = [];
+
+        if (realName !== undefined) { fields.push('real_name = ?'); values.push(realName); }
+        if (phone !== undefined) { fields.push('phone = ?'); values.push(phone); }
+        if (major !== undefined) { fields.push('major = ?'); values.push(major); }
+        if (avatar !== undefined) { fields.push('avatar = ?'); values.push(avatar); }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ code: 400, message: '无可更新字段' });
+        }
+
+        values.push(userId);
+
+        await withConnection(async (conn) => {
+            const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+            await conn.execute(sql, values);
+        });
+
+        return res.json({ code: 200, message: '更新成功' });
+    } catch (error) {
+        console.error('更新用户资料错误:', error);
+        return res.status(500).json({ code: 500, message: '更新失败，请稍后重试' });
+    }
+};
+
 // 获取用户信息（需要认证）
 exports.getUserInfo = async (req, res) => {
     try {
@@ -228,7 +280,23 @@ exports.getUserInfo = async (req, res) => {
         const connection = await pool.getConnection();
 
         const [users] = await connection.execute(
-            'SELECT id, username, role, status, created_at FROM users WHERE id = ?',
+            `SELECT 
+                id,
+                username,
+                role,
+                status,
+                real_name AS realName,
+                student_id AS studentId,
+                school,
+                college,
+                major,
+                grade,
+                phone,
+                NULL AS email,
+                avatar,
+                created_at AS createdAt,
+                updated_at AS updatedAt
+             FROM users WHERE id = ?`,
             [userId]
         );
 

@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>用户管理 - 校园食光</title>
+
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    
+
+    <!-- 字体图标 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+
+    <style>
+
+        /* 全局样式 - 与现有页面保持一致 */
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 15px;
+
+            --spacing-large: 20px;
+
+            --border-radius: 4px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            --role-super-admin: #e60012;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+        .embedded-shell .global-nav,
+        .embedded-shell .main-nav {
+            display: none;
+        }
+
+        .embedded-shell .admin-main {
+            padding-top: var(--spacing-large);
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 - 与现有页面保持一致 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        /* 主导航 - 使用动态导航栏 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            position: sticky;
+
+            top: 45px;
+
+            z-index: 999;
+
+        }
+
+        
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none;
+
+            padding: 0 15px;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 主要内容区域 */
+
+        .admin-main {
+
+            padding: var(--spacing-large) 0 60px;
+
+        }
+
+        
+
+        /* 页面标题 */
+
+        .page-header {
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .page-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .page-title i {
+
+            margin-right: 10px;
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-subtitle {
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 用户统计卡片 */
+
+        .stats-section {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .stat-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-large);
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+            border-left: 4px solid var(--primary-color);
+
+        }
+
+        
+
+        .stat-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            color: var(--primary-color);
+
+            margin-bottom: 8px;
+
+        }
+
+        
+
+        .stat-label {
+
+            font-size: 14px;
+
+            color: var(--text-dark);
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .stat-change {
+
+            font-size: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .trend-up {
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .trend-down {
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        /* 搜索和筛选栏 */
+
+        .filter-section {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-medium);
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+            align-items: center;
+
+        }
+
+        
+
+        .search-box {
+
+            position: relative;
+
+            flex: 1;
+
+            min-width: 250px;
+
+        }
+
+        
+
+        .search-input {
+
+            width: 100%;
+
+            padding: 10px 15px 10px 40px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            background-color: white;
+
+        }
+
+        
+
+        .search-icon {
+
+            position: absolute;
+
+            left: 12px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .filter-group {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-small);
+
+        }
+
+        
+
+        .filter-label {
+
+            font-size: 14px;
+
+            color: var(--text-dark);
+
+            margin-right: var(--spacing-small);
+
+        }
+
+        
+
+        .filter-select {
+
+            padding: 8px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            background-color: white;
+
+            min-width: 150px;
+
+        }
+
+        
+
+        .action-btn {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            white-space: nowrap;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background-color: #cc0010;
+
+        }
+
+        
+
+        /* 用户列表 */
+
+        .users-table-container {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .table-header {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+        
+
+        .table-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .table-actions {
+
+            display: flex;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .table-wrapper {
+
+            overflow-x: auto;
+
+        }
+
+        
+
+        .users-table {
+
+            width: 100%;
+
+            border-collapse: separate;
+
+            border-spacing: 0;
+
+        }
+
+        
+
+        .users-table th {
+
+            background-color: #fafafa;
+
+            text-align: left;
+
+            padding: 12px 15px;
+
+            font-weight: 500;
+
+            border-bottom: 1px solid var(--border-color);
+
+            color: var(--text-dark);
+
+            white-space: nowrap;
+
+        }
+
+        
+
+        .users-table td {
+
+            padding: 12px 15px;
+
+            border-bottom: 1px solid var(--border-color);
+
+            vertical-align: middle;
+
+        }
+
+        
+
+        .users-table tbody tr:hover {
+
+            background-color: #fafafa;
+
+        }
+
+        
+
+        .user-avatar {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            background-color: #f5f5f5;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: var(--primary-color);
+
+            font-weight: bold;
+
+        }
+
+        
+
+        .user-info {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+        
+
+        .user-name {
+
+            font-weight: 500;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .user-email {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .user-role {
+
+            padding: 3px 8px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            margin-left: 10px;
+
+        }
+
+        
+
+        .role-user {
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: #1890ff;
+
+        }
+
+        
+
+        .role-super-admin {
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .role-school-admin {
+
+            background-color: rgba(82, 196, 26, 0.1);
+
+            color: #52c41a;
+
+        }
+
+        
+
+        .role-merchant-admin {
+
+            background-color: rgba(255, 193, 7, 0.1);
+
+            color: #ffc107;
+
+        }
+
+        
+
+        .role-stall-admin {
+
+            background-color: rgba(250, 173, 20, 0.1);
+
+            color: #faad14;
+
+        }
+
+        
+
+        .user-status {
+
+            padding: 3px 8px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+
+            font-weight: 500;
+
+            margin-left: 10px;
+
+        }
+
+        
+
+        .status-active {
+
+            background-color: rgba(82, 196, 26, 0.1);
+
+            color: #52c41a;
+
+        }
+
+        
+
+        .status-inactive {
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .status-banned {
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .user-actions {
+
+            display: flex;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .action-btn-small {
+
+            padding: 6px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            background-color: white;
+
+            font-size: 13px;
+
+            color: var(--text-dark);
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .action-btn-small:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        /* 分页器 */
+
+        .pagination {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 5px;
+
+            margin-top: 30px;
+
+        }
+
+        
+
+        .page-btn {
+
+            width: 36px;
+
+            height: 36px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            background-color: white;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .page-btn:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-btn.active {
+
+            background-color: var(--primary-color);
+
+            border-color: var(--primary-color);
+
+            color: white;
+
+        }
+
+        
+
+        /* 用户详情模态框 */
+
+        .modal-overlay {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background-color: rgba(0, 0, 0, 0.5);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            z-index: 1001;
+
+            opacity: 0;
+
+            transition: opacity 0.3s;
+
+            pointer-events: none;
+
+        }
+
+        
+
+        .modal-overlay.show {
+
+            opacity: 1;
+
+            pointer-events: auto;
+
+        }
+
+        
+
+        .modal-content {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            width: 90%;
+
+            max-width: 600px;
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+        }
+
+        
+
+        .modal-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: var(--spacing-medium);
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .modal-title {
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+        }
+
+        
+
+        .modal-close {
+
+            background: none;
+
+            border: none;
+
+            font-size: 24px;
+
+            cursor: pointer;
+
+            color: var(--text-light);
+
+            transition: color 0.3s;
+
+        }
+
+        
+
+        .modal-close:hover {
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .modal-body {
+
+            padding: var(--spacing-large);
+
+        }
+
+        
+
+        .user-detail-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .detail-item {
+
+            margin-bottom: var(--spacing-medium);
+
+        }
+
+        
+
+        .detail-label {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+            margin-bottom: 8px;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .detail-value {
+
+            font-size: 14px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .form-group {
+
+            margin-bottom: 20px;
+
+        }
+
+        
+
+        .form-label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: 500;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .form-input {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-input:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-textarea {
+
+            width: 100%;
+
+            padding: 10px 12px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            font-size: 14px;
+
+            min-height: 100px;
+
+            resize: vertical;
+
+            transition: border-color 0.3s;
+
+        }
+
+        
+
+        .form-textarea:focus {
+
+            border-color: var(--primary-color);
+
+            outline: none;
+
+        }
+
+        
+
+        .form-actions {
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid var(--border-color);
+
+        }
+
+        
+
+        /* 响应式调整 */
+
+        @media (max-width: 992px) {
+
+            .stats-section {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-medium);
+
+            }
+
+            
+
+            .page-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            
+
+            .filter-section {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: var(--spacing-medium);
+
+            }
+
+            
+
+            .search-box {
+
+                min-width: 100%;
+
+            }
+
+            
+
+            .table-header {
+
+                flex-direction: column;
+
+                gap: var(--spacing-medium);
+
+            }
+
+            
+
+            .table-actions {
+
+                flex-direction: column;
+
+                gap: var(--spacing-small);
+
+            }
+
+            
+
+            .nav-tabs {
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .nav-tab {
+
+                flex: 0 0 auto;
+
+                padding: 0 15px;
+
+                font-size: 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- 主要内容 -->
+
+    <main class="container admin-main">
+
+        <!-- 页面标题 -->
+
+        <div class="page-header">
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+
+                <button class="action-btn" onclick="window.location.href='/main/admin/super_admin_index.html'">
+
+                    <i class="fas fa-arrow-left"></i> 返回控制台
+
+                </button>
+
+                <div>
+
+                    <h1 class="page-title">
+
+                        <i class="fas fa-users-cog"></i> 用户管理
+
+                    </h1>
+
+                    <p class="page-subtitle">管理平台所有用户，支持封禁/重置密码</p>
+
+                </div>
+
+            </div>
+
+            <button class="action-btn" onclick="exportUsers()">
+
+                <i class="fas fa-download"></i> 导出用户
+
+            </button>
+
+        </div>
+
+        
+
+        <!-- 用户统计卡片 -->
+
+        <section class="stats-section">
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="totalUsers">28,456</div>
+
+                <div class="stat-label">总用户数</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>12.5%</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="activeUsers">8,234</div>
+
+                <div class="stat-label">今日活跃</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-down trend-down"></i>
+
+                    <span>3.2%</span>
+
+                    <span>较昨日</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="newUsers">456</div>
+
+                <div class="stat-label">本月新增</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>8.7%</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-value" id="bannedUsers">12</div>
+
+                <div class="stat-label">已封禁</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>2</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 搜索和筛选栏 -->
+
+        <section class="filter-section">
+
+            <div class="search-box">
+
+                <i class="fas fa-search search-icon"></i>
+
+                <input type="text" class="search-input" placeholder="搜索用户名、邮箱、学号..." id="searchInput">
+
+            </div>
+
+            
+
+            <div class="filter-group">
+
+                <label class="filter-label">角色:</label>
+
+                <select class="filter-select" id="roleFilter">
+
+                    <option value="">全部角色</option>
+
+                    <option value="user">普通用户</option>
+
+                    <option value="super_admin">超级管理员</option>
+
+                    <option value="school_admin">学校管理员</option>
+
+                    <option value="merchant_admin">商户管理员</option>
+
+                    <option value="stall_admin">档口管理员</option>
+
+                </select>
+
+            </div>
+
+            
+
+            <div class="filter-group">
+
+                <label class="filter-label">状态:</label>
+
+                <select class="filter-select" id="statusFilter">
+
+                    <option value="">全部状态</option>
+
+                    <option value="active">正常</option>
+
+                    <option value="inactive">未激活</option>
+
+                    <option value="banned">已封禁</option>
+
+                </select>
+
+            </div>
+
+            
+
+            <button class="action-btn" onclick="applyFilters()">
+
+                <i class="fas fa-filter"></i> 筛选
+
+            </button>
+
+        </section>
+
+        
+
+        <!-- 用户列表 -->
+
+        <section class="users-table-container">
+
+            <div class="table-header">
+
+                <div class="table-title">用户列表</div>
+
+                <div class="table-actions">
+
+                    <button class="action-btn" onclick="batchBan()">
+
+                        <i class="fas fa-ban"></i> 批量封禁
+
+                    </button>
+
+                    <button class="action-btn" onclick="batchResetPassword()">
+
+                        <i class="fas fa-key"></i> 批量重置密码
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="table-wrapper">
+
+                <table class="users-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>序号</th>
+
+                            <th>头像</th>
+
+                            <th>用户名</th>
+
+                            <th>真实姓名</th>
+
+                            <th>角色</th>
+
+                            <th>学校</th>
+
+                            <th>学院/身份</th>
+
+                            <th>状态</th>
+
+                            <th>操作</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="usersTableBody">
+
+                        <!-- 用户数据将通过JavaScript动态生成 -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 分页器 -->
+
+        <div class="pagination" id="pagination">
+
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+
+        </div>
+
+    </main>
+
+    
+
+    <!-- 用户详情模态框 -->
+
+    <div class="modal-overlay" id="userDetailModal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div class="modal-title" id="modalUserName">用户详情</div>
+
+                <button class="modal-close" onclick="closeUserDetailModal()">&times;</button>
+
+            </div>
+
+            <div class="modal-body" id="userDetailContent">
+
+                <!-- 用户详情将通过JavaScript动态生成 -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/admin/admin-permission.js"></script>
+
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+
+    
+
+    <script>
+
+        // 页面初始化
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                window.DynamicNavbar.updateNavbar('super_admin_users.html');
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+            
+
+            // 加载用户数据
+
+            loadUsersData();
+
+            
+
+            // 初始化分页
+
+            initPagination();
+
+        });
+
+        
+
+        let currentUsers = [];
+
+        let currentPage = 1;
+
+        const itemsPerPage = 10;
+
+        
+
+        // 加载用户数据
+
+        function loadUsersData() {
+
+            const page = currentPage || 1;
+
+            const status = document.getElementById('statusFilter')?.value || '';
+
+            const role = document.getElementById('roleFilter')?.value || '';
+
+            const keyword = document.getElementById('searchInput')?.value || '';
+
+            
+
+            const params = new URLSearchParams({
+
+                page: page,
+
+                limit: itemsPerPage,
+
+                ...(status && { status }),
+
+                ...(role && { role }),
+
+                ...(keyword && { keyword })
+
+            });
+
+            
+
+            fetch(`${CONFIG.API_BASE_URL}/users?${params}`, {
+
+                method: 'GET',
+
+                headers: {
+
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+
+                    'Content-Type': 'application/json'
+
+                }
+
+            })
+
+            .then(response => response.json())
+
+            .then(result => {
+
+                if (result.code === 200) {
+
+                    currentUsers = result.data.users || [];
+
+                    renderUsersTable(currentUsers);
+
+                    renderPagination(result.data.pagination);
+
+                    updateStats();
+
+                } else {
+
+                    console.error('加载用户列表失败:', result);
+
+                    alert('加载用户列表失败：' + (result.message || '请稍后重试'));
+
+                }
+
+            })
+
+            .catch(error => {
+
+                console.error('加载用户列表出错:', error);
+
+                alert('网络错误，请检查连接');
+
+            });
+
+        }
+
+        
+
+                // 渲染用户表格
+
+        function renderUsersTable(pageData = []) {
+
+            const currentRole = getCurrentRole();
+            const canManageUsers = currentRole === 'super_admin' || currentRole === 'school_admin' || currentRole === 'merchant_admin';
+            const baseIndex = (currentPage - 1) * itemsPerPage;
+
+            const usersHTML = pageData.map((user, index) => {
+
+                const roleClass = getRoleClass(user.role);
+
+                const roleText = getRoleText(user.role);
+
+                const statusClass = getStatusClass(user.status);
+
+                const statusText = getStatusText(user.status);
+
+                const isAdminUser = user.user_type === 'admin';
+                const identitySuffix = (user.identity_suffix || '').trim();
+                const identityLabel = (user.identity_label || '').trim();
+                const identityText = identityLabel ? (identitySuffix ? `${identityLabel}·${identitySuffix}` : identityLabel) : '-';
+                const collegeOrIdentity = isAdminUser ? identityText : (user.college || '-');
+                const isPlatformAdmin = isAdminUser && user.role === 'super_admin';
+                const actionButtons = isPlatformAdmin || !canManageUsers ? `
+                                <button class="action-btn-small" onclick="viewUserDetail(${user.id})">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                            ` : `
+                                <button class="action-btn-small" onclick="viewUserDetail(${user.id})">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                                <button class="action-btn-small" onclick="resetPassword(${user.id})">
+                                    <i class="fas fa-key"></i> 重置密码
+                                </button>
+                                ${user.status === 'active' ? 
+                                    `<button class="action-btn-small" onclick="banUser(${user.id})">
+                                        <i class="fas fa-ban"></i> 封禁
+                                    </button>` :
+                                    `<button class="action-btn-small" onclick="unbanUser(${user.id})">
+                                        <i class="fas fa-check"></i> 解封
+                                    </button>`
+                                }
+                            `;
+
+                return `
+
+                    <tr>
+
+                        <td>${baseIndex + index + 1}</td>
+
+                        <td>
+
+<div class="user-avatar">${user.real_name?.charAt(0) || user.username.charAt(0)}</div>
+
+                        </td>
+
+                        <td>
+
+                            <div class="user-info">
+
+                                <div class="user-name">${user.username}</div>
+
+                            </div>
+
+                        </td>
+
+                        <td>${user.real_name || '-'}</td>
+
+                        <td>
+
+                            <span class="user-role ${roleClass}">${roleText}</span>
+
+                        </td>
+
+                        <td>${user.school || '-'}</td>
+
+                        <td>${collegeOrIdentity}</td>
+
+                        <td>
+
+                            <span class="user-status ${statusClass}">${statusText}</span>
+
+                        </td>
+
+                        <td>
+
+                            <div class="user-actions">
+
+                                ${actionButtons}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }).join('');
+
+            
+
+            document.getElementById('usersTableBody').innerHTML = usersHTML;
+
+        }
+
+        
+
+        // 获取角色样式类
+
+        function getRoleClass(role) {
+            const normalizedRole = normalizeRole(role);
+            // 严格匹配CSS中的类名：role-user/role-super-admin等
+            const roleClasses = {
+                'user': 'role-user',         // 普通用户（CSS定义的类名）
+                'super_admin': 'role-super-admin',
+                'school_admin': 'role-school-admin',
+                'merchant_admin': 'role-merchant-admin',
+                'stall_admin': 'role-stall-admin'
+            };
+            return roleClasses[normalizedRole] || '';
+        }
+
+        
+
+        // 获取角色文本
+
+        function getRoleText(role) {
+            const normalizedRole = normalizeRole(role);
+            // 后端返回的role值：user（普通用户）/super_admin/school_admin等
+            const roleTexts = {
+                'user': '普通用户',          // 后端普通用户统一返回user，对应“普通用户”
+                'super_admin': '超级管理员',
+                'school_admin': '学校管理员',
+                'merchant_admin': '商户管理员',
+                'stall_admin': '档口管理员',
+                'admin': '管理员'           // 兜底兼容后端COALESCE(ap.role, 'admin')的情况
+            };
+            // 兜底显示「未知(原始值)」，便于调试
+            return roleTexts[normalizedRole] || `未知(${role})`;
+        }
+
+
+        function normalizeRole(role) {
+
+            if (!role) return '';
+            // 统一转小写 + 横线替换为下划线 + 拆分特殊字符 + 去空
+            return String(role)
+                .trim()
+                .toLowerCase()
+                .replace(/-/g, '_') // 兼容数据库中用横线的情况（如 school-admin）
+                .split(/[:·|]/)[0]; // 兼容更多分隔符（:、·、|）
+
+        }
+
+        
+
+        // 获取状态样式类
+
+        function getStatusClass(status) {
+
+            const statusClasses = {
+
+                'active': 'status-active',
+
+                'inactive': 'status-inactive',
+
+                'banned': 'status-banned'
+
+            };
+
+            
+
+            return statusClasses[status] || '';
+
+        }
+
+        
+
+        // 获取状态文本
+
+        function getStatusText(status) {
+
+            const statusTexts = {
+
+                'active': '正常',
+
+                'inactive': '未激活',
+
+                'banned': '已封禁'
+
+            };
+
+            
+
+            return statusTexts[status] || '未知';
+
+        }
+
+        
+
+        // 初始化分页
+
+        function initPagination() {
+
+            renderPagination();
+
+        }
+
+        
+
+        // 渲染分页器
+
+        function renderPagination(pagination = {}) {
+
+            const totalPages = pagination.pages || 1;
+
+            const total = pagination.total || 0;
+
+            const page = pagination.page || 1;
+
+            
+
+            let paginationHTML = '';
+
+            
+
+            // 上一页按钮
+
+            if (page > 1) {
+
+                paginationHTML += `<button class="page-btn" onclick="changePage(${page - 1})">
+
+                    <i class="fas fa-chevron-left"></i>
+
+                </button>`;
+
+            }
+
+            
+
+            // 页码按钮
+
+            const startPage = Math.max(1, page - 2);
+
+            const endPage = Math.min(totalPages, page + 2);
+
+            
+
+            for (let i = startPage; i <= endPage; i++) {
+
+                if (i > 0 && i <= totalPages) {
+
+                    paginationHTML += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+
+                }
+
+            }
+
+            
+
+            // 下一页按钮
+
+            if (page < totalPages) {
+
+                paginationHTML += `<button class="page-btn" onclick="changePage(${page + 1})">
+
+                    <i class="fas fa-chevron-right"></i>
+
+                </button>`;
+
+            }
+
+            
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+
+        }
+
+        
+
+        // 切换页面
+
+        function changePage(page) {
+
+            currentPage = page;
+
+            loadUsersData();
+
+        }
+
+        
+
+        // 应用筛选
+
+        function applyFilters() {
+
+            currentPage = 1;
+
+            loadUsersData();
+
+        }
+
+        
+
+        // 更新统计信息
+
+        function updateStats(users = []) {
+
+            fetch(`${CONFIG.API_BASE_URL}/users/stats/summary`, {
+
+                method: 'GET',
+
+                headers: {
+
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+
+                    'Content-Type': 'application/json'
+
+                }
+
+            })
+
+            .then(response => response.json())
+
+            .then(result => {
+
+                if (result.code === 200 && result.data) {
+
+                    const stats = result.data;
+
+                    document.getElementById('totalUsers').textContent = (stats.totalUsers || 0).toLocaleString();
+
+                    document.getElementById('activeUsers').textContent = (stats.activeUsers || 0).toLocaleString();
+
+                    document.getElementById('newUsers').textContent = (stats.newUsers || 0).toLocaleString();
+
+                    document.getElementById('bannedUsers').textContent = (stats.bannedUsers || 0).toLocaleString();
+
+                }
+
+            })
+
+            .catch(error => console.error('获取统计信息失败:', error));
+
+        }
+
+        
+
+        // 查看用户详情
+
+        function viewUserDetail(userId) {
+
+            const user = currentUsers.find(u => u.id === userId);
+
+            if (!user) return;
+
+            
+
+            const modalTitle = document.getElementById('modalUserName');
+
+            const modalContent = document.getElementById('userDetailContent');
+
+            
+
+            modalTitle.textContent = `用户详情 - ${user.real_name || user.username}`;
+
+            
+
+            modalContent.innerHTML = `
+
+                <div class="user-detail-grid">
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">用户名</div>
+
+                        <div class="detail-value">${user.username}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">真实姓名</div>
+
+                        <div class="detail-value">${user.real_name || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">邮箱</div>
+
+                        <div class="detail-value">${user.email || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">学号</div>
+
+                        <div class="detail-value">${user.student_id || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">学校</div>
+
+                        <div class="detail-value">${user.school || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">手机号</div>
+
+                        <div class="detail-value">${user.phone || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">学院</div>
+
+                        <div class="detail-value">${user.user_type === 'admin' ? '-' : (user.college || '-')}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">角色</div>
+
+                        <div class="detail-value">${getRoleText(user.role)}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">注册时间</div>
+
+                        <div class="detail-value">${user.registerDate || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">最后登录</div>
+
+                        <div class="detail-value">${user.lastLogin || '-'}</div>
+
+                    </div>
+
+                    <div class="detail-item">
+
+                        <div class="detail-label">状态</div>
+
+                        <div class="detail-value">${getStatusText(user.status)}</div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            
+
+            document.getElementById('userDetailModal').classList.add('show');
+
+        }
+
+        
+
+        // 关闭用户详情模态框
+
+        function closeUserDetailModal() {
+
+            document.getElementById('userDetailModal').classList.remove('show');
+
+        }
+
+        function getUserById(userId) {
+            return currentUsers.find(u => u.id === userId);
+        }
+
+        
+
+        // 重置密码
+
+        function resetPassword(userId) {
+
+            const user = getUserById(userId);
+            if (!user) return;
+
+            if (confirm(`确定要重置此用户的密码为 123456 吗？`)) {
+
+                fetch(`${CONFIG.API_BASE_URL}/users/${userId}/reset-password`, {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+
+                        'Content-Type': 'application/json'
+
+                    },
+
+                    body: JSON.stringify({ userType: user.user_type || 'user' })
+
+                })
+
+                .then(response => response.json())
+
+                .then(result => {
+
+                    if (result.code === 200) {
+
+                        alert('密码重置成功！新密码为 123456');
+
+                        loadUsersData();
+
+                    } else {
+
+                        alert('重置失败：' + (result.message || '请稍后重试'));
+
+                    }
+
+                })
+
+                .catch(error => {
+
+                    console.error('重置密码出错:', error);
+
+                    alert('网络错误');
+
+                });
+
+            }
+
+        }
+
+        
+
+        // 封禁用户
+
+        function banUser(userId) {
+
+            const user = getUserById(userId);
+            if (!user) return;
+
+            if (confirm(`确定要封禁此用户吗？`)) {
+
+                fetch(`${CONFIG.API_BASE_URL}/users/${userId}/status`, {
+
+                    method: 'PUT',
+
+                    headers: {
+
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+
+                        'Content-Type': 'application/json'
+
+                    },
+
+                    body: JSON.stringify({ status: 'banned', userType: user.user_type || 'user' })
+
+                })
+
+                .then(response => response.json())
+
+                .then(result => {
+
+                    if (result.code === 200) {
+
+                        alert('用户已封禁');
+
+                        loadUsersData();
+
+                    } else {
+
+                        alert('操作失败：' + (result.message || '请稍后重试'));
+
+                    }
+
+                })
+
+                .catch(error => {
+
+                    console.error('封禁用户出错:', error);
+
+                    alert('网络错误');
+
+                });
+
+            }
+
+        }
+
+        
+
+        // 解封用户
+
+        function unbanUser(userId) {
+
+            const user = getUserById(userId);
+            if (!user) return;
+
+            if (confirm(`确定要解封此用户吗？`)) {
+
+                fetch(`${CONFIG.API_BASE_URL}/users/${userId}/status`, {
+
+                    method: 'PUT',
+
+                    headers: {
+
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+
+                        'Content-Type': 'application/json'
+
+                    },
+
+                    body: JSON.stringify({ status: 'active', userType: user.user_type || 'user' })
+
+                })
+
+                .then(response => response.json())
+
+                .then(result => {
+
+                    if (result.code === 200) {
+
+                        alert('用户已解封');
+
+                        loadUsersData();
+
+                    } else {
+
+                        alert('操作失败：' + (result.message || '请稍后重试'));
+
+                    }
+
+                })
+
+                .catch(error => {
+
+                    console.error('解封用户出错:', error);
+
+                    alert('网络错误');
+
+                });
+
+            }
+
+        }
+
+        
+
+        // 批量封禁
+
+        function batchBan() {
+
+            alert('批量操作：请选择用户后执行操作');
+
+        }
+
+        
+
+        // 批量重置密码
+
+        function batchResetPassword() {
+
+            alert('批量操作：请选择用户后执行操作');
+
+        }
+
+        
+
+        // 获取选中的用户
+
+        function getSelectedUsers() {
+
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        }
+
+        
+
+        // 导出用户
+
+        function exportUsers() {
+
+            alert('用户导出功能开发中...\n即将支持Excel和CSV格式导出');
+
+        }
+
+    </script>
+
+</body>
+
+</html>

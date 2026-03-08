@@ -1,671 +1,2361 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>档口工作台 - 校园食光</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
-        }
-        
-        body {
-            background: #f8f9fa;
-            min-height: 100vh;
-            padding-bottom: 60px;
-        }
-        
-        /* 顶部导航 */
-        .top-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            background: linear-gradient(135deg, #1890FF, #0c7cd5);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-        
-        .back-btn {
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .nav-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .logout-btn {
-            font-size: 14px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 5px;
-            background: rgba(255,255,255,0.2);
-        }
-        
-        /* 今日数据卡片 */
-        .stats-section {
-            margin-top: 60px;
-            padding: 15px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .stat-label {
-            font-size: 13px;
-            color: #777;
-            margin-bottom: 8px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1890FF;
-        }
-        
-        .stat-card.warning .stat-value {
-            color: #FF6B35;
-        }
-        
-        /* 快捷操作 */
-        .quick-actions {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: #1890FF;
-            margin-right: 8px;
-            border-radius: 2px;
-        }
-        
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-        
-        .action-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px 10px;
-            border-radius: 10px;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-        }
-        
-        .action-btn:hover {
-            background: #e6f7ff;
-            transform: translateY(-2px);
-        }
-        
-        .action-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .action-label {
-            font-size: 13px;
-            color: #666;
-        }
-        
-        /* 菜品列表 */
-        .dish-management {
-            padding: 0 15px;
-        }
-        
-        .dish-filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-        }
-        
-        .filter-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            border: 1px solid #ddd;
-            font-size: 13px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-        
-        .filter-btn.active {
-            background: #1890FF;
-            color: white;
-            border-color: #1890FF;
-        }
-        
-        .dish-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .dish-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .dish-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        
-        .dish-info {
-            flex: 1;
-        }
-        
-        .dish-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .dish-meta {
-            font-size: 13px;
-            color: #777;
-            margin-bottom: 8px;
-        }
-        
-        .dish-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .stock-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .stock-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #1890FF;
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .stock-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            min-width: 30px;
-            text-align: center;
-        }
-        
-        .status-toggle {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .status-toggle.available {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-toggle.sold-out {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .edit-btn {
-            padding: 6px 12px;
-            border-radius: 15px;
-            background: #fff5eb;
-            color: #FF6B35;
-            border: none;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        
-        /* 空状态 */
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #999;
-        }
-        
-        .empty-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-        }
-        
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #777;
-        }
-        
-        /* 底部悬浮按钮 */
-        .float-add-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1890FF, #0c7cd5);
-            color: white;
-            border: none;
-            font-size: 28px;
-            box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
-            cursor: pointer;
-            z-index: 50;
-        }
-        
-        .float-add-btn:hover {
-            transform: scale(1.1);
-        }
-    </style>
-</head>
-<body>
-    <!-- 顶部导航 -->
-    <div class="top-nav">
-        <span class="back-btn" onclick="backToHome()">←</span>
-        <div class="nav-title">档口工作台</div>
-        <span class="logout-btn" onclick="logout()">退出</span>
-    </div>
-    
-    <!-- 今日数据 -->
-    <div class="stats-section">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">今日供应</div>
-                <div class="stat-value" id="todaySupply">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">今日评价</div>
-                <div class="stat-value" id="todayReviews">0</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-label">库存预警</div>
-                <div class="stat-value" id="stockWarning">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">曝光次数</div>
-                <div class="stat-value" id="todayViews">0</div>
-            </div>
-        </div>
-        
-        <!-- 快捷操作 -->
-        <div class="quick-actions">
-            <div class="section-title">快捷操作</div>
-            <div class="action-grid">
-                <button class="action-btn" onclick="scanQR()">
-                    <div class="action-icon">📷</div>
-                    <div class="action-label">扫码快编</div>
-                </button>
-                <button class="action-btn" onclick="batchImport()">
-                    <div class="action-icon">📊</div>
-                    <div class="action-label">批量导入</div>
-                </button>
-                <button class="action-btn" onclick="batchStock()">
-                    <div class="action-icon">📦</div>
-                    <div class="action-label">批量库存</div>
-                </button>
-                <button class="action-btn" onclick="viewReviews()">
-                    <div class="action-icon">💬</div>
-                    <div class="action-label">口碑管理</div>
-                </button>
-                <button class="action-btn" onclick="viewStats()">
-                    <div class="action-icon">📈</div>
-                    <div class="action-label">数据查看</div>
-                </button>
-                <button class="action-btn" onclick="viewLogs()">
-                    <div class="action-icon">📝</div>
-                    <div class="action-label">操作日志</div>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 菜品管理 -->
-    <div class="dish-management">
-        <div class="section-title">菜品管理</div>
-        
-        <div class="dish-filters">
-            <button class="filter-btn active" data-filter="all" onclick="filterDishes('all')">全部</button>
-            <button class="filter-btn" data-filter="available" onclick="filterDishes('available')">在售</button>
-            <button class="filter-btn" data-filter="sold-out" onclick="filterDishes('sold-out')">售罄</button>
-            <button class="filter-btn" data-filter="limited" onclick="filterDishes('limited')">限量</button>
-        </div>
-        
-        <div class="dish-list" id="dishList">
-            <div class="loading">加载中...</div>
-        </div>
-    </div>
-    
-    <!-- 添加菜品按钮 -->
-    <button class="float-add-btn" onclick="addDish()" title="添加菜品">+</button>
-
-    <script>
-        const API_BASE_URL = 'http://39.108.138.4:5000/api';
-        let allDishes = [];
-        let currentFilter = 'all';
-        
-        // 页面加载
-        window.onload = function() {
-            checkAuth();
-            loadStats();
-            loadDishes();
-        };
-        
-        // 检查权限
-        function checkAuth() {
-            const token = localStorage.getItem('token');
-            const role = localStorage.getItem('role');
-            
-            if (!token || role !== 'admin') {
-                alert('请先登录管理员账号');
-                Router.toAdminLogin();
-            }
-        }
-        
-        // 加载统计数据
-        async function loadStats() {
-            try {
-                // 模拟数据
-                const stats = {
-                    todaySupply: 15,
-                    todayReviews: 8,
-                    stockWarning: 3,
-                    todayViews: 126
-                };
-                
-                document.getElementById('todaySupply').textContent = stats.todaySupply;
-                document.getElementById('todayReviews').textContent = stats.todayReviews;
-                document.getElementById('stockWarning').textContent = stats.stockWarning;
-                document.getElementById('todayViews').textContent = stats.todayViews;
-            } catch (error) {
-                console.error('加载统计数据失败:', error);
-            }
-        }
-        
-        // 加载菜品列表
-        async function loadDishes() {
-            try {
-                // 模拟数据
-                allDishes = [
-                    {
-                        id: 1,
-                        name: '宫保鸡丁',
-                        price: 15,
-                        image: 'https://via.placeholder.com/80?text=宫保鸡丁',
-                        stockMode: 'limited',
-                        totalStock: 50,
-                        remainingStock: 12,
-                        isAvailable: true
-                    },
-                    {
-                        id: 2,
-                        name: '麻婆豆腐',
-                        price: 12,
-                        image: 'https://via.placeholder.com/80?text=麻婆豆腐',
-                        stockMode: 'unlimited',
-                        isAvailable: true
-                    },
-                    {
-                        id: 3,
-                        name: '番茄炒蛋',
-                        price: 10,
-                        image: 'https://via.placeholder.com/80?text=番茄炒蛋',
-                        stockMode: 'unlimited',
-                        isAvailable: true
-                    },
-                    {
-                        id: 4,
-                        name: '鱼香肉丝',
-                        price: 16,
-                        image: 'https://via.placeholder.com/80?text=鱼香肉丝',
-                        stockMode: 'limited',
-                        totalStock: 30,
-                        remainingStock: 3,
-                        isAvailable: true
-                    },
-                    {
-                        id: 5,
-                        name: '青椒肉丝',
-                        price: 14,
-                        image: 'https://via.placeholder.com/80?text=青椒肉丝',
-                        stockMode: 'unlimited',
-                        isAvailable: false
-                    }
-                ];
-                
-                renderDishList();
-            } catch (error) {
-                console.error('加载菜品失败:', error);
-                document.getElementById('dishList').innerHTML = '<div class="empty-state">加载失败</div>';
-            }
-        }
-        
-        // 渲染菜品列表
-        function renderDishList() {
-            let filteredDishes = allDishes;
-            
-            if (currentFilter === 'available') {
-                filteredDishes = allDishes.filter(d => d.isAvailable);
-            } else if (currentFilter === 'sold-out') {
-                filteredDishes = allDishes.filter(d => !d.isAvailable);
-            } else if (currentFilter === 'limited') {
-                filteredDishes = allDishes.filter(d => d.stockMode === 'limited');
-            }
-            
-            if (filteredDishes.length === 0) {
-                document.getElementById('dishList').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🍽️</div>
-                        <div>暂无菜品</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const html = filteredDishes.map(dish => {
-                let stockControl = '';
-                if (dish.stockMode === 'limited') {
-                    stockControl = `
-                        <div class="stock-control">
-                            <button class="stock-btn" onclick="updateStock(${dish.id}, -1)">-</button>
-                            <div class="stock-value">${dish.remainingStock}</div>
-                            <button class="stock-btn" onclick="updateStock(${dish.id}, 1)">+</button>
-                        </div>
-                    `;
-                }
-                
-                const statusClass = dish.isAvailable ? 'available' : 'sold-out';
-                const statusText = dish.isAvailable ? '在售' : '售罄';
-                
-                return `
-                    <div class="dish-item">
-                        <img src="${dish.image}" alt="${dish.name}" class="dish-image">
-                        <div class="dish-info">
-                            <div class="dish-name">${dish.name}</div>
-                            <div class="dish-meta">¥${dish.price} · ${dish.stockMode === 'limited' ? '限量' : '常规'}</div>
-                            <div class="dish-controls">
-                                ${stockControl}
-                                <button class="status-toggle ${statusClass}" onclick="toggleStatus(${dish.id})">
-                                    ${statusText}
-                                </button>
-                                <button class="edit-btn" onclick="editDish(${dish.id})">编辑</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('dishList').innerHTML = html;
-        }
-        
-        // 筛选菜品
-        function filterDishes(filter) {
-            currentFilter = filter;
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.dataset.filter === filter) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            renderDishList();
-        }
-        
-        // 更新库存
-        async function updateStock(dishId, change) {
-            const dish = allDishes.find(d => d.id === dishId);
-            if (!dish || dish.stockMode !== 'limited') return;
-            
-            const newStock = Math.max(0, dish.remainingStock + change);
-            dish.remainingStock = newStock;
-            
-            // TODO: 调用API更新库存
-            console.log(`更新菜品 ${dishId} 库存为 ${newStock}`);
-            
-            renderDishList();
-            loadStats(); // 更新统计数据
-        }
-        
-        // 切换状态
-        async function toggleStatus(dishId) {
-            const dish = allDishes.find(d => d.id === dishId);
-            if (!dish) return;
-            
-            dish.isAvailable = !dish.isAvailable;
-            
-            // TODO: 调用API更新状态
-            console.log(`切换菜品 ${dishId} 状态为 ${dish.isAvailable ? '在售' : '售罄'}`);
-            
-            renderDishList();
-        }
-        
-        // 编辑菜品
-        function editDish(dishId) {
-            alert(`编辑菜品 ${dishId}\n\n实际开发中会打开编辑表单`);
-            // TODO: 打开编辑表单
-        }
-        
-        // 添加菜品
-        function addDish() {
-            alert('添加菜品\n\n实际开发中会打开添加表单');
-            // TODO: 打开添加表单
-        }
-        
-        // 快捷操作
-        function scanQR() {
-            alert('扫码快编\n\n手机端调用相机扫描菜品二维码');
-        }
-        
-        function batchImport() {
-            alert('批量导入\n\n支持Excel批量导入菜品数据');
-        }
-        
-        function batchStock() {
-            alert('批量库存\n\n批量设置菜品库存模式');
-        }
-        
-        function viewReviews() {
-            alert('口碑管理\n\n查看和回复用户评价');
-        }
-        
-        function viewStats() {
-            alert('数据查看\n\n查看详细运营数据');
-        }
-        
-        function viewLogs() {
-            alert('操作日志\n\n查看所有操作记录');
-        }
-        
-        // 返回首页
-        function backToHome() {
-            Router.toUserIndex();
-        }
-        
-        // 退出登录
-        function logout() {
-            if (confirm('确定要退出吗？')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('username');
-                localStorage.removeItem('role');
-                Router.toAdminLogin();
-            }
-        }
-        
-        // 返回带认证头的对象
-        function getAuthHeaders() {
-            const token = localStorage.getItem('token');
-            const headers = { 'Content-Type': 'application/json' };
-            if (token) headers['Authorization'] = 'Bearer ' + token;
-            return headers;
-        }
-    </script>
-</body>
-</html>
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>档口工作台 - 校园食光</title>
+
+    <style>
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 16px;
+
+            --spacing-large: 24px;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background: #f8f9fa;
+
+            min-height: 100vh;
+
+            padding-bottom: 60px;
+
+        }
+
+        
+
+        /* 顶部导航栏 */
+
+        .global-nav {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            height: 50px;
+
+            background: linear-gradient(135deg, var(--tag-blue), #0c7cd5);
+
+            color: white;
+
+            z-index: 100;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+        }
+
+        
+
+        .nav-container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            height: 100%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 0 var(--spacing-medium);
+
+        }
+
+        
+
+        .logo {
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .nav-item {
+
+            font-size: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            cursor: pointer;
+
+        }
+
+        
+
+        /* 主导航 */
+
+        .main-nav {
+
+            margin-top: 50px;
+
+            background: white;
+
+            border-bottom: 1px solid var(--border-color);
+
+            overflow-x: auto;
+
+            -webkit-overflow-scrolling: touch;
+
+        }
+
+        
+
+        .nav-tabs {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            display: flex;
+
+            padding: 0 var(--spacing-medium);
+
+            min-height: 44px;
+
+        }
+
+        
+
+        .nav-tab {
+
+            padding: 12px 16px;
+
+            font-size: 14px;
+
+            color: var(--text-dark);
+
+            text-decoration: none;
+
+            white-space: nowrap;
+
+            border-bottom: 3px solid transparent;
+
+            transition: all 0.2s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            font-size: 16px;
+
+        }
+
+        
+
+        /* 今日数据卡片 */
+
+        .stats-section {
+
+            margin-top: 100px; /* 50px (global-nav) + 50px (main-nav) */
+
+            padding: 15px;
+
+        }
+
+        
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 10px;
+
+            margin-bottom: 15px;
+
+        }
+
+        
+
+        .stat-card {
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        }
+
+        
+
+        .stat-label {
+
+            font-size: 13px;
+
+            color: #777;
+
+            margin-bottom: 8px;
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            color: #1890FF;
+
+        }
+
+        
+
+        .stat-card.warning .stat-value {
+
+            color: #FF6B35;
+
+        }
+
+        
+
+        /* 快捷操作 */
+
+        .quick-actions {
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            margin-bottom: 15px;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        }
+
+        
+
+        .section-title {
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            margin-bottom: 15px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .section-title::before {
+
+            content: '';
+
+            width: 4px;
+
+            height: 16px;
+
+            background: #1890FF;
+
+            margin-right: 8px;
+
+            border-radius: 2px;
+
+        }
+
+        
+
+        .action-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 15px;
+
+        }
+
+        
+
+        .action-btn {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            padding: 15px 10px;
+
+            border-radius: 10px;
+
+            background: #f8f9fa;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            border: none;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background: #e6f7ff;
+
+            transform: translateY(-2px);
+
+        }
+
+        
+
+        .action-icon {
+
+            font-size: 28px;
+
+            margin-bottom: 8px;
+
+        }
+
+        
+
+        .action-label {
+
+            font-size: 13px;
+
+            color: #666;
+
+        }
+
+        
+
+        /* 菜品列表 */
+
+        .dish-management {
+
+            padding: 0 15px;
+
+        }
+
+        
+
+        .dish-filters {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 15px;
+
+            overflow-x: auto;
+
+        }
+
+        
+
+        .filter-btn {
+
+            padding: 8px 15px;
+
+            border-radius: 20px;
+
+            background: white;
+
+            color: #666;
+
+            border: 1px solid #ddd;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            white-space: nowrap;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .filter-btn.active {
+
+            background: #1890FF;
+
+            color: white;
+
+            border-color: #1890FF;
+
+        }
+
+        
+
+        .dish-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+        
+
+        .dish-item {
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        }
+
+        
+
+        .dish-image {
+
+            width: 80px;
+
+            height: 80px;
+
+            border-radius: 8px;
+
+            object-fit: cover;
+
+            flex-shrink: 0;
+
+        }
+
+        
+
+        .dish-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .dish-name {
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .dish-meta {
+
+            font-size: 13px;
+
+            color: #777;
+
+            margin-bottom: 8px;
+
+        }
+
+        
+
+        .dish-controls {
+
+            display: flex;
+
+            gap: 8px;
+
+            align-items: center;
+
+        }
+
+        
+
+        .stock-control {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .stock-btn {
+
+            width: 28px;
+
+            height: 28px;
+
+            border-radius: 50%;
+
+            background: #1890FF;
+
+            color: white;
+
+            border: none;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+        
+
+        .stock-value {
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            min-width: 30px;
+
+            text-align: center;
+
+        }
+
+        
+
+        .status-toggle {
+
+            padding: 6px 12px;
+
+            border-radius: 15px;
+
+            font-size: 12px;
+
+            border: none;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .status-toggle.available {
+
+            background: #d4edda;
+
+            color: #155724;
+
+        }
+
+        
+
+        .status-toggle.sold-out {
+
+            background: #f8d7da;
+
+            color: #721c24;
+
+        }
+
+        
+
+        .edit-btn {
+
+            padding: 6px 12px;
+
+            border-radius: 15px;
+
+            background: #fff5eb;
+
+            color: #FF6B35;
+
+            border: none;
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+        }
+
+        
+
+        /* 空状态 */
+
+        .empty-state {
+
+            text-align: center;
+
+            padding: 50px 20px;
+
+            color: #999;
+
+        }
+
+        
+
+        .empty-icon {
+
+            font-size: 60px;
+
+            margin-bottom: 15px;
+
+        }
+
+        
+
+        /* 加载状态 */
+
+        .loading {
+
+            text-align: center;
+
+            padding: 50px;
+
+            color: #777;
+
+        }
+
+        
+
+        /* 底部悬浮按钮 */
+
+        .float-add-btn {
+
+            position: fixed;
+
+            bottom: 20px;
+
+            right: 20px;
+
+            width: 56px;
+
+            height: 56px;
+
+            border-radius: 50%;
+
+            background: linear-gradient(135deg, #1890FF, #0c7cd5);
+
+            color: white;
+
+            border: none;
+
+            font-size: 28px;
+
+            box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
+
+            cursor: pointer;
+
+            z-index: 50;
+
+        }
+
+        
+
+        .float-add-btn:hover {
+
+            transform: scale(1.1);
+
+        }
+
+        
+
+        /* 库存预警实时监控样式 */
+
+        .inventory-alert-section {
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            margin: 0 15px 15px;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+        }
+
+        
+
+        .alert-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+            margin-bottom: 15px;
+
+        }
+
+        
+
+        .alert-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            border-left: 4px solid #ddd;
+
+        }
+
+        
+
+        .alert-item.critical {
+
+            border-left-color: #ff4d4f;
+
+            background: #fff2f0;
+
+        }
+
+        
+
+        .alert-item.warning {
+
+            border-left-color: #faad14;
+
+            background: #fffbe6;
+
+        }
+
+        
+
+        .alert-item.info {
+
+            border-left-color: #1890ff;
+
+            background: #e6f7ff;
+
+        }
+
+        
+
+        .alert-icon {
+
+            font-size: 24px;
+
+            width: 36px;
+
+            height: 36px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-shrink: 0;
+
+        }
+
+        
+
+        .alert-content {
+
+            flex: 1;
+
+        }
+
+        
+
+        .alert-title {
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            margin-bottom: 3px;
+
+        }
+
+        
+
+        .alert-desc {
+
+            font-size: 12px;
+
+            color: #777;
+
+        }
+
+        
+
+        .alert-action {
+
+            padding: 6px 12px;
+
+            border-radius: 15px;
+
+            font-size: 12px;
+
+            border: none;
+
+            cursor: pointer;
+
+            flex-shrink: 0;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .alert-item.critical .alert-action {
+
+            background: #ff4d4f;
+
+            color: white;
+
+        }
+
+        
+
+        .alert-item.warning .alert-action {
+
+            background: #faad14;
+
+            color: white;
+
+        }
+
+        
+
+        .alert-item.info .alert-action {
+
+            background: #1890ff;
+
+            color: white;
+
+        }
+
+        
+
+        .alert-action:hover {
+
+            opacity: 0.9;
+
+            transform: translateY(-1px);
+
+        }
+
+        
+
+        .alert-refresh {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding-top: 10px;
+
+            border-top: 1px solid #f0f0f0;
+
+        }
+
+        
+
+        .refresh-btn {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding: 6px 12px;
+
+            border-radius: 15px;
+
+            background: #f8f9fa;
+
+            color: #666;
+
+            border: 1px solid #ddd;
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .refresh-btn:hover {
+
+            background: #e6f7ff;
+
+            color: #1890ff;
+
+            border-color: #1890ff;
+
+        }
+
+        
+
+        .refresh-icon {
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .last-update {
+
+            font-size: 12px;
+
+            color: #999;
+
+        }
+
+        
+
+        /* 动画效果 */
+
+        @keyframes fadeInOut {
+
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+
+            20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+            80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+
+        }
+
+        
+
+        /* 移动端优化 */
+
+        @media (max-width: 768px) {
+
+            /* 增大触摸目标尺寸 */
+
+            .action-btn {
+
+                min-height: 80px;
+
+            }
+
+            
+
+            .filter-btn {
+
+                padding: 10px 18px;
+
+                font-size: 14px;
+
+            }
+
+            
+
+            .dish-item {
+
+                padding: 18px;
+
+            }
+
+            
+
+            .stat-card {
+
+                padding: 18px;
+
+            }
+
+            
+
+            /* 优化按钮反馈 */
+
+            .action-btn:active,
+
+            .filter-btn:active,
+
+            .alert-action:active,
+
+            .refresh-btn:active {
+
+                transform: scale(0.98);
+
+                transition: transform 0.1s;
+
+            }
+
+            
+
+            /* 增大点击区域 */
+
+            .back-btn,
+
+            .logout-btn {
+
+                padding: 10px;
+
+                margin: -10px;
+
+            }
+
+            
+
+            /* 简化布局 */
+
+            .stats-grid {
+
+                gap: 12px;
+
+            }
+
+            
+
+            .action-grid {
+
+                gap: 12px;
+
+            }
+
+        }
+
+        
+
+        /* 超小屏幕优化 */
+
+        @media (max-width: 360px) {
+
+            .stats-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .action-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .dish-controls {
+
+                flex-wrap: wrap;
+
+                gap: 6px;
+
+            }
+
+        }
+
+        
+
+        /* 触摸设备优化 */
+
+        @media (hover: none) and (pointer: coarse) {
+
+            .action-btn:hover {
+
+                transform: none;
+
+                background: #f8f9fa;
+
+            }
+
+            
+
+            .action-btn:active {
+
+                background: #e6f7ff;
+
+                transform: scale(0.98);
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- 顶部导航栏 -->
+
+    <nav class="global-nav">
+
+        <div class="nav-container">
+
+            <div class="logo">
+
+                <i class="fas fa-utensils"></i>
+
+                校园食光 - 档口工作台
+
+            </div>
+
+            <div class="nav-right">
+
+                <!-- 用户信息将通过JavaScript动态生成 -->
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    
+
+    <!-- 主导航 - 动态生成 -->
+
+    <nav class="main-nav">
+
+        <div class="nav-tabs">
+
+            <!-- 导航标签将通过JavaScript动态生成 -->
+
+        </div>
+
+    </nav>
+
+    
+
+    <!-- 今日数据 -->
+
+    <div class="stats-section">
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-label">今日供应</div>
+
+                <div class="stat-value" id="todaySupply">0</div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-label">今日评价</div>
+
+                <div class="stat-value" id="todayReviews">0</div>
+
+            </div>
+
+            <div class="stat-card warning">
+
+                <div class="stat-label">库存预警</div>
+
+                <div class="stat-value" id="stockWarning">0</div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-label">曝光次数</div>
+
+                <div class="stat-value" id="todayViews">0</div>
+
+            </div>
+
+        </div>
+
+        
+
+        <!-- 快捷操作 -->
+
+        <div class="quick-actions">
+
+            <div class="section-title">快捷操作</div>
+
+            <div class="action-grid">
+
+                <button class="action-btn" onclick="scanQR()">
+
+                    <div class="action-icon">📷</div>
+
+                    <div class="action-label">扫码快编</div>
+
+                </button>
+
+                <button class="action-btn" onclick="batchImport()">
+
+                    <div class="action-icon">📊</div>
+
+                    <div class="action-label">批量导入</div>
+
+                </button>
+
+                <button class="action-btn" onclick="editMapPoint()">
+
+                    <div class="action-icon">�</div>
+
+                    <div class="action-label">地图点位</div>
+
+                </button>
+
+                <button class="action-btn" onclick="viewReviews()">
+
+                    <div class="action-icon">💬</div>
+
+                    <div class="action-label">口碑管理</div>
+
+                </button>
+
+                <button class="action-btn" onclick="viewStats()">
+
+                    <div class="action-icon">📈</div>
+
+                    <div class="action-label">数据查看</div>
+
+                </button>
+
+                <button class="action-btn" onclick="viewLogs()">
+
+                    <div class="action-icon">📝</div>
+
+                    <div class="action-label">操作日志</div>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    
+
+    <!-- 库存预警实时监控 -->
+
+    <div class="inventory-alert-section">
+
+        <div class="section-title">库存预警监控</div>
+
+        <div class="alert-list" id="inventoryAlertList">
+
+            <div class="alert-item critical">
+
+                <div class="alert-icon">⚠️</div>
+
+                <div class="alert-content">
+
+                    <div class="alert-title">宫保鸡丁库存严重不足</div>
+
+                    <div class="alert-desc">剩余12份，建议及时补充</div>
+
+                </div>
+
+                <button class="alert-action" onclick="restockItem('宫保鸡丁')">去补充</button>
+
+            </div>
+
+            <div class="alert-item warning">
+
+                <div class="alert-icon">🔔</div>
+
+                <div class="alert-content">
+
+                    <div class="alert-title">鱼香肉丝库存偏低</div>
+
+                    <div class="alert-desc">剩余3份，即将售罄</div>
+
+                </div>
+
+                <button class="alert-action" onclick="restockItem('鱼香肉丝')">去补充</button>
+
+            </div>
+
+            <div class="alert-item info">
+
+                <div class="alert-icon">📊</div>
+
+                <div class="alert-content">
+
+                    <div class="alert-title">青椒肉丝已售罄</div>
+
+                    <div class="alert-desc">库存为0，已自动下架</div>
+
+                </div>
+
+                <button class="alert-action" onclick="restockItem('青椒肉丝')">重新上架</button>
+
+            </div>
+
+        </div>
+
+        <div class="alert-refresh">
+
+            <button class="refresh-btn" onclick="refreshInventoryAlerts()">
+
+                <span class="refresh-icon">🔄</span>
+
+                <span>刷新预警信息</span>
+
+            </button>
+
+            <div class="last-update">最后更新: <span id="lastUpdateTime">刚刚</span></div>
+
+        </div>
+
+    </div>
+
+    
+
+    <!-- 菜品管理 -->
+
+    <div class="dish-management">
+
+        <div class="section-title">菜品管理</div>
+
+        
+
+        <div class="dish-filters">
+
+            <button class="filter-btn active" data-filter="all" onclick="filterDishes('all')">全部</button>
+
+            <button class="filter-btn" data-filter="available" onclick="filterDishes('available')">在售</button>
+
+            <button class="filter-btn" data-filter="sold-out" onclick="filterDishes('sold-out')">售罄</button>
+
+            <button class="filter-btn" data-filter="limited" onclick="filterDishes('limited')">限量</button>
+
+        </div>
+
+        
+
+        <div class="dish-list" id="dishList">
+
+            <div class="loading">加载中...</div>
+
+        </div>
+
+    </div>
+
+    
+
+    <!-- 添加菜品按钮 -->
+
+    <button class="float-add-btn" onclick="addDish()" title="添加菜品">+</button>
+
+
+
+    <script>
+
+        const API_BASE_URL = (window.CONFIG && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'http://39.108.138.4:5000/api';
+
+        let allDishes = [];
+
+        let currentFilter = 'all';
+
+        
+
+        // 页面加载
+
+        window.onload = function() {
+
+            checkAuth();
+
+            loadStats();
+
+            loadDishes();
+
+            loadInventoryAlerts();
+
+        };
+
+        
+
+        // 检查权限
+
+        function checkAuth() {
+
+            const token = localStorage.getItem('adminToken');
+
+            if (!token) {
+
+                alert('请先登录管理员账号');
+
+                Router.toAdminLogin();
+
+            }
+
+        }
+
+        
+
+        // 加载统计数据
+
+        async function loadStats() {
+
+            try {
+
+                const response = await fetch(`${API_BASE_URL}/stall/stats`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data) {
+                    const stats = result.data;
+                    document.getElementById('todaySupply').textContent = stats.todaySupply;
+                    document.getElementById('todayReviews').textContent = stats.todayReviews;
+                    document.getElementById('stockWarning').textContent = stats.stockWarning;
+                    document.getElementById('todayViews').textContent = stats.todayViews;
+                } else {
+                    console.error('加载统计数据失败:', result.message);
+                }
+
+            } catch (error) {
+
+                console.error('加载统计数据失败:', error);
+
+            }
+
+        }
+
+        
+
+        // 加载菜品列表
+
+        async function loadDishes() {
+
+            try {
+
+                const response = await fetch(`${API_BASE_URL}/stall/dishes`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data?.dishes) {
+                    allDishes = result.data.dishes;
+                    renderDishList();
+                } else {
+                    console.error('加载菜品失败:', result.message);
+                    document.getElementById('dishList').innerHTML = '<div class="empty-state">加载失败</div>';
+                }
+
+            } catch (error) {
+
+                console.error('加载菜品失败:', error);
+
+                document.getElementById('dishList').innerHTML = '<div class="empty-state">加载失败</div>';
+
+            }
+
+        }
+
+        // 加载库存预警
+        async function loadInventoryAlerts() {
+
+            try {
+
+                const response = await fetch(`${API_BASE_URL}/stall/inventory/alerts`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data?.alerts) {
+                    renderInventoryAlerts(result.data.alerts);
+                } else {
+                    console.error('加载库存预警失败:', result.message);
+                }
+
+            } catch (error) {
+
+                console.error('加载库存预警失败:', error);
+
+            }
+
+        }
+
+        function renderInventoryAlerts(alerts) {
+            const list = document.getElementById('inventoryAlertList');
+            if (!list) return;
+
+            if (!alerts.length) {
+                list.innerHTML = '<div class="empty-state">暂无预警</div>';
+                return;
+            }
+
+            list.innerHTML = alerts.map(alert => `
+                <div class="alert-item ${alert.level}">
+                    <div class="alert-icon">${alert.level === 'critical' ? '⚠️' : alert.level === 'warning' ? '🔔' : 'ℹ️'}</div>
+                    <div class="alert-content">
+                        <div class="alert-title">${alert.title}</div>
+                        <div class="alert-desc">${alert.desc}</div>
+                    </div>
+                    <button class="alert-action" onclick="restockItem('${alert.itemName}')">${alert.action}</button>
+                </div>
+            `).join('');
+        }
+
+        
+
+        // 渲染菜品列表
+
+        function renderDishList() {
+
+            let filteredDishes = allDishes;
+
+            
+
+            if (currentFilter === 'available') {
+
+                filteredDishes = allDishes.filter(d => d.isAvailable);
+
+            } else if (currentFilter === 'sold-out') {
+
+                filteredDishes = allDishes.filter(d => !d.isAvailable);
+
+            } else if (currentFilter === 'limited') {
+
+                filteredDishes = allDishes.filter(d => d.stockMode === 'limited');
+
+            }
+
+            
+
+            if (filteredDishes.length === 0) {
+
+                document.getElementById('dishList').innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">🍽️</div>
+
+                        <div>暂无菜品</div>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+            
+
+            const html = filteredDishes.map(dish => {
+
+                let stockControl = '';
+
+                if (dish.stockMode === 'limited') {
+
+                    stockControl = `
+
+                        <div class="stock-control">
+
+                            <button class="stock-btn" onclick="updateStock(${dish.id}, -1)">-</button>
+
+                            <div class="stock-value">${dish.remainingStock}</div>
+
+                            <button class="stock-btn" onclick="updateStock(${dish.id}, 1)">+</button>
+
+                        </div>
+
+                    `;
+
+                }
+
+                
+
+                const statusClass = dish.isAvailable ? 'available' : 'sold-out';
+
+                const statusText = dish.isAvailable ? '在售' : '售罄';
+
+                
+
+                return `
+
+                    <div class="dish-item">
+
+                        <img src="${dish.image}" alt="${dish.name}" class="dish-image">
+
+                        <div class="dish-info">
+
+                            <div class="dish-name">${dish.name}</div>
+
+                            <div class="dish-meta">¥${dish.price} · ${dish.stockMode === 'limited' ? '限量' : '常规'}</div>
+
+                            <div class="dish-controls">
+
+                                ${stockControl}
+
+                                <button class="status-toggle ${statusClass}" onclick="toggleStatus(${dish.id})">
+
+                                    ${statusText}
+
+                                </button>
+
+                                <button class="edit-btn" onclick="editDish(${dish.id})">编辑</button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join('');
+
+            
+
+            document.getElementById('dishList').innerHTML = html;
+
+        }
+
+        
+
+        // 筛选菜品
+
+        function filterDishes(filter) {
+
+            currentFilter = filter;
+
+            
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+
+                if (btn.dataset.filter === filter) {
+
+                    btn.classList.add('active');
+
+                } else {
+
+                    btn.classList.remove('active');
+
+                }
+
+            });
+
+            
+
+            renderDishList();
+
+        }
+
+        
+
+        // 更新库存
+
+        async function updateStock(dishId, change) {
+
+            const dish = allDishes.find(d => d.id === dishId);
+
+            if (!dish || dish.stockMode !== 'limited') return;
+
+            
+
+            const newStock = Math.max(0, dish.remainingStock + change);
+
+            dish.remainingStock = newStock;
+
+            
+
+            // TODO: 调用API更新库存
+
+            console.log(`更新菜品 ${dishId} 库存为 ${newStock}`);
+
+            
+
+            renderDishList();
+
+            loadStats(); // 更新统计数据
+
+        }
+
+        
+
+        // 切换状态
+
+        async function toggleStatus(dishId) {
+
+            const dish = allDishes.find(d => d.id === dishId);
+
+            if (!dish) return;
+
+            
+
+            dish.isAvailable = !dish.isAvailable;
+
+            
+
+            // TODO: 调用API更新状态
+
+            console.log(`切换菜品 ${dishId} 状态为 ${dish.isAvailable ? '在售' : '售罄'}`);
+
+            
+
+            renderDishList();
+
+        }
+
+        
+
+        // 编辑菜品
+
+        function editDish(dishId) {
+
+            alert(`编辑菜品 ${dishId}\n\n实际开发中会打开编辑表单`);
+
+            // TODO: 打开编辑表单
+
+        }
+
+        
+
+        // 添加菜品
+
+        function addDish() {
+
+            alert('添加菜品\n\n实际开发中会打开添加表单');
+
+            // TODO: 打开添加表单
+
+        }
+
+        
+
+        // 快捷操作
+
+        function scanQR() {
+
+            alert('扫码快编\n\n手机端调用相机扫描菜品二维码');
+
+        }
+
+        
+
+        function batchImport() {
+
+            alert('批量导入\n\n支持Excel批量导入菜品数据');
+
+        }
+
+        
+
+        function editMapPoint() {
+
+            // 模拟地图点位编辑功能
+
+            const mapPointInfo = {
+
+                location: '第一食堂 - 川菜窗口',
+
+                coordinates: '23.123456, 113.654321',
+
+                accuracy: '高',
+
+                lastUpdated: '今天 10:30'
+
+            };
+
+            
+
+            const mapMessage = `档口地图点位编辑\n
+
+当前位置: ${mapPointInfo.location}
+
+坐标: ${mapPointInfo.coordinates}
+
+定位精度: ${mapPointInfo.accuracy}
+
+最后更新: ${mapPointInfo.lastUpdated}
+
+\n是否编辑地图点位？`;
+
+            
+
+            const confirmAction = confirm(mapMessage);
+
+            if (confirmAction) {
+
+                alert('跳转至地图点位编辑页面\n\n支持拖拽调整位置、上传位置照片');
+
+            }
+
+        }
+
+        
+
+        async function viewReviews() {
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/stall/reviews/summary`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data) {
+                    const total = result.data.total || 0;
+                    const unreplied = result.data.unreplied || 0;
+                    const confirmAction = confirm(`口碑管理面板\n\n共有 ${total} 条评价，其中 ${unreplied} 条待回复\n\n是否查看详细评价？`);
+                    if (confirmAction) {
+                        alert('跳转至口碑管理页面\n\n实际开发中会打开评价管理界面');
+                    }
+                } else {
+                    alert('获取口碑数据失败');
+                }
+            } catch (error) {
+                console.error('获取口碑数据失败:', error);
+                alert('获取口碑数据失败');
+            }
+
+        }
+
+        
+
+        async function viewStats() {
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/stall/reports/summary`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data) {
+                    const statsData = result.data;
+                    const statsMessage = `档口运营数据概览\n
+今日订单: ${statsData.todayOrders} 单
+今日营收: ${statsData.todayRevenue}
+平均评分: ${statsData.avgRating} 分
+热门菜品: ${statsData.popularDish}
+转化率: ${statsData.conversionRate}
+\n是否查看详细报表？`;
+                    const confirmAction = confirm(statsMessage);
+                    if (confirmAction) {
+                        alert('跳转至数据报表页面\n\n包含趋势图表和详细分析');
+                    }
+                } else {
+                    alert('获取运营数据失败');
+                }
+            } catch (error) {
+                console.error('获取运营数据失败:', error);
+                alert('获取运营数据失败');
+            }
+
+        }
+
+        
+
+        async function viewLogs() {
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/stall/logs`, {
+                    headers: getAuthHeaders()
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data?.logs) {
+                    const logs = result.data.logs;
+                    let logMessage = '最近操作记录:\n\n';
+                    logs.forEach(log => {
+                        logMessage += `${log.time} - ${log.action} (${log.target})\n`;
+                    });
+                    logMessage += '\n共计 ' + logs.length + ' 条操作记录\n\n是否查看完整日志？';
+                    const confirmAction = confirm(logMessage);
+                    if (confirmAction) {
+                        alert('跳转至操作日志页面\n\n支持筛选、导出和搜索功能');
+                    }
+                } else {
+                    alert('获取操作日志失败');
+                }
+            } catch (error) {
+                console.error('获取操作日志失败:', error);
+                alert('获取操作日志失败');
+            }
+
+        }
+
+        
+
+        // 库存预警相关函数
+
+        async function restockItem(itemName) {
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/stall/inventory/restock`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ itemName })
+                });
+                const result = await response.json();
+
+                if (result.code === 200) {
+                    showToast(result.message || `已提交补货: ${itemName}`);
+                } else {
+                    alert('提交补货失败');
+                }
+            } catch (error) {
+                console.error('提交补货失败:', error);
+                alert('提交补货失败');
+            }
+
+        }
+
+        
+
+        async function refreshInventoryAlerts() {
+
+            await loadInventoryAlerts();
+            await loadStats();
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdateTime').textContent = timeString;
+            showToast('库存预警信息已刷新');
+
+        }
+
+        
+
+        function showToast(message) {
+
+            // 创建临时提示元素
+
+            const toast = document.createElement('div');
+
+            toast.className = 'inventory-toast';
+
+            toast.textContent = message;
+
+            toast.style.cssText = `
+
+                position: fixed;
+
+                bottom: 100px;
+
+                left: 50%;
+
+                transform: translateX(-50%);
+
+                background: rgba(0,0,0,0.8);
+
+                color: white;
+
+                padding: 10px 20px;
+
+                border-radius: 20px;
+
+                font-size: 14px;
+
+                z-index: 1000;
+
+                animation: fadeInOut 2s ease-in-out;
+
+            `;
+
+            
+
+            document.body.appendChild(toast);
+
+            
+
+            setTimeout(() => {
+
+                toast.remove();
+
+            }, 2000);
+
+        }
+
+        
+
+        // 页面初始化权限检查与导航栏初始化
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 验证用户权限
+
+            if (window.AdminPermission) {
+
+                if (!AdminPermission.checkPermissionAndRedirect('stall_admin')) {
+
+                    return; // 无权限，已重定向
+
+                }
+
+                
+
+                // 验证访问范围 - 档口管理员只能访问本档口
+
+                const userStallId = AdminPermission.getCurrentStallId();
+
+                const pageStallId = getPageStallId(); // 需要实现此函数
+
+                if (userStallId && pageStallId && userStallId !== pageStallId) {
+
+                    alert('权限错误：您只能访问本档口的管理页面');
+
+                    // Router.navigate(ADMIN_ROUTES.getAbsoluteStallAdminIndex());
+
+                    return;
+
+                }
+
+            }
+
+            
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                const currentPage = window.location.pathname.split('/').pop();
+
+                window.DynamicNavbar.updateNavbar(currentPage);
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+            
+
+            // 设置当前档口信息
+
+            const currentStall = '第一食堂-川菜档口';
+
+            const logoElement = document.querySelector('.logo');
+
+            if (logoElement) {
+
+                logoElement.innerHTML = '<i class="fas fa-utensils"></i>校园食光 - ' + currentStall;
+
+            }
+
+        });
+
+        
+
+        // 获取页面档口ID（模拟实现）
+
+        function getPageStallId() {
+
+            // 实际应从URL参数或页面数据获取
+
+            return 'stall_001';
+
+        }
+
+        
+
+        // 初始化库存预警
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 设置初始更新时间
+
+            const now = new Date();
+
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+
+                hour: '2-digit', 
+
+                minute: '2-digit'
+
+            });
+
+            document.getElementById('lastUpdateTime').textContent = timeString;
+
+            
+
+            // 自动刷新预警信息（每30秒）
+
+            setInterval(() => {
+
+                const currentTime = new Date();
+
+                const currentTimeString = currentTime.toLocaleTimeString('zh-CN', { 
+
+                    hour: '2-digit', 
+
+                    minute: '2-digit'
+
+                });
+
+                document.getElementById('lastUpdateTime').textContent = currentTimeString + ' (自动)';
+
+            }, 30000);
+
+        });
+
+        
+
+        // 返回首页（保留兼容性）
+
+        function backToHome() {
+
+            Router.toUserIndex();
+
+        }
+
+        
+
+        // 退出登录
+
+        function logout() {
+
+            // 使用动态导航栏的退出功能（如果可用）
+
+            if (window.DynamicNavbar && typeof DynamicNavbar.logout === 'function') {
+
+                DynamicNavbar.logout();
+
+            } else {
+
+                // 备用退出逻辑
+
+                if (confirm('确定要退出吗？')) {
+
+                    localStorage.removeItem('token');
+
+                    localStorage.removeItem('userId');
+
+                    localStorage.removeItem('username');
+
+                    localStorage.removeItem('role');
+
+                    Router.toAdminLogin();
+
+                }
+
+            }
+
+        }
+
+        
+
+        // 返回带认证头的对象
+
+        function getAuthHeaders() {
+
+            const token = localStorage.getItem('adminToken');
+            const activePositionId = localStorage.getItem('adminActivePositionId');
+            const headers = { 'Content-Type': 'application/json' };
+
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            if (activePositionId) headers['X-Active-Position-Id'] = activePositionId;
+
+            return headers;
+
+        }
+
+    </script>
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/admin/admin-permission.js"></script>
+
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+
+    <script src="/main/admin/admin-quick-actions.js"></script>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <style>
+
+        /* 页脚样式 */
+
+        .footer {
+
+            background-color: white;
+
+            padding: 20px 0;
+
+            text-align: center;
+
+            color: #999;
+
+            font-size: 13px;
+
+            border-top: 1px solid #e5e5e5;
+
+            margin-top: 40px;
+
+        }
+
+        
+
+        .footer .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 15px;
+
+        }
+
+    </style>
+
+</body>
+
+</html>
+

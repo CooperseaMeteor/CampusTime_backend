@@ -1,0 +1,324 @@
+/**
+ * 管理员管理模块样式表
+ */
+
+/* Modal 基础样式 */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.admin-modal {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.admin-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.admin-modal-close {
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.admin-modal-close:hover {
+  color: #333;
+}
+
+/* 表单样式 */
+.admin-form,
+.admin-transfer-form,
+.admin-review-form {
+  padding: 20px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+}
+
+.form-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #e60012;
+  box-shadow: 0 0 4px rgba(230, 0, 18, 0.2);
+}
+
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.node-input {
+  cursor: pointer;
+}
+
+.node-input:hover {
+  background-color: #fafafa;
+}
+
+/* 节点选择器 */
+.node-selector-modal {
+  max-width: 520px;
+}
+
+.node-selector-list {
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 6px 0;
+}
+
+.node-selector-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.node-selector-item:hover {
+  background: #fafafa;
+}
+
+.node-selector-item.disabled {
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.node-selector-item.disabled:hover {
+  background: transparent;
+}
+
+.node-selector-tip {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.node-selector-search {
+  margin-bottom: 10px;
+}
+
+.node-selector-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.permission-block {
+  border: 1px solid #eee;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.form-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+  margin: 0 -20px -20px -20px;
+  padding: 20px;
+}
+
+/* 按钮样式 */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #e60012;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #c70010;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #efefef;
+}
+
+.btn-success {
+  background-color: #52c41a;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #389e0d;
+}
+
+.btn-danger {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #d9363e;
+}
+
+/* 权限复选框 */
+#permissionsCheckbox,
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+#permissionsCheckbox .permission-item,
+.permission-grid .permission-item {
+  display: flex;
+  align-items: center;
+}
+
+#permissionsCheckbox input[type="checkbox"],
+.permission-grid input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+#permissionsCheckbox label,
+.permission-grid label {
+  margin: 0;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+/* 调岗特定样式 */
+.admin-transfer-form .form-group input[readonly] {
+  background-color: #f5f5f5;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .admin-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .form-section {
+    margin-bottom: 20px;
+  }
+
+  #permissionsCheckbox {
+    grid-template-columns: 1fr;
+  }
+
+  .form-footer {
+    flex-direction: column-reverse;
+  }
+
+  .form-footer button {
+    width: 100%;
+  }
+}

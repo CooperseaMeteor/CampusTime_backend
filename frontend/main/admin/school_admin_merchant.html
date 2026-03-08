@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户管理 - 校园食光</title>
+    
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 全局样式 - 与现有页面保持一致 */
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            --status-open: #52c41a;
+            --status-closed: #ff4d4f;
+            --rating-color: #ffc107;
+            --tag-blue: #1890ff;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --role-school-admin: #1890ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        /* 顶部导航栏 - 与现有页面保持一致 */
+        .global-nav {
+            background-color: var(--primary-color);
+            height: 45px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            margin-left: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover {
+            opacity: 0.9;
+        }
+        
+        /* 主导航 - 使用动态导航栏 */
+        .main-nav {
+            background-color: white;
+            height: 50px;
+            margin-top: 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 45px;
+            z-index: 999;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none;
+            padding: 0 15px;
+        }
+        
+        .nav-tab:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        /* 主要内容区域 */
+        .admin-main {
+            padding: var(--spacing-large) 0 60px;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-title i {
+            margin-right: 10px;
+            color: var(--role-school-admin);
+        }
+        
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        /* 商户统计卡片 */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-large);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid var(--role-school-admin);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--role-school-admin);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .trend-up {
+            color: var(--status-open);
+        }
+        
+        .trend-down {
+            color: var(--status-closed);
+        }
+        
+        /* 搜索和筛选栏 */
+        .filter-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-medium);
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+            align-items: center;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            background-color: white;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-right: var(--spacing-small);
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            background-color: white;
+            min-width: 150px;
+        }
+        
+        .action-btn {
+            background-color: var(--role-school-admin);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .action-btn:hover {
+            background-color: #1478d0;
+        }
+        
+        /* 商户列表 */
+        .merchants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .merchant-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .merchant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .merchant-header {
+            position: relative;
+            height: 160px;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        
+        .merchant-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .merchant-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .status-active {
+            background-color: var(--status-open);
+        }
+        
+        .status-inactive {
+            background-color: var(--status-closed);
+        }
+        
+        .status-pending {
+            background-color: var(--rating-color);
+        }
+        
+        .merchant-body {
+            padding: var(--spacing-medium);
+        }
+        
+        .merchant-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .merchant-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .badge-new {
+            background-color: var(--tag-blue);
+            color: white;
+        }
+        
+        .badge-hot {
+            background-color: var(--status-closed);
+            color: white;
+        }
+        
+        .merchant-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .meta-item i {
+            width: 16px;
+            color: var(--role-school-admin);
+            margin-right: 8px;
+        }
+        
+        .merchant-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value-small {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--role-school-admin);
+            margin-bottom: 3px;
+        }
+        
+        .stat-label-small {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        
+        .merchant-actions {
+            display: flex;
+            gap: var(--spacing-small);
+            padding: 15px 0;
+        }
+        
+        .action-btn-small {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+        
+        /* 分页器 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 30px;
+        }
+        
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--role-school-admin);
+            color: var(--role-school-admin);
+        }
+        
+        .page-btn.active {
+            background-color: var(--role-school-admin);
+            border-color: var(--role-school-admin);
+            color: white;
+        }
+        
+        /* 商户审核模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-dark);
+        }
+        
+        .modal-body {
+            padding: var(--spacing-large);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: var(--role-school-admin);
+            outline: none;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .form-textarea:focus {
+            border-color: var(--role-school-admin);
+            outline: none;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .merchants-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-medium);
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .merchants-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-medium);
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .merchant-stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .merchant-actions {
+                flex-direction: column;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+            }
+            
+            .nav-tab {
+                flex: 0 0 auto;
+                padding: 0 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="global-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-store"></i>
+                校园食光 - 学校管理员
+            </div>
+            <div class="nav-right">
+                <div class="nav-item">
+                    <i class="fas fa-user-circle"></i> 学校管理员
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主导航 - 动态生成 -->
+    <nav class="main-nav" id="dynamicNavbar">
+        <!-- 导航标签将通过JavaScript动态生成 -->
+    </nav>
+    
+    <!-- 主要内容 -->
+    <main class="container admin-main">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-store"></i> 商户管理
+                </h1>
+                <p class="page-subtitle">审核商户入驻，编辑商户信息</p>
+            </div>
+            <button class="action-btn" onclick="exportMerchants()">
+                <i class="fas fa-download"></i> 导出商户
+            </button>
+        </div>
+        
+        <!-- 商户统计卡片 -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-value" id="totalMerchants">42</div>
+                <div class="stat-label">总商户数</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>2</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="activeMerchants">38</div>
+                <div class="stat-label">正常运营</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>3</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="pendingMerchants">4</div>
+                <div class="stat-label">待审核</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-down trend-down"></i>
+                    <span>1</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="avgRating">4.2</div>
+                <div class="stat-label">平均评分</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>0.2</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 搜索和筛选栏 -->
+        <section class="filter-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="搜索商户名称、档口..." id="searchInput">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">状态:</label>
+                <select class="filter-select" id="statusFilter">
+                    <option value="">全部状态</option>
+                    <option value="active">正常运营</option>
+                    <option value="pending">待审核</option>
+                    <option value="inactive">暂停运营</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">类型:</label>
+                <select class="filter-select" id="typeFilter">
+                    <option value="">全部类型</option>
+                    <option value="canteen">食堂</option>
+                    <option value="restaurant">餐厅</option>
+                    <option value="cafe">咖啡厅</option>
+                    <option value="convenience">便利店</option>
+                </select>
+            </div>
+            
+            <button class="action-btn" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> 筛选
+            </button>
+        </section>
+        
+        <!-- 商户列表 -->
+        <section class="merchants-grid" id="merchantsGrid">
+            <!-- 商户卡片将通过JavaScript动态生成 -->
+        </section>
+        
+        <!-- 分页器 -->
+        <div class="pagination" id="pagination">
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+        </div>
+    </main>
+    
+    <!-- 商户审核模态框 -->
+    <div class="modal-overlay" id="merchantReviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalMerchantName">商户审核</div>
+                <button class="modal-close" onclick="closeMerchantReviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="merchantReviewContent">
+                <!-- 商户详情将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>校园食光 - 多校AI美食社区平台</p>
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+        </div>
+    </footer>
+    
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/admin/admin-permission.js"></script>
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+    
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化动态导航栏
+            if (window.DynamicNavbar) {
+                window.DynamicNavbar.updateNavbar('school_admin_merchant.html');
+                window.DynamicNavbar.updateTopNavUserInfo();
+            }
+            
+            // 加载商户数据
+            loadMerchantsData();
+            
+            // 初始化分页
+            initPagination();
+        });
+        
+        // 模拟商户数据
+        const merchantsData = [
+            {
+                id: 1,
+                name: '川味香锅',
+                type: 'canteen',
+                status: 'active',
+                stalls: 3,
+                rating: 4.5,
+                joinDate: '2023-09-01',
+                description: '正宗川味香锅，麻辣鲜香，深受学生喜爱。',
+                image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 2,
+                name: '黄焖鸡米饭',
+                type: 'canteen',
+                status: 'active',
+                stalls: 2,
+                rating: 4.2,
+                joinDate: '2023-09-15',
+                description: '香嫩黄焖鸡，配以秘制酱料，营养丰富。',
+                image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 3,
+                name: '面点坊',
+                type: 'canteen',
+                status: 'active',
+                stalls: 2,
+                rating: 4.0,
+                joinDate: '2023-10-01',
+                description: '手工制作各类面点，口感劲道，汤底鲜美。',
+                image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 4,
+                name: '家常菜',
+                type: 'canteen',
+                status: 'pending',
+                stalls: 4,
+                rating: 0,
+                joinDate: '2024-12-01',
+                description: '提供各类家常菜，口味地道，价格实惠。',
+                image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 5,
+                name: '星巴克咖啡',
+                type: 'cafe',
+                status: 'active',
+                stalls: 1,
+                rating: 4.3,
+                joinDate: '2023-11-15',
+                description: '全球知名咖啡品牌，提供优质咖啡和轻食。',
+                image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 6,
+                name: '7-11便利店',
+                type: 'convenience',
+                status: 'active',
+                stalls: 1,
+                rating: 3.8,
+                joinDate: '2023-08-20',
+                description: '24小时便利店，提供各类生活用品和简单食品。',
+                image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+            }
+        ];
+        
+        let filteredData = [...merchantsData];
+        let currentPage = 1;
+        const itemsPerPage = 9;
+        
+        // 加载商户数据
+        function loadMerchantsData() {
+            renderMerchantsGrid();
+            renderPagination();
+        }
+        
+        // 渲染商户网格
+        function renderMerchantsGrid() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            const merchantsHTML = pageData.map(merchant => {
+                const statusClass = merchant.status === 'active' ? 'status-active' : 
+                                   merchant.status === 'pending' ? 'status-pending' : 'status-inactive';
+                const statusText = merchant.status === 'active' ? '正常运营' : 
+                                  merchant.status === 'pending' ? '待审核' : '暂停运营';
+                
+                const isNew = Date.now() - new Date(merchant.joinDate).getTime() < 30 * 24 * 60 * 60 * 1000; // 30天内
+                const badgeClass = isNew ? 'badge-new' : 'badge-hot';
+                const badgeText = isNew ? '新' : '热门';
+                
+                return `
+                    <div class="merchant-card">
+                        <div class="merchant-header">
+                            <img src="${merchant.image}" alt="${merchant.name}" class="merchant-image">
+                            <div class="merchant-status ${statusClass}">${statusText}</div>
+                        </div>
+                        <div class="merchant-body">
+                            <div class="merchant-name">
+                                ${merchant.name}
+                                <span class="merchant-badge ${badgeClass}">${badgeText}</span>
+                            </div>
+                            <div class="merchant-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-store"></i>
+                                    ${merchant.type === 'canteen' ? '食堂' : 
+                                      merchant.type === 'restaurant' ? '餐厅' : 
+                                      merchant.type === 'cafe' ? '咖啡厅' : '便利店'}
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    ${merchant.joinDate}
+                                </div>
+                            </div>
+                            <div class="merchant-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value-small">${merchant.stalls}</div>
+                                    <div class="stat-label-small">档口数</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-small">${merchant.rating > 0 ? merchant.rating : '-'}</div>
+                                    <div class="stat-label-small">评分</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value-small">${new Date(merchant.joinDate).toLocaleDateString()}</div>
+                                    <div class="stat-label-small">入驻时间</div>
+                                </div>
+                            </div>
+                            <div class="merchant-actions">
+                                <button class="action-btn action-btn-small" onclick="reviewMerchant(${merchant.id})">
+                                    <i class="fas fa-eye"></i> 审核
+                                </button>
+                                <button class="action-btn action-btn-small" onclick="editMerchant(${merchant.id})">
+                                    <i class="fas fa-edit"></i> 编辑
+                                </button>
+                                <button class="action-btn action-btn-small" onclick="setMerchantAdmin(${merchant.id})">
+                                    <i class="fas fa-user-cog"></i> 设置管理员
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('merchantsGrid').innerHTML = merchantsHTML;
+        }
+        
+        // 初始化分页
+        function initPagination() {
+            renderPagination();
+        }
+        
+        // 渲染分页器
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            let paginationHTML = '';
+            
+            // 上一页按钮
+            if (currentPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
+            }
+            
+            // 页码按钮
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                if (i > 0 && i <= totalPages) {
+                    paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                }
+            }
+            
+            // 下一页按钮
+            if (currentPage < totalPages) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
+            }
+            
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+        
+        // 切换页面
+        function changePage(page) {
+            currentPage = page;
+            renderMerchantsGrid();
+            renderPagination();
+        }
+        
+        // 应用筛选
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            
+            filteredData = merchantsData.filter(merchant => {
+                const matchSearch = !searchTerm || 
+                                   merchant.name.toLowerCase().includes(searchTerm);
+                
+                const matchStatus = !statusFilter || merchant.status === statusFilter;
+                const matchType = !typeFilter || merchant.type === typeFilter;
+                
+                return matchSearch && matchStatus && matchType;
+            });
+            
+            currentPage = 1;
+            renderMerchantsGrid();
+            renderPagination();
+        }
+        
+        // 审核商户
+        function reviewMerchant(merchantId) {
+            const merchant = merchantsData.find(m => m.id === merchantId);
+            if (!merchant) return;
+            
+            const modalTitle = document.getElementById('modalMerchantName');
+            const modalContent = document.getElementById('merchantReviewContent');
+            
+            modalTitle.textContent = `商户审核 - ${merchant.name}`;
+            
+            modalContent.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">商户名称</label>
+                    <input type="text" class="form-input" value="${merchant.name}" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">商户类型</label>
+                    <input type="text" class="form-input" value="${merchant.type === 'canteen' ? '食堂' : 
+                                                                          merchant.type === 'restaurant' ? '餐厅' : 
+                                                                          merchant.type === 'cafe' ? '咖啡厅' : '便利店'}" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">档口数量</label>
+                    <input type="number" class="form-input" value="${merchant.stalls}" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">商户描述</label>
+                    <textarea class="form-textarea" readonly>${merchant.description}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">审核意见</label>
+                    <textarea class="form-textarea" id="reviewComment" placeholder="请输入审核意见..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="action-btn" style="background-color: white; color: var(--text-dark); border: 1px solid var(--border-color);" onclick="closeMerchantReviewModal()">取消</button>
+                    <button type="button" class="action-btn" style="background-color: var(--status-closed);" onclick="rejectMerchant(${merchant.id})">拒绝</button>
+                    <button type="button" class="action-btn" style="background-color: var(--status-open);" onclick="approveMerchant(${merchant.id})">通过</button>
+                </div>
+            `;
+            
+            document.getElementById('merchantReviewModal').classList.add('show');
+        }
+        
+        // 关闭商户审核模态框
+        function closeMerchantReviewModal() {
+            document.getElementById('merchantReviewModal').classList.remove('show');
+        }
+        
+        // 通过商户
+        function approveMerchant(merchantId) {
+            const comment = document.getElementById('reviewComment').value;
+            
+            if (!comment) {
+                alert('请输入审核意见');
+                return;
+            }
+            
+            const merchant = merchantsData.find(m => m.id === merchantId);
+            if (!merchant) return;
+            
+            // 模拟API调用
+            console.log(`通过商户 ${merchantId}，审核意见: ${comment}`);
+            
+            // 更新本地数据
+            merchant.status = 'active';
+            
+            // 关闭模态框
+            closeMerchantReviewModal();
+            
+            // 重新渲染
+            renderMerchantsGrid();
+            
+            alert('商户审核通过！');
+        }
+        
+        // 拒绝商户
+        function rejectMerchant(merchantId) {
+            const comment = document.getElementById('reviewComment').value;
+            
+            if (!comment) {
+                alert('请输入审核意见');
+                return;
+            }
+            
+            const merchant = merchantsData.find(m => m.id === merchantId);
+            if (!merchant) return;
+            
+            if (confirm('确定要拒绝这个商户吗？')) {
+                // 模拟API调用
+                console.log(`拒绝商户 ${merchantId}，审核意见: ${comment}`);
+                
+                // 更新本地数据
+                merchant.status = 'inactive';
+                
+                // 关闭模态框
+                closeMerchantReviewModal();
+                
+                // 重新渲染
+                renderMerchantsGrid();
+                
+                alert('商户已拒绝！');
+            }
+        }
+        
+        // 编辑商户
+        function editMerchant(merchantId) {
+            const merchant = merchantsData.find(m => m.id === merchantId);
+            if (!merchant) return;
+            
+            alert(`编辑商户: ${merchant.name}\n\n实际开发中会打开编辑表单`);
+        }
+        
+        // 设置商户管理员
+        function setMerchantAdmin(merchantId) {
+            const merchant = merchantsData.find(m => m.id === merchantId);
+            if (!merchant) return;
+            
+            alert(`设置商户管理员: ${merchant.name}\n\n实际开发中会打开管理员设置表单`);
+        }
+        
+        // 导出商户
+        function exportMerchants() {
+            alert('商户导出功能开发中...\n即将支持Excel和CSV格式导出');
+        }
+    </script>
+</body>
+</html>

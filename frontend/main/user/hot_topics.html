@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热门话题 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/navigation-manager.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            --status-open: #52c41a;
+            --rating-color: #ffc107;
+            --tag-blue: #1890ff;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        .global-nav {
+            background-color: var(--primary-color);
+            height: 45px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            margin-left: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover {
+            opacity: 0.9;
+        }
+        
+        .main-nav {
+            background-color: white;
+            height: 50px;
+            margin-top: 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-tab:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding-top: var(--spacing-large);
+            padding-bottom: 50px;
+        }
+        
+        .page-header {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-large);
+            box-shadow: var(--shadow-card);
+            margin-bottom: var(--spacing-large);
+            text-align: center;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .topic-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .topic-header {
+            padding: var(--spacing-large);
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .topic-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-medium);
+            font-size: 20px;
+            color: white;
+        }
+        
+        .topic-icon.canteen {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+        }
+        
+        .topic-icon.warning {
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+        }
+        
+        .topic-icon.star {
+            background: linear-gradient(135deg, #54a0ff, #2e86de);
+        }
+        
+        .topic-icon.health {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+        
+        .topic-icon.breakfast {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+        }
+        
+        .topic-icon.social {
+            background: linear-gradient(135deg, #5f27cd, #341f97);
+        }
+        
+        .topic-icon.discount {
+            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+        }
+        
+        .topic-icon.review {
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
+        }
+        
+        .topic-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .topic-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .topic-body {
+            padding: var(--spacing-large);
+        }
+        
+        .topic-desc {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-medium);
+        }
+        
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: var(--spacing-medium);
+        }
+        
+        .topic-tag {
+            background-color: #f0f9ff;
+            color: var(--tag-blue);
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .topic-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--spacing-medium);
+            border-top: 1px solid #f5f5f5;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .stat-item i {
+            margin-right: 5px;
+        }
+        
+        .topic-footer {
+            padding: var(--spacing-medium);
+            background-color: #fafafa;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .join-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+        
+        .join-btn:hover {
+            background-color: #d5000f;
+        }
+        
+        .join-btn.joined {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        
+        .trending-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .hot-posts-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-large);
+            box-shadow: var(--shadow-card);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .post-item {
+            display: flex;
+            padding: var(--spacing-medium) 0;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .post-item:hover {
+            background-color: #fafafa;
+        }
+        
+        .post-item:last-child {
+            border-bottom: none;
+        }
+        
+        .post-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: var(--spacing-medium);
+            flex-shrink: 0;
+        }
+        
+        .post-rank.top-1 {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: white;
+        }
+        
+        .post-rank.top-2 {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            color: white;
+        }
+        
+        .post-rank.top-3 {
+            background: linear-gradient(135deg, #cd7f32, #a0522d);
+            color: white;
+        }
+        
+        .post-rank.other {
+            background-color: #f0f0f0;
+            color: var(--text-light);
+        }
+        
+        .post-content {
+            flex: 1;
+        }
+        
+        .post-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .post-meta i {
+            margin-right: 3px;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #d5000f;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer {
+            background-color: white;
+            padding: var(--spacing-large) 0;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 13px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-medium);
+            }
+            
+            .topics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .nav-tab {
+                min-width: 100px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 20px;
+            }
+            
+            .topic-header {
+                padding: var(--spacing-medium);
+            }
+            
+            .topic-body {
+                padding: var(--spacing-medium);
+            }
+        }
+    </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/components/navigation-component.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-fire"></i> 热门话题</h1>
+                <p class="page-subtitle">发现校园美食热点，参与热门话题讨论</p>
+            </div>
+            
+            <div class="topics-grid">
+                    <div class="topic-card" onclick="window.location.href='topics/topic_canteen.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon canteen">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">食堂推荐 <span class="topic-badge">热门</span></div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">分享你心目中的最佳食堂，帮助同学找到美食</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#食堂推荐</span>
+                            <span class="topic-tag">#美食分享</span>
+                            <span class="topic-tag">#校园生活</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 1.2k 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 8.5k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-fire"></i> 热度飙升</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_warning.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">避雷指南</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">分享踩坑经历，帮助同学避雷</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#避雷</span>
+                            <span class="topic-tag">#真实评价</span>
+                            <span class="topic-tag">#踩坑</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 856 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 6.3k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-arrow-up"></i> 上升中</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_new.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon star">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">新品测评</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">食堂新菜品抢先体验与评价</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#新品</span>
+                            <span class="topic-tag">#测评</span>
+                            <span class="topic-tag">#尝鲜</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 523 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 4.2k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-clock"></i> 最新</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_health.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon health">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">健康饮食</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">分享健康饮食搭配，追求营养均衡</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#健康</span>
+                            <span class="topic-tag">#营养</span>
+                            <span class="topic-tag">#轻食</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 342 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 3.8k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-heart"></i> 精选</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_breakfast.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon breakfast">
+                            <i class="fas fa-coffee"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">早餐打卡</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">每天早上吃什么？分享你的早餐时光</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#早餐</span>
+                            <span class="topic-tag">#打卡</span>
+                            <span class="topic-tag">#早安</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 267 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 2.9k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-sun"></i> 每日</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_social.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon social">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">饭搭子</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">寻找志同道合的饭搭子，一起享受美食</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#饭搭子</span>
+                            <span class="topic-tag">#社交</span>
+                            <span class="topic-tag">#约饭</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 198 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 2.1k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-user-friends"></i> 互动</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_discount.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon discount">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">优惠分享</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">分享食堂优惠活动，一起省钱吃好饭</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#优惠</span>
+                            <span class="topic-tag">#省钱</span>
+                            <span class="topic-tag">#特惠</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 156 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 1.8k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-gift"></i> 福利</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+                
+                <div class="topic-card" onclick="window.location.href='topics/topic_review.html'">
+                    <div class="topic-header">
+                        <div class="topic-icon review">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <div>
+                            <div class="topic-name">美食测评</div>
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <p class="topic-desc">专业美食测评，用文字记录味道</p>
+                        <div class="topic-tags">
+                            <span class="topic-tag">#测评</span>
+                            <span class="topic-tag">#美食</span>
+                            <span class="topic-tag">#评价</span>
+                        </div>
+                        <div class="topic-stats">
+                            <div class="stat-item"><i class="fas fa-comments"></i> 134 讨论</div>
+                            <div class="stat-item"><i class="fas fa-eye"></i> 1.5k 浏览</div>
+                        </div>
+                    </div>
+                    <div class="topic-footer">
+                        <span class="trending-badge"><i class="fas fa-award"></i> 精品</span>
+                        <button class="join-btn" onclick="event.stopPropagation(); toggleJoin(this)">参与讨论</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hot-posts-section">
+                <div class="section-title">
+                    <div>
+                        <i class="fas fa-fire"></i> 热门帖子
+                    </div>
+                    <a href="user_community.html" class="btn">查看更多</a>
+                </div>
+                
+                <div class="post-item" onclick="viewPost('post1')">
+                    <div class="post-rank top-1">1</div>
+                    <div class="post-content">
+                        <div class="post-title">第一食堂烧腊档的烧鸭饭真是绝了！</div>
+                        <div class="post-meta">
+                            <span><i class="fas fa-thumbs-up"></i> 32 点赞</span>
+                            <span><i class="fas fa-comment"></i> 12 评论</span>
+                            <span><i class="fas fa-eye"></i> 189 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-item" onclick="viewPost('post2')">
+                    <div class="post-rank top-2">2</div>
+                    <div class="post-content">
+                        <div class="post-title">第二食堂麻辣烫新品尝试</div>
+                        <div class="post-meta">
+                            <span><i class="fas fa-thumbs-up"></i> 24 点赞</span>
+                            <span><i class="fas fa-comment"></i> 8 评论</span>
+                            <span><i class="fas fa-eye"></i> 142 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-item" onclick="viewPost('post3')">
+                    <div class="post-rank top-3">3</div>
+                    <div class="post-content">
+                        <div class="post-title">寻找早餐搭子，一起去莞城食堂吃肠粉！</div>
+                        <div class="post-meta">
+                            <span><i class="fas fa-thumbs-up"></i> 18 点赞</span>
+                            <span><i class="fas fa-comment"></i> 5 评论</span>
+                            <span><i class="fas fa-eye"></i> 89 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-item" onclick="viewPost('post4')">
+                    <div class="post-rank other">4</div>
+                    <div class="post-content">
+                        <div class="post-title">第三食堂腊味煲仔饭，锅巴超香！</div>
+                        <div class="post-meta">
+                            <span><i class="fas fa-thumbs-up"></i> 15 点赞</span>
+                            <span><i class="fas fa-comment"></i> 6 评论</span>
+                            <span><i class="fas fa-eye"></i> 76 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-item" onclick="viewPost('post5')">
+                    <div class="post-rank other">5</div>
+                    <div class="post-content">
+                        <div class="post-title">莞城食堂鲜虾肠粉，早餐必点！</div>
+                        <div class="post-meta">
+                            <span><i class="fas fa-thumbs-up"></i> 12 点赞</span>
+                            <span><i class="fas fa-comment"></i> 4 评论</span>
+                            <span><i class="fas fa-eye"></i> 65 浏览</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>校园食光 - 多校AI美食社区平台</p>
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+        </div>
+    </footer>
+    
+    <script>
+        function viewTopic(topicId) {
+            const topicNames = {
+                'canteen': '食堂推荐',
+                'warning': '避雷指南',
+                'new': '新品测评',
+                'health': '健康饮食',
+                'breakfast': '早餐打卡',
+                'social': '饭搭子',
+                'discount': '优惠分享',
+                'review': '美食测评'
+            };
+            alert(`查看"${topicNames[topicId]}"话题详情...`);
+        }
+        
+        function viewPost(postId) {
+            alert(`查看帖子详情...`);
+        }
+        
+        function toggleJoin(btn) {
+            if (btn.classList.contains('joined')) {
+                btn.classList.remove('joined');
+                btn.textContent = '参与讨论';
+            } else {
+                btn.classList.add('joined');
+                btn.textContent = '已参与';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = decodeURIComponent((window.location.pathname.split('/').pop() || 'index.html'));
+            const navTabs = document.querySelectorAll('.nav-tab');
+            let anyActive = false;
+
+            navTabs.forEach(tab => {
+                const href = tab.getAttribute('href') || '';
+                const tabPage = decodeURIComponent(href.split('/').pop() || '');
+                if(tabPage && tabPage === currentPage) {
+                    tab.classList.add('active');
+                    anyActive = true;
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            if(!anyActive) {
+                navTabs.forEach(tab => {
+                    const text = (tab.textContent || '').trim();
+                    if(text.startsWith('社区') || (document.title && document.title.includes('社区') && text.includes('社区'))) {
+                        tab.classList.add('active');
+                        anyActive = true;
+                    }
+                });
+            }
+            
+            console.log('热门话题页面加载完成');
+        });
+    </script>
+</body>
+</html>

@@ -18,4 +18,7 @@ router.post('/logout', authController.logout);
 // 获取用户信息（需要认证）
 router.get('/user', verifyToken, authController.getUserInfo);
 
+// 更新用户信息（需要认证）
+router.post('/user', verifyToken, authController.updateUserProfile);
+
 module.exports = router;

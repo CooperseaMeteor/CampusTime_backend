@@ -1,0 +1,581 @@
+<!-- 前端快速集成检查清单 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员系统 - 集成检查清单</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #e60012 0%, #ff4444 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #e60012;
+        }
+        .checklist {
+            list-style: none;
+        }
+        .checklist li {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f9f9f9;
+            border-left: 4px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .checklist li:hover {
+            border-left-color: #e60012;
+            background: #fff5f5;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .checklist label {
+            cursor: pointer;
+            flex: 1;
+        }
+        .status-done {
+            color: #52c41a;
+            font-weight: bold;
+        }
+        .status-todo {
+            color: #faad14;
+        }
+        .status-blocked {
+            color: #ff4d4f;
+        }
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        .file-tree {
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .file-tree pre {
+            margin: 0;
+        }
+        .highlight {
+            background: #fffacd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .badge-done {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-todo {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-blocked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .warning-box {
+            background: #fff5f5;
+            border-left: 4px solid #ff4d4f;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background: #f6ffed;
+            border-left: 4px solid #52c41a;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info-box {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background: #fafafa;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #e5e5e5;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 管理员权限系统</h1>
+            <p>完整前后端实现 - 集成检查清单</p>
+        </div>
+
+        <div class="content">
+            <!-- 项目概览 -->
+            <div class="section">
+                <h2>📊 项目概览</h2>
+                <table>
+                    <tr>
+                        <th>指标</th>
+                        <th>数值</th>
+                    </tr>
+                    <tr>
+                        <td>代码行数</td>
+                        <td><span class="highlight">2500+</span></td>
+                    </tr>
+                    <tr>
+                        <td>后端文件</td>
+                        <td>3 个 (SQL + middleware + routes)</td>
+                    </tr>
+                    <tr>
+                        <td>前端文件</td>
+                        <td>4 个 (HTML + JS × 2 + CSS)</td>
+                    </tr>
+                    <tr>
+                        <td>数据库表</td>
+                        <td>5 张</td>
+                    </tr>
+                    <tr>
+                        <td>API 端点</td>
+                        <td>9 个</td>
+                    </tr>
+                    <tr>
+                        <td>角色类型</td>
+                        <td>4 种 (L0-L3 层级)</td>
+                    </tr>
+                    <tr>
+                        <td>权限项</td>
+                        <td>7 个</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 已完成功能 -->
+            <div class="section">
+                <h2>✅ 已完成功能</h2>
+                
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">后端</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 数据库设计 (5 表 + 初始化)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 权限校验中间件 (7 个函数)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> API 端点实现 (9 个路由)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 操作审计日志
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 身份标签系统
+                    </label></li>
+                </ul>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">前端</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 管理员列表页面 (树状展示)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 新增/编辑弹窗 (含身份标签)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 调岗弹窗
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 身份标签审核弹窗
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 搜索功能 (前缀匹配)
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> "我的创建"侧栏
+                    </label></li>
+                    <li><input type="checkbox" checked disabled><label>
+                        <span class="status-done">✓</span> 完整样式表 (CSS)
+                    </label></li>
+                </ul>
+            </div>
+
+            <!-- 集成检查清单 -->
+            <div class="section">
+                <h2>🔧 集成前检查清单</h2>
+                
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">数据库</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox"><label>
+                        [ ] MySQL 数据库已创建并可连接
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 执行 <code>admin_system.sql</code> 初始化
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 验证 5 张表已创建 (admin_users, admin_positions, admin_permissions, role_template_permissions, admin_audit_log)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 验证角色模板权限已初始化 (80+ 条记录)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 连接池配置正确 (max connections, timeout)
+                    </label></li>
+                </ul>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">后端</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox"><label>
+                        [ ] Node.js 和 Express 环境已配置
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] JWT 认证中间件已实现
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 导入 <code>adminAuth.js</code> 中间件
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 注册 <code>admin-management.js</code> 路由 (<code>/api/admin</code>)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 将伪代码中的 <code>db.query()</code> 替换为真实数据库调用
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] CORS 配置允许前端跨域请求
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 测试 <code>GET /api/admin/list</code> 返回 200
+                    </label></li>
+                </ul>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">前端</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox"><label>
+                        [ ] 复制 <code>admin_manage.html</code> 到前端项目
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 复制 <code>admin-modals.js</code>, <code>admin-search-manager.js</code> 到同目录
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 复制 <code>admin-modals.css</code> 到同目录
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 验证 localStorage 中有 <code>adminToken</code> 和 <code>adminActivePositionId</code>
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 在浏览器中打开 <code>admin_manage.html</code>
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 检查浏览器控制台无 JavaScript 错误
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 点击"新增管理员"按钮，弹窗打开
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 搜索框可输入和搜索
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] "我的创建"侧栏可打开和关闭
+                    </label></li>
+                </ul>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">API 联调</h3>
+                <ul class="checklist">
+                    <li><input type="checkbox"><label>
+                        [ ] 创建管理员提交成功 (POST /api/admin/create)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 列表显示数据库中的真实数据 (GET /api/admin/list)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 搜索结果正确 (GET /api/admin/search)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 权限校验生效 (无权限返回 403)
+                    </label></li>
+                    <li><input type="checkbox"><label>
+                        [ ] 审计日志记录成功 (查看数据库 admin_audit_log)
+                    </label></li>
+                </ul>
+            </div>
+
+            <!-- 关键文件位置 -->
+            <div class="section">
+                <h2>📁 关键文件位置</h2>
+                <div class="file-tree">
+<pre>CampusTime_backend/
+├── backend/
+│   ├── sql/
+│   │   └── <span class="highlight">admin_system.sql</span>
+│   ├── middleware/
+│   │   └── <span class="highlight">adminAuth.js</span>
+│   └── routes/
+│       └── <span class="highlight">admin-management.js</span>
+└── frontend/main/admin/
+    ├── <span class="highlight">admin_manage.html</span>
+    ├── <span class="highlight">admin-modals.js</span>
+    ├── <span class="highlight">admin-modals.css</span>
+    ├── <span class="highlight">admin-search-manager.js</span>
+    └── README.md (使用指南)
+</pre>
+                </div>
+            </div>
+
+            <!-- 快速命令 -->
+            <div class="section">
+                <h2>⚡ 快速命令</h2>
+                
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">初始化数据库</h3>
+                <div class="code-block">mysql -u root -p < backend/sql/admin_system.sql</div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">启动后端服务</h3>
+                <div class="code-block">cd backend && npm start</div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">测试 API</h3>
+                <div class="code-block">curl -H "Authorization: Bearer &lt;token&gt;" \
+     -H "X-Active-Position-Id: &lt;position_id&gt;" \
+     http://localhost:3000/api/admin/list</div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">前端集成</h3>
+                <div class="code-block"><!-- 在 HTML 中 -->
+&lt;script src="admin-modals.js"&gt;&lt;/script&gt;
+&lt;script src="admin-search-manager.js"&gt;&lt;/script&gt;</div>
+            </div>
+
+            <!-- 权限体系 -->
+            <div class="section">
+                <h2>🔐 权限体系一览</h2>
+                
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">四层角色</h3>
+                <table>
+                    <tr>
+                        <th>角色</th>
+                        <th>层级</th>
+                        <th>作用域</th>
+                        <th>示例权限</th>
+                    </tr>
+                    <tr>
+                        <td>super_admin</td>
+                        <td>L0</td>
+                        <td>全校</td>
+                        <td>所有权限</td>
+                    </tr>
+                    <tr>
+                        <td>school_admin</td>
+                        <td>L1</td>
+                        <td>学校</td>
+                        <td>管理商户/人员/内容</td>
+                    </tr>
+                    <tr>
+                        <td>merchant_admin</td>
+                        <td>L2</td>
+                        <td>商户</td>
+                        <td>管理子树/人员/内容</td>
+                    </tr>
+                    <tr>
+                        <td>stall_admin</td>
+                        <td>L3</td>
+                        <td>档口</td>
+                        <td>管理菜品/评价</td>
+                    </tr>
+                </table>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">权限清单</h3>
+                <table>
+                    <tr>
+                        <th>权限标识</th>
+                        <th>说明</th>
+                        <th>默认包含角色</th>
+                    </tr>
+                    <tr>
+                        <td><code>admin.create</code></td>
+                        <td>创建管理员</td>
+                        <td>L0, L1, L2</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin.assign</code></td>
+                        <td>分配职位</td>
+                        <td>L0, L1</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin.disable</code></td>
+                        <td>禁用账户</td>
+                        <td>L0, L1</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin.manage_peer</code></td>
+                        <td>管理同级</td>
+                        <td>无 (默认关闭)</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin.identity.approve</code></td>
+                        <td>审核身份标签</td>
+                        <td>L0</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin.audit</code></td>
+                        <td>查看审计日志</td>
+                        <td>L0, L1</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 常见问题 -->
+            <div class="section">
+                <h2>❓ 常见问题</h2>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Q: 如何验证权限校验是否生效？</h3>
+                <div class="info-box">
+                    <p><strong>A:</strong> 用一个低级别管理员账户尝试执行高级别操作，应该得到 <code>403 Forbidden</code> 响应。</p>
+                </div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Q: 如何支持一人多职？</h3>
+                <div class="info-box">
+                    <p><strong>A:</strong> 已支持。通过 <code>admin_positions</code> 表的一对多关系，和 <code>X-Active-Position-Id</code> header 激活不同职位。</p>
+                </div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Q: 节点选择器为什么是占位符？</h3>
+                <div class="warning-box">
+                    <p><strong>A:</strong> 待后端完成真实数据库集成后，可根据实际的学校/商户/档口树结构实现。当前已预留接口。</p>
+                </div>
+
+                <h3 style="color: #666; margin-top: 20px; margin-bottom: 10px;">Q: 搜索支持大数据量吗？</h3>
+                <div class="info-box">
+                    <p><strong>A:</strong> 当前为客户端前缀匹配（适合 <1000 条）。超过 1000 条建议改为后端分页搜索。</p>
+                </div>
+            </div>
+
+            <!-- 重要提示 -->
+            <div class="section">
+                <h2>⚠️ 重要提示</h2>
+
+                <div class="warning-box">
+                    <strong>1. 伪代码转换</strong>
+                    <p style="margin-top: 10px;">所有 <code>db.query()</code> 伪代码需替换为真实的数据库执行，例如使用 <code>mysql2/promise</code> 或 ORM（Sequelize）。</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>2. 安全配置</strong>
+                    <p style="margin-top: 10px;">确保 JWT secret 已配置到环保变量 <code>.env</code> 文件，不要硬编码。</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>3. localStorage 依赖</strong>
+                    <p style="margin-top: 10px;">前端依赖以下键：<br>
+                    • <code>adminToken</code> - JWT 认证令牌<br>
+                    • <code>adminActivePositionId</code> - 激活的职位 ID
+                    </p>
+                </div>
+
+                <div class="success-box">
+                    <strong>✓ 完成验证</strong>
+                    <p style="margin-top: 10px;">所有测试通过后，可进行灰度发布或全量上线。建议先在测试环境验证 2-3 天。</p>
+                </div>
+            </div>
+
+            <!-- 下一步 -->
+            <div class="section">
+                <h2>📈 下一步改进方向</h2>
+                <ul style="line-height: 2;">
+                    <li>✨ 实现节点选择器树形组件（支持大数据量虚拟滚动）</li>
+                    <li>✨ 后端分页搜索接口（支持 >10000 管理员）</li>
+                    <li>✨ 权限矩阵可视化编辑器</li>
+                    <li>✨ 批量导入/导出管理员</li>
+                    <li>✨ 操作历史时间线和对比视图</li>
+                    <li>✨ 敏感操作二次验证 (OTP/扫码)</li>
+                    <li>✨ 权限变更实时通知</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>管理员权限系统 v1.0 - 2025-01-05</p>
+            <p>项目文档: <code>ADMIN_SYSTEM_PROGRESS.md</code> | 使用指南: <code>frontend/main/admin/README.md</code></p>
+        </div>
+    </div>
+
+    <script>
+        // 交互功能
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            if (!checkbox.disabled) {
+                checkbox.addEventListener('change', function() {
+                    localStorage.setItem('checklist_' + Math.random(), this.checked);
+                });
+            }
+        });
+
+        console.log('✅ 管理员权限系统集成清单已加载');
+        console.log('📁 关键文件: backend/sql/admin_system.sql, adminAuth.js, admin-management.js');
+        console.log('📁 前端文件: admin_manage.html, admin-modals.js, admin-search-manager.js, admin-modals.css');
+    </script>
+</body>
+</html>

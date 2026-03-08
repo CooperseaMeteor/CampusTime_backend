@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 - 校园食光</title>
+    
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 全局样式 - 与现有页面保持一致 */
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            --status-open: #52c41a;
+            --status-closed: #ff4d4f;
+            --rating-color: #ffc107;
+            --tag-blue: #1890ff;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --role-school-admin: #1890ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        /* 顶部导航栏 - 与现有页面保持一致 */
+        .global-nav {
+            background-color: var(--primary-color);
+            height: 45px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            margin-left: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover {
+            opacity: 0.9;
+        }
+        
+        /* 主导航 - 使用动态导航栏 */
+        .main-nav {
+            background-color: white;
+            height: 50px;
+            margin-top: 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 45px;
+            z-index: 999;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none;
+            padding: 0 15px;
+        }
+        
+        .nav-tab:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        /* 主要内容区域 */
+        .admin-main {
+            padding: var(--spacing-large) 0 60px;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-title i {
+            margin-right: 10px;
+            color: var(--role-school-admin);
+        }
+        
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        /* 学生统计卡片 */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-large);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-large);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid var(--role-school-admin);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--role-school-admin);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .trend-up {
+            color: var(--status-open);
+        }
+        
+        .trend-down {
+            color: var(--status-closed);
+        }
+        
+        /* 搜索和筛选栏 */
+        .filter-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            padding: var(--spacing-medium);
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-medium);
+            align-items: center;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            background-color: white;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-small);
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-right: var(--spacing-small);
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            background-color: white;
+            min-width: 150px;
+        }
+        
+        .action-btn {
+            background-color: var(--role-school-admin);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .action-btn:hover {
+            background-color: #1478d0;
+        }
+        
+        /* 学生列表 */
+        .students-table-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background-color: var(--role-school-admin);
+            color: white;
+            padding: var(--spacing-medium);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: var(--spacing-medium);
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .students-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .students-table th {
+            background-color: #fafafa;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+            white-space: nowrap;
+        }
+        
+        .students-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        .students-table tbody tr:hover {
+            background-color: #fafafa;
+        }
+        
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--role-school-admin);
+            font-weight: bold;
+        }
+        
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .student-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .student-email {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        
+        .student-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .status-active {
+            background-color: rgba(82, 196, 26, 0.1);
+            color: var(--status-open);
+        }
+        
+        .status-inactive {
+            background-color: rgba(255, 77, 79, 0.1);
+            color: var(--status-closed);
+        }
+        
+        .student-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn-small {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: white;
+            font-size: 13px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-btn-small:hover {
+            border-color: var(--role-school-admin);
+            color: var(--role-school-admin);
+        }
+        
+        /* 分页器 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 30px;
+        }
+        
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--role-school-admin);
+            color: var(--role-school-admin);
+        }
+        
+        .page-btn.active {
+            background-color: var(--role-school-admin);
+            border-color: var(--role-school-admin);
+            color: white;
+        }
+        
+        /* 学生详情模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-dark);
+        }
+        
+        .modal-body {
+            padding: var(--spacing-large);
+        }
+        
+        .student-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-medium);
+        }
+        
+        .detail-item {
+            margin-bottom: 20px;
+        }
+        
+        .detail-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-medium);
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-medium);
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: var(--spacing-medium);
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                gap: var(--spacing-small);
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+            }
+            
+            .nav-tab {
+                flex: 0 0 auto;
+                padding: 0 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="global-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-user-graduate"></i>
+                校园食光 - 学校管理员
+            </div>
+            <div class="nav-right">
+                <div class="nav-item">
+                    <i class="fas fa-user-circle"></i> 学校管理员
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主导航 - 动态生成 -->
+    <nav class="main-nav" id="dynamicNavbar">
+        <!-- 导航标签将通过JavaScript动态生成 -->
+    </nav>
+    
+    <!-- 主要内容 -->
+    <main class="container admin-main">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-user-graduate"></i> 学生管理
+                </h1>
+                <p class="page-subtitle">查看本校学生列表，管理学生信息</p>
+            </div>
+            <button class="action-btn" onclick="exportStudents()">
+                <i class="fas fa-download"></i> 导出学生
+            </button>
+        </div>
+        
+        <!-- 学生统计卡片 -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-value" id="totalStudents">8,456</div>
+                <div class="stat-label">总学生数</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>5.2%</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="activeStudents">7,823</div>
+                <div class="stat-label">活跃学生</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>8.7%</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="newStudents">456</div>
+                <div class="stat-label">本月新增</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-up trend-up"></i>
+                    <span>12.3%</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="graduatingStudents">892</div>
+                <div class="stat-label">毕业学生</div>
+                <div class="stat-change">
+                    <i class="fas fa-arrow-down trend-down"></i>
+                    <span>2.1%</span>
+                    <span>较上月</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 搜索和筛选栏 -->
+        <section class="filter-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="搜索学生姓名、学号..." id="searchInput">
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">年级:</label>
+                <select class="filter-select" id="gradeFilter">
+                    <option value="">全部年级</option>
+                    <option value="freshman">大一</option>
+                    <option value="sophomore">大二</option>
+                    <option value="junior">大三</option>
+                    <option value="senior">大四</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">学院:</label>
+                <select class="filter-select" id="collegeFilter">
+                    <option value="">全部学院</option>
+                    <option value="marxism">马克思主义学院</option>
+                    <option value="graduate">研究生院</option>
+                    <option value="excellence">卓越工程师学院</option>
+                    <option value="computer">计算机科学与技术学院</option>
+                    <option value="telecom">电信工程与智能化学院</option>
+                    <option value="environment">生态环境与建筑工程学院</option>
+                    <option value="chemical">化学工程与能源技术学院</option>
+                    <option value="mechanical">机械工程学院</option>
+                    <option value="materials">材料科学与工程学院</option>
+                    <option value="integrated">集成电路学院</option>
+                </select>
+            </div>
+            
+            <button class="action-btn" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> 筛选
+            </button>
+        </section>
+        
+        <!-- 学生列表 -->
+        <section class="students-table-container">
+            <div class="table-header">
+                <div class="table-title">学生列表</div>
+                <div class="table-actions">
+                    <button class="action-btn" onclick="batchExport()">
+                        <i class="fas fa-download"></i> 批量导出
+                    </button>
+                    <button class="action-btn" onclick="batchNotify()">
+                        <i class="fas fa-bell"></i> 批量通知
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>头像</th>
+                            <th>姓名</th>
+                            <th>学号</th>
+                            <th>学院</th>
+                            <th>年级</th>
+                            <th>注册时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- 学生数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- 分页器 -->
+        <div class="pagination" id="pagination">
+            <!-- 分页按钮将通过JavaScript动态生成 -->
+        </div>
+    </main>
+    
+    <!-- 学生详情模态框 -->
+    <div class="modal-overlay" id="studentDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalStudentName">学生详情</div>
+                <button class="modal-close" onclick="closeStudentDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="studentDetailContent">
+                <!-- 学生详情将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>校园食光 - 多校AI美食社区平台</p>
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+        </div>
+    </footer>
+    
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/admin/admin-permission.js"></script>
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+    
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化动态导航栏
+            if (window.DynamicNavbar) {
+                window.DynamicNavbar.updateNavbar('school_admin_students.html');
+                window.DynamicNavbar.updateTopNavUserInfo();
+            }
+            
+            // 加载学生数据
+            loadStudentsData();
+            
+            // 初始化分页
+            initPagination();
+        });
+        
+        // 模拟学生数据
+        const studentsData = [
+            {
+                id: 1,
+                name: '张三',
+                studentId: '2021001001',
+                email: 'zhangsan@example.com',
+                college: '计算机科学与技术学院',
+                grade: '大三',
+                status: 'active',
+                registerDate: '2021-09-15',
+                avatar: 'https://images.unsplash.com/photo-1535719974-0cda9d8e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 2,
+                name: '李四',
+                studentId: '2021001002',
+                email: 'lisi@example.com',
+                college: '电信工程与智能化学院',
+                grade: '大二',
+                status: 'active',
+                registerDate: '2022-09-01',
+                avatar: 'https://images.unsplash.com/photo-1494760102-38d5ac073e6d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 3,
+                name: '王五',
+                studentId: '2021001003',
+                email: 'wangwu@example.com',
+                college: '马克思主义学院',
+                grade: '大三',
+                status: 'active',
+                registerDate: '2021-09-20',
+                avatar: 'https://images.unsplash.com/photo-1507002188-281d-4d88e371?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 4,
+                name: '赵六',
+                studentId: '2021001004',
+                email: 'zhaoliu@example.com',
+                college: '卓越工程师学院',
+                grade: '大四',
+                status: 'active',
+                registerDate: '2020-09-10',
+                avatar: 'https://images.unsplash.com/photo-1472099645785-5a87fdab5fc?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 5,
+                name: '钱七',
+                studentId: '2021001005',
+                email: 'qianqi@example.com',
+                college: '研究生院',
+                grade: '研究生',
+                status: 'active',
+                registerDate: '2023-09-01',
+                avatar: 'https://images.unsplash.com/photo-1507002188-281d-4d88e371?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 6,
+                name: '孙八',
+                studentId: '2021001006',
+                email: 'sunba@example.com',
+                college: '化学工程与能源技术学院',
+                grade: '大一',
+                status: 'inactive',
+                registerDate: '2023-09-15',
+                avatar: 'https://images.unsplash.com/photo-1507002188-281d-4d88e371?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 7,
+                name: '周九',
+                studentId: '2021001007',
+                email: 'zhoujiu@example.com',
+                college: '机械工程学院',
+                grade: '大二',
+                status: 'active',
+                registerDate: '2022-09-15',
+                avatar: 'https://images.unsplash.com/photo-1507002188-281d-4d88e371?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            },
+            {
+                id: 8,
+                name: '吴十',
+                studentId: '2021001008',
+                email: 'wushi@example.com',
+                college: '材料科学与工程学院',
+                grade: '大三',
+                status: 'active',
+                registerDate: '2021-09-05',
+                avatar: 'https://images.unsplash.com/photo-1507002188-281d-4d88e371?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
+            }
+        ];
+        
+        let filteredData = [...studentsData];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // 加载学生数据
+        function loadStudentsData() {
+            renderStudentsTable();
+            renderPagination();
+        }
+        
+        // 渲染学生表格
+        function renderStudentsTable() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            const studentsHTML = pageData.map(student => {
+                const statusClass = student.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusText = student.status === 'active' ? '正常' : '未激活';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="student-avatar">${student.name.charAt(0)}</div>
+                        </td>
+                        <td>
+                            <div class="student-info">
+                                <div class="student-name">${student.name}</div>
+                                <div class="student-email">${student.email}</div>
+                            </div>
+                        </td>
+                        <td>${student.studentId}</td>
+                        <td>${student.college}</td>
+                        <td>${student.grade}</td>
+                        <td>${student.registerDate}</td>
+                        <td>
+                            <span class="student-status ${statusClass}">${statusText}</span>
+                        </td>
+                        <td>
+                            <div class="student-actions">
+                                <button class="action-btn-small" onclick="viewStudentDetail(${student.id})">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                                <button class="action-btn-small" onclick="sendNotification(${student.id})">
+                                    <i class="fas fa-bell"></i> 通知
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('studentsTableBody').innerHTML = studentsHTML;
+        }
+        
+        // 初始化分页
+        function initPagination() {
+            renderPagination();
+        }
+        
+        // 渲染分页器
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            let paginationHTML = '';
+            
+            // 上一页按钮
+            if (currentPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
+            }
+            
+            // 页码按钮
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                if (i > 0 && i <= totalPages) {
+                    paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                }
+            }
+            
+            // 下一页按钮
+            if (currentPage < totalPages) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
+            }
+            
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+        
+        // 切换页面
+        function changePage(page) {
+            currentPage = page;
+            renderStudentsTable();
+            renderPagination();
+        }
+        
+        // 应用筛选
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const gradeFilter = document.getElementById('gradeFilter').value;
+            const collegeFilter = document.getElementById('collegeFilter').value;
+            
+            filteredData = studentsData.filter(student => {
+                const matchSearch = !searchTerm || 
+                                   student.name.toLowerCase().includes(searchTerm) || 
+                                   student.studentId.toLowerCase().includes(searchTerm);
+                
+                const matchGrade = !gradeFilter || student.grade === gradeFilter;
+                const matchCollege = !collegeFilter || student.college === collegeFilter;
+                
+                return matchSearch && matchGrade && matchCollege;
+            });
+            
+            currentPage = 1;
+            renderStudentsTable();
+            renderPagination();
+        }
+        
+        // 查看学生详情
+        function viewStudentDetail(studentId) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (!student) return;
+            
+            const modalTitle = document.getElementById('modalStudentName');
+            const modalContent = document.getElementById('studentDetailContent');
+            
+            modalTitle.textContent = `学生详情 - ${student.name}`;
+            
+            modalContent.innerHTML = `
+                <div class="student-detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">姓名</div>
+                        <div class="detail-value">${student.name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">学号</div>
+                        <div class="detail-value">${student.studentId}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">邮箱</div>
+                        <div class="detail-value">${student.email}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">学院</div>
+                        <div class="detail-value">${student.college}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">年级</div>
+                        <div class="detail-value">${student.grade}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">注册时间</div>
+                        <div class="detail-value">${student.registerDate}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">状态</div>
+                        <div class="detail-value">${student.status === 'active' ? '正常' : '未激活'}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('studentDetailModal').classList.add('show');
+        }
+        
+        // 关闭学生详情模态框
+        function closeStudentDetailModal() {
+            document.getElementById('studentDetailModal').classList.remove('show');
+        }
+        
+        // 发送通知
+        function sendNotification(studentId) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (!student) return;
+            
+            const message = prompt(`请输入要发送给 ${student.name} 的通知内容:`);
+            if (message === null) return;
+            
+            // 模拟API调用
+            console.log(`发送通知给学生 ${studentId}，内容: ${message}`);
+            alert(`通知已发送给 ${student.name}！`);
+        }
+        
+        // 批量导出
+        function batchExport() {
+            alert('批量导出功能开发中...\n即将支持Excel和CSV格式导出');
+        }
+        
+        // 批量通知
+        function batchNotify() {
+            const message = prompt('请输入要批量发送的通知内容:');
+            if (message === null) return;
+            
+            if (confirm(`确定要向所有学生发送通知吗？\n\n内容: ${message}`)) {
+                // 模拟API调用
+                console.log(`批量发送通知: ${message}`);
+                alert('通知已发送给所有学生！');
+            }
+        }
+        
+        // 导出学生
+        function exportStudents() {
+            alert('学生导出功能开发中...\n即将支持Excel和CSV格式导出');
+        }
+    </script>
+</body>
+</html>

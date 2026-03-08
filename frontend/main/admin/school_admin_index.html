@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>学校管理员工作台-校园食光</title>
+
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    
+
+    <!-- 字体图标 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ECharts 图表库 -->
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    
+
+    <style>
+
+        /* 全局样式 - 与现有页面保持一致 */
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 15px;
+
+            --spacing-large: 20px;
+
+            --border-radius: 4px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            --role-school-admin: #1890ff;
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 - 与现有页面保持一致 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        /* 主导航 - 使用动态导航栏 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            position: sticky;
+
+            top: 45px;
+
+            z-index: 999;
+
+        }
+
+        
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none;
+
+            padding: 0 15px;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 主要内容区域 */
+
+        .admin-main {
+
+            padding: var(--spacing-large) 0 60px;
+
+        }
+
+        /* Shell 嵌入模式：当通过 admin_shell.html iframe 加载时隐藏本页导航 */
+        html.embedded-shell .global-nav,
+        html.embedded-shell .main-nav {
+            display: none !important;
+        }
+
+        
+
+        /* 页面标题 */
+
+        .page-header {
+
+            margin-bottom: var(--spacing-large);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .page-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .page-title i {
+
+            margin-right: 10px;
+
+            color: var(--role-school-admin);
+
+        }
+
+        
+
+        .page-subtitle {
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 本校数据卡片 */
+
+        .stats-section {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .stat-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-large);
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+            border-left: 4px solid var(--role-school-admin);
+
+        }
+
+        
+
+        .stat-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .stat-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 15px;
+
+        }
+
+        
+
+        .stat-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .stat-icon {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--role-school-admin);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 32px;
+
+            font-weight: bold;
+
+            color: var(--role-school-admin);
+
+            margin-bottom: 10px;
+
+        }
+
+        
+
+        .stat-change {
+
+            font-size: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .trend-up {
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .trend-down {
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .stat-footer {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        /* 本校热门菜品TOP10 */
+
+        .top-dishes {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .section-header {
+
+            background-color: var(--role-school-admin);
+
+            color: white;
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+        
+
+        .section-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .section-more {
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            opacity: 0.8;
+
+            transition: opacity 0.3s;
+
+        }
+
+        
+
+        .section-more:hover {
+
+            opacity: 1;
+
+        }
+
+        
+
+        .dishes-list {
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .dish-item {
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 12px 0;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .dish-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .dish-rank {
+
+            width: 28px;
+
+            height: 28px;
+
+            border-radius: 50%;
+
+            background-color: #f5f5f5;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 15px;
+
+            font-weight: bold;
+
+            font-size: 13px;
+
+        }
+
+        
+
+        .dish-rank.top3 {
+
+            background-color: var(--role-school-admin);
+
+            color: white;
+
+        }
+
+        
+
+        .dish-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .dish-name {
+
+            font-size: 15px;
+
+            font-weight: 500;
+
+            margin-bottom: 3px;
+
+        }
+
+        
+
+        .dish-meta {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+        
+
+        .dish-merchant {
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .dish-orders {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        .dish-image {
+
+            width: 50px;
+
+            height: 50px;
+
+            border-radius: var(--border-radius);
+
+            object-fit: cover;
+
+            margin-left: 15px;
+
+        }
+
+        
+
+        /* 食堂流量对比 */
+
+        .traffic-comparison {
+
+            display: grid;
+
+            grid-template-columns: 2fr 1fr;
+
+            gap: var(--spacing-large);
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .chart-container {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-medium);
+
+            height: 400px;
+
+        }
+
+        
+
+        .canteen-ranking {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .ranking-list {
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .ranking-item {
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 12px 0;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .ranking-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .ranking-number {
+
+            width: 28px;
+
+            height: 28px;
+
+            border-radius: 50%;
+
+            background-color: #f5f5f5;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 15px;
+
+            font-weight: bold;
+
+            font-size: 13px;
+
+        }
+
+        
+
+        .ranking-number.top3 {
+
+            background-color: var(--role-school-admin);
+
+            color: white;
+
+        }
+
+        
+
+        .ranking-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .ranking-name {
+
+            font-size: 15px;
+
+            font-weight: 500;
+
+            margin-bottom: 3px;
+
+        }
+
+        
+
+        .ranking-meta {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+        
+
+        .ranking-visitors {
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .ranking-growth {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+        
+
+        /* 快捷操作 */
+
+        .quick-actions {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+        }
+
+        
+
+        .actions-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: var(--spacing-medium);
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .action-card {
+
+            background-color: white;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: var(--border-radius);
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            text-align: center;
+
+            transition: all 0.3s;
+
+            cursor: pointer;
+
+        }
+
+        
+
+        .action-card:hover {
+
+            border-color: var(--role-school-admin);
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .action-icon {
+
+            width: 50px;
+
+            height: 50px;
+
+            border-radius: 50%;
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--role-school-admin);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 20px;
+
+            margin-bottom: 12px;
+
+        }
+
+        
+
+        .action-title {
+
+            font-size: 15px;
+
+            font-weight: 500;
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .action-desc {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        /* 操作按钮 */
+
+        .action-btn {
+
+            background-color: var(--role-school-admin);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background-color: #1478d0;
+
+        }
+
+        
+
+        /* 响应式调整 */
+
+        @media (max-width: 992px) {
+
+            .stats-section {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .traffic-comparison {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-medium);
+
+            }
+
+            
+
+            .page-header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            
+
+            .stats-section {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .actions-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .nav-tabs {
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .nav-tab {
+
+            flex: 0 0 auto;
+
+            padding: 0 15px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 本校专属功能模块样式 */
+
+        .school-modules {
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .section-subtitle {
+
+            font-size: 14px;
+
+            color: var(--text-light);
+
+            margin-top: 5px;
+
+            font-weight: normal;
+
+        }
+
+        
+
+        .modules-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-top: 15px;
+
+        }
+
+        
+
+        .module-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            transition: all 0.3s;
+
+            border: 1px solid var(--border-color);
+
+            cursor: pointer;
+
+        }
+
+        
+
+        .module-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+            border-color: var(--role-school-admin);
+
+        }
+
+        
+
+        .module-header {
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            align-items: center;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .module-header i {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--role-school-admin);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 18px;
+
+            margin-right: 12px;
+
+            flex-shrink: 0;
+
+        }
+
+        
+
+        .module-title {
+
+            font-size: 15px;
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+            margin-bottom: 5px;
+
+        }
+
+        
+
+        .module-content {
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .module-content p {
+
+            color: var(--text-light);
+
+            margin-bottom: 10px;
+
+            line-height: 1.5;
+
+            font-size: 13px;
+
+        }
+
+        
+
+        .module-stats {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 8px 0;
+
+            border-top: 1px dashed var(--border-color);
+
+        }
+
+        
+
+        .module-stats:first-child {
+
+            border-top: none;
+
+        }
+
+        
+
+        .stat-label {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+            color: var(--role-school-admin);
+
+        }
+
+        
+
+        .module-footer {
+
+            padding: var(--spacing-medium);
+
+            background-color: #fafafa;
+
+            border-top: 1px solid var(--border-color);
+
+            text-align: right;
+
+        }
+
+        
+
+        .module-btn {
+
+            background-color: var(--role-school-admin);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .module-btn:hover {
+
+            background-color: #1478d0;
+
+        }
+
+        
+
+        @media (max-width: 992px) {
+
+            .modules-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .modules-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+    }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- 顶部导航栏 -->
+
+    <nav class="global-nav">
+
+        <div class="nav-container">
+
+            <div class="logo">
+
+                <i class="fas fa-university"></i>
+
+                东莞理工学院 - 学校管理员
+
+            </div>
+
+            <div class="nav-right">
+
+                <div class="nav-item">
+
+                    <i class="fas fa-user-circle"></i> 学校管理员
+
+                </div>
+
+                
+
+                <!-- 商户审核模块
+
+                <div class="module-card" onclick="navigateToMerchantApproval()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-clipboard-check"></i>
+
+                        <div class="module-title">商户审核</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>审核商户入驻申请，管理本校商户资质。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">待审核:</span>
+
+                            <span class="stat-value">3</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">本月通过:</span>
+
+                            <span class="stat-value">5</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToMerchantApproval()">审核商户</button>
+
+                    </div>
+
+                </div> -->
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    
+
+    <!-- 主导航 - 动态生成 -->
+
+    <nav class="main-nav" id="dynamicNavbar">
+
+        <!-- 导航标签将通过JavaScript动态生成 -->
+
+    </nav>
+
+    
+
+    <!-- 主要内容 -->
+
+    <main class="container admin-main">
+
+        <!-- 页面标题 -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+
+                    <i class="fas fa-tachometer-alt"></i> 东莞理工学院 - 学校管理员控制台
+
+                </h1>
+
+                <p class="page-subtitle">本校数据概览与运营管理 | 权限范围：仅限本校层级</p>
+
+            </div>
+
+            <button class="action-btn" onclick="refreshData()">
+
+                <i class="fas fa-sync-alt"></i> 刷新数据
+
+            </button>
+
+        </div>
+
+        
+
+        <!-- 本校数据卡片 -->
+
+        <section class="stats-section">
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <div class="stat-title">学生数</div>
+
+                    <div class="stat-icon">
+
+                        <i class="fas fa-user-graduate"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="stat-value" id="totalStudents">8,456</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>5.2%</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+                <div class="stat-footer">本校注册学生总数</div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <div class="stat-title">今日打卡</div>
+
+                    <div class="stat-icon">
+
+                        <i class="fas fa-check-circle"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="stat-value" id="todayCheckins">2,345</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>8.7%</span>
+
+                    <span>较昨日</span>
+
+                </div>
+
+                <div class="stat-footer">今日食堂打卡次数</div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <div class="stat-title">AI使用次数</div>
+
+                    <div class="stat-icon">
+
+                        <i class="fas fa-robot"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="stat-value" id="aiUsage">1,856</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>12.3%</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+                <div class="stat-footer">本月AI美食助手使用次数</div>
+
+            </div>
+
+            
+
+            <div class="stat-card">
+
+                <div class="stat-header">
+
+                    <div class="stat-title">活跃商户</div>
+
+                    <div class="stat-icon">
+
+                        <i class="fas fa-store"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="stat-value" id="activeMerchants">42</div>
+
+                <div class="stat-change">
+
+                    <i class="fas fa-arrow-up trend-up"></i>
+
+                    <span>2</span>
+
+                    <span>较上月</span>
+
+                </div>
+
+                <div class="stat-footer">本月有交易的商户数</div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 本校热门菜品TOP10和食堂流量对比 -->
+
+        <div class="traffic-comparison">
+
+            <!-- 本校热门菜品TOP10 -->
+
+            <div class="top-dishes">
+
+                <div class="section-header">
+
+                    <div class="section-title">本校热门菜品TOP10</div>
+
+                    <div class="section-more" onclick="viewAllDishes()">查看全部</div>
+
+                </div>
+
+                <div class="dishes-list" id="topDishesList">
+
+                    <!-- 菜品数据将通过JavaScript动态生成 -->
+
+                </div>
+
+            </div>
+
+            
+
+            <!-- 食堂流量对比 -->
+
+            <div class="canteen-ranking">
+
+                <div class="section-header">
+
+                    <div class="section-title">食堂流量对比</div>
+
+                    <div class="section-more" onclick="viewAllCanteens()">查看详情</div>
+
+                </div>
+
+                <div class="ranking-list" id="canteenRankingList">
+
+                    <!-- 食堂数据将通过JavaScript动态生成 -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+        
+
+        <!-- 食堂流量图表 -->
+
+        <div class="chart-container">
+
+            <div class="section-title" style="margin-bottom: 15px;">
+
+                <i class="fas fa-chart-line" style="color: var(--role-school-admin); margin-right: 10px;"></i> 食堂流量趋势
+
+            </div>
+
+            <div id="canteenTrafficChart" style="width: 100%; height: 320px;"></div>
+
+        </div>
+
+        
+
+        <!-- 快捷操作 -->
+
+        <section class="quick-actions">
+
+            <div class="section-header">
+
+                <div class="section-title">快捷操作</div>
+
+            </div>
+
+            <div class="actions-grid">
+
+                <div class="action-card" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminContent())">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-bullhorn"></i>
+
+                    </div>
+
+                    <div class="action-title">发布内容</div>
+
+                    <div class="action-desc">发布本校宣传内容</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminStudents())">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-user-graduate"></i>
+
+                    </div>
+
+                    <div class="action-title">查看学生</div>
+
+                    <div class="action-desc">管理本校学生信息</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminMerchant())">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-store"></i>
+
+                    </div>
+
+                    <div class="action-title">商户审核</div>
+
+                    <div class="action-desc">审核商户入驻申请</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminData())">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-chart-bar"></i>
+
+                    </div>
+
+                    <div class="action-title">数据查看</div>
+
+                    <div class="action-desc">查看本校数据分析</div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 本校专属功能模块 -->
+
+        <section class="quick-actions">
+
+            <div class="section-header">
+
+                <div class="section-title">本校专属功能</div>
+
+                <div class="section-more">仅限本校层级的管理权限</div>
+
+            </div>
+
+            <div class="actions-grid">
+
+                <div class="action-card" onclick="navigateToLevelManagement()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-sitemap"></i>
+
+                    </div>
+
+                    <div class="action-title">层级管理</div>
+
+                    <div class="action-desc">管理本校商户层级结构，包括食堂、档口等下级单元</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToUserManagement()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-users-cog"></i>
+
+                    </div>
+
+                    <div class="action-title">用户管理</div>
+
+                    <div class="action-desc">管理本校用户信息，包括学生账号和工作人员权限</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToMerchantManagement()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-store-alt"></i>
+
+                    </div>
+
+                    <div class="action-title">商户管理</div>
+
+                    <div class="action-desc">审核和管理本校商户信息，支持商户入驻审批</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToContentPublish()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-newspaper"></i>
+
+                    </div>
+
+                    <div class="action-title">内容发布</div>
+
+                    <div class="action-desc">发布本校宣传内容，管理校园活动通知和商户推广</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToDataAnalysis()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-chart-pie"></i>
+
+                    </div>
+
+                    <div class="action-title">数据分析</div>
+
+                    <div class="action-desc">查看本校运营数据报表，了解校园餐饮消费趋势</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToRuleConfiguration()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-sliders-h"></i>
+
+                    </div>
+
+                    <div class="action-title">规则配置</div>
+
+                    <div class="action-desc">配置本校特定规则，包括营业时间、促销活动等</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="navigateToMerchantApproval()">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-clipboard-check"></i>
+
+                    </div>
+
+                    <div class="action-title">商户审核</div>
+
+                    <div class="action-desc">审核商户入驻申请，管理本校商户资质</div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <style>
+
+        /* 页脚样式 */
+
+        .footer {
+
+            background-color: white;
+
+            padding: 20px 0;
+
+            text-align: center;
+
+            color: #999;
+
+            font-size: 13px;
+
+            border-top: 1px solid #e5e5e5;
+
+            margin-top: 40px;
+
+        }
+
+        
+
+        .footer .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 15px;
+
+        }
+
+    </style>
+
+    
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="/main/admin/admin-permission.js"></script>
+
+    <script src="/main/admin/admin-navbar-dynamic.js"></script>
+
+    <script src="/main/admin/admin-quick-actions.js"></script>
+
+    
+
+    <script>
+
+        // 页面初始化权限检查与导航栏初始化
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 验证用户权限
+
+            if (window.AdminPermission) {
+
+                if (!AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                    return; // 无权限，已重定向
+
+                }
+
+            }
+
+            
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                window.DynamicNavbar.updateNavbar('school_admin_index.html');
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+            
+
+            // 加载热门菜品数据
+
+            loadTopDishes();
+
+            
+
+            // 加载食堂流量数据
+
+            loadCanteenRanking();
+
+            
+
+            // 初始化食堂流量图表
+
+            initCanteenTrafficChart();
+
+        });
+
+        
+
+        // 模拟热门菜品数据
+
+        const topDishesData = [
+
+            { name: '麻辣香锅', merchant: '川味香锅', orders: 856, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '黄焖鸡米饭', merchant: '黄焖鸡', orders: 742, image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '番茄鸡蛋面', merchant: '面点坊', orders: 698, image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '红烧肉套餐', merchant: '家常菜', orders: 634, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '酸菜鱼', merchant: '川味香锅', orders: 589, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '糖醋排骨', merchant: '家常菜', orders: 523, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '宫保鸡丁', merchant: '川味香锅', orders: 487, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '青椒肉丝', merchant: '家常菜', orders: 456, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '牛肉拉面', merchant: '面点坊', orders: 423, image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' },
+
+            { name: '鱼香肉丝', merchant: '家常菜', orders: 398, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=50&q=80' }
+
+        ];
+
+        
+
+        // 模拟食堂流量数据
+
+        const canteenRankingData = [
+
+            { name: '第一食堂', visitors: 3456, growth: 8.5 },
+
+            { name: '第二食堂', visitors: 2897, growth: 5.2 },
+
+            { name: '第三食堂', visitors: 2234, growth: 3.8 },
+
+            { name: '清真食堂', visitors: 1876, growth: -2.1 },
+
+            { name: '教工食堂', visitors: 1234, growth: 1.5 }
+
+        ];
+
+        
+
+        // 加载热门菜品数据
+
+        function loadTopDishes() {
+
+            const dishesHTML = topDishesData.map((dish, index) => {
+
+                const isTop3 = index < 3;
+
+                return `
+
+                    <div class="dish-item">
+
+                        <div class="dish-rank ${isTop3 ? 'top3' : ''}">${index + 1}</div>
+
+                        <div class="dish-info">
+
+                            <div class="dish-name">${dish.name}</div>
+
+                            <div class="dish-meta">
+
+                                <div class="dish-merchant">${dish.merchant}</div>
+
+                                <div class="dish-orders">
+
+                                    <i class="fas fa-shopping-cart"></i>
+
+                                    <span>${dish.orders} 单</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <img src="${dish.image}" alt="${dish.name}" class="dish-image">
+
+                    </div>
+
+                `;
+
+            }).join('');
+
+            
+
+            document.getElementById('topDishesList').innerHTML = dishesHTML;
+
+        }
+
+        
+
+        // 加载食堂流量数据
+
+        function loadCanteenRanking() {
+
+            const rankingHTML = canteenRankingData.map((canteen, index) => {
+
+                const isTop3 = index < 3;
+
+                return `
+
+                    <div class="ranking-item">
+
+                        <div class="ranking-number ${isTop3 ? 'top3' : ''}">${index + 1}</div>
+
+                        <div class="ranking-info">
+
+                            <div class="ranking-name">${canteen.name}</div>
+
+                            <div class="ranking-meta">
+
+                                <div class="ranking-visitors">${canteen.visitors} 人次</div>
+
+                                <div class="ranking-growth">
+
+                                    <i class="fas fa-arrow-${canteen.growth > 0 ? 'up' : 'down'} trend-${canteen.growth > 0 ? 'up' : 'down'}"></i>
+
+                                    <span>${Math.abs(canteen.growth)}%</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join('');
+
+            
+
+            document.getElementById('canteenRankingList').innerHTML = rankingHTML;
+
+        }
+
+        
+
+        // 初始化食堂流量图表
+
+        function initCanteenTrafficChart() {
+
+            const chartDom = document.getElementById('canteenTrafficChart');
+
+            if (!chartDom) return;
+
+            
+
+            const myChart = echarts.init(chartDom);
+
+            
+
+            const option = {
+
+                color: ['#1890ff', '#52c41a', '#faad14', '#ff4d4f'],
+
+                tooltip: {
+
+                    trigger: 'axis',
+
+                    axisPointer: {
+
+                        type: 'shadow'
+
+                    },
+
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+
+                    borderColor: '#e5e5e5',
+
+                    textStyle: {
+
+                        color: '#333'
+
+                    }
+
+                },
+
+                legend: {
+
+                    data: ['第一食堂', '第二食堂', '第三食堂', '清真食堂'],
+
+                    top: 10
+
+                },
+
+                grid: {
+
+                    left: '3%',
+
+                    right: '4%',
+
+                    bottom: '3%',
+
+                    top: '15%',
+
+                    containLabel: true
+
+                },
+
+                xAxis: {
+
+                    type: 'category',
+
+                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+
+                    axisLabel: {
+
+                        color: '#666',
+
+                        fontSize: 12
+
+                    }
+
+                },
+
+                yAxis: {
+
+                    type: 'value',
+
+                    axisLabel: {
+
+                        color: '#666',
+
+                        fontSize: 12
+
+                    }
+
+                },
+
+                series: [
+
+                    {
+
+                        name: '第一食堂',
+
+                        type: 'line',
+
+                        smooth: true,
+
+                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+
+                        areaStyle: {
+
+                            color: {
+
+                                type: 'linear',
+
+                                x: 0,
+
+                                y: 0,
+
+                                x2: 0,
+
+                                y2: 1,
+
+                                colorStops: [{
+
+                                    offset: 0, color: 'rgba(24, 144, 255, 0.3)'
+
+                                }, {
+
+                                    offset: 1, color: 'rgba(24, 144, 255, 0.05)'
+
+                                }]
+
+                            }
+
+                        }
+
+                    },
+
+                    {
+
+                        name: '第二食堂',
+
+                        type: 'line',
+
+                        smooth: true,
+
+                        data: [620, 732, 701, 734, 1090, 1130, 1120]
+
+                    },
+
+                    {
+
+                        name: '第三食堂',
+
+                        type: 'line',
+
+                        smooth: true,
+
+                        data: [420, 532, 501, 534, 890, 930, 920]
+
+                    },
+
+                    {
+
+                        name: '清真食堂',
+
+                        type: 'line',
+
+                        smooth: true,
+
+                        data: [320, 432, 401, 434, 690, 730, 720]
+
+                    }
+
+                ]
+
+            };
+
+            
+
+            myChart.setOption(option);
+
+            
+
+            // 响应式调整
+
+            window.addEventListener('resize', function() {
+
+                myChart.resize();
+
+            });
+
+        }
+
+        
+
+        // 刷新数据
+
+        function refreshData() {
+
+            // 显示加载状态
+
+            const btn = event.target.closest('.action-btn');
+
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
+
+            btn.disabled = true;
+
+            
+
+            // 模拟刷新数据
+
+            setTimeout(() => {
+
+                // 重新加载页面或更新数据
+
+                location.reload();
+
+            }, 1000);
+
+        }
+
+        
+
+        // 查看所有菜品
+
+        function viewAllDishes() {
+
+            Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminData());
+
+        }
+
+        
+
+        // 查看所有食堂
+
+        function viewAllCanteens() {
+
+            Router.navigate(ADMIN_ROUTES.getAbsoluteSchoolAdminData());
+
+        }
+
+        
+
+        // 本校专属功能模块导航函数
+
+        function navigateToLevelManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校层级管理页面\n权限限制：仅限本校层级');
+
+                // 实际应用中: Router.navigate('/main/admin/school_level_management.html');
+
+            }
+
+        }
+
+        
+
+        function navigateToUserManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校用户管理页面\n权限限制：仅限本校用户');
+
+                // 实际应用中: Router.navigate('/main/admin/school_user_management.html');
+
+            }
+
+        }
+
+        
+
+        function navigateToMerchantManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校商户管理页面\n权限限制：仅限本校商户');
+
+                // 实际应用中: Router.navigate('/main/admin/school_merchant_management.html');
+
+            }
+
+        }
+
+        
+
+        function navigateToContentPublish() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校内容发布页面\n权限限制：仅限本校内容');
+
+                // 实际应用中: Router.navigate('/main/admin/school_content_publish.html');
+
+            }
+
+        }
+
+        
+
+        function navigateToDataAnalysis() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校数据分析页面\n权限限制：仅限本校数据');
+
+                // 实际应用中: Router.navigate('/main/admin/school_data_analysis.html');
+
+            }
+
+        }
+
+        
+
+        function navigateToRuleConfiguration() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                showRuleConfiguration();
+
+            }
+
+        }
+
+        
+
+        function navigateToMerchantApproval() {
+
+            if (AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                alert('跳转至本校商户审核页面\n权限限制：仅限本校商户审核');
+
+                // 实际应用中: Router.navigate('/main/admin/school_merchant_approval.html');
+
+            }
+
+        }
+
+        
+
+
+
+        
+
+        // 规则配置相关函数
+
+        function showRuleConfiguration() {
+
+            // 打开规则配置模态框
+
+            openRuleConfigModal({
+
+                schoolId: 'school_001', // 使用默认学校ID
+
+                ruleTypes: ['business_hours', 'promotion', 'safety', 'hygiene'],
+
+                onSave: function(rules) {
+
+                    saveSchoolRules(rules).then(() => {
+
+                        showSuccess('规则配置已保存');
+
+                    });
+
+                }
+
+            });
+
+        }
+
+        
+
+        // 营业时间规则配置
+
+        function configureBusinessHours() {
+
+            alert('营业时间规则配置功能开发中...\n支持设置不同食堂的营业时间段。');
+
+            // 实现营业时间规则配置逻辑
+
+        }
+
+        
+
+        // 促销活动规则配置
+
+        function configurePromotionRules() {
+
+            alert('促销活动规则配置功能开发中...\n支持设置折扣、满减等促销活动。');
+
+            // 实现促销活动规则配置逻辑
+
+        }
+
+        
+
+        // 保存学校规则（模拟）
+
+        function saveSchoolRules(rules) {
+
+            console.log('保存学校规则:', rules);
+
+            return new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    resolve({ success: true, message: '规则保存成功' });
+
+                }, 1000);
+
+            });
+
+        }
+
+        
+
+        // 显示成功消息（模拟）
+
+        function showSuccess(message) {
+
+            alert('✅ ' + message);
+
+        }
+
+        
+
+        // 打开规则配置模态框（模拟）
+
+        function openRuleConfigModal(options) {
+
+            alert('规则配置界面开发中...\n学校ID: ' + options.schoolId + '\n规则类型: ' + options.ruleTypes.join(', '));
+
+            // 实际应用中应打开模态框进行规则配置
+
+        }
+
+        
+
+        // 页面初始化权限检查
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 验证用户权限
+
+            if (window.AdminPermission) {
+
+                // 验证用户角色
+
+                if (!AdminPermission.checkPermissionAndRedirect('school_admin')) {
+
+                    return; // 无权限，已重定向
+
+                }
+
+                
+
+                // 验证访问范围
+
+                if (!checkAccessScope()) {
+
+                    return; // 无访问权限，已重定向
+
+                }
+
+            }
+
+            
+
+            // 显示当前学校信息
+
+            const currentSchool = '东莞理工学院';
+
+            const schoolInfoElement = document.querySelector('.page-subtitle');
+
+            if (schoolInfoElement) {
+
+                schoolInfoElement.textContent = `本校数据概览与运营管理 - ${currentSchool}`;
+
+            }
+
+            
+
+            // 在导航栏显示学校标识
+
+            const navItem = document.querySelector('.nav-item');
+
+            if (navItem) {
+
+                navItem.innerHTML = `<i class="fas fa-university"></i> ${currentSchool}`;
+
+            }
+
+        });
+
+        
+
+        // 从URL获取学校ID的辅助函数
+
+        function getPageSchoolId() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+
+            return urlParams.get('schoolId') || 'school_001'; // 默认为当前学校
+
+        }
+
+        
+
+        // 访问范围检查 - 简化版本
+
+        function checkAccessScope() {
+
+            // 移除学校信息检查，直接返回成功
+
+            return true;
+
+        }
+
+    </script>
+
+</body>
+
+</html>

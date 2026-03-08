@@ -1,0 +1,2873 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>商户管理员工作台 - 校园食光</title>
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+    <script src="admin-permission.js"></script>
+
+    <script src="admin-navbar-dynamic.js"></script>
+
+    <script src="admin-quick-actions.js"></script>
+
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('shell') === '1') {
+                    document.documentElement.classList.add('embedded-shell');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    
+
+    <!-- 字体图标 -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+
+    <style>
+
+        /* 全局样式 - 与首页完全一致 */
+
+        :root {
+
+            --primary-color: #e60012;
+
+            --bg-gray: #f8f8f8;
+
+            --border-color: #e5e5e5;
+
+            --text-dark: #333;
+
+            --text-light: #999;
+
+            --status-open: #52c41a;
+
+            --status-closed: #ff4d4f;
+
+            --rating-color: #ffc107;
+
+            --tag-blue: #1890ff;
+
+            --spacing-small: 8px;
+
+            --spacing-medium: 15px;
+
+            --spacing-large: 20px;
+
+            --border-radius: 4px;
+
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+        }
+
+        
+
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+
+        }
+
+        
+
+        body {
+
+            background-color: var(--bg-gray);
+
+            color: var(--text-dark);
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        a {
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        
+
+        ul {
+
+            list-style: none;
+
+        }
+
+        
+
+        .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        /* 顶部导航栏 - 与首页一致 */
+
+        .global-nav {
+
+            background-color: var(--primary-color);
+
+            height: 45px;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            z-index: 1000;
+
+            color: white;
+
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+
+        }
+
+        
+
+        .nav-container {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 var(--spacing-large);
+
+        }
+
+        
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+        
+
+        .logo i {
+
+            margin-right: 8px;
+
+        }
+
+        
+
+        .nav-right {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .nav-item {
+
+            margin-left: 20px;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            padding: 5px 0;
+
+        }
+
+        
+
+        .nav-item:hover {
+
+            opacity: 0.9;
+
+        }
+
+        
+
+        .nav-item.active::after {
+
+            content: '';
+
+            position: absolute;
+
+            bottom: 0;
+
+            left: 0;
+
+            right: 0;
+
+            height: 2px;
+
+            background-color: white;
+
+        }
+
+        
+
+        /* 主导航 - 与首页一致 */
+
+        .main-nav {
+
+            background-color: white;
+
+            height: 50px;
+
+            margin-top: 45px;
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            position: sticky;
+
+            top: 45px;
+
+            z-index: 999;
+
+        }
+
+        
+
+        .nav-tabs {
+
+            display: flex;
+
+            height: 100%;
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+        }
+
+        
+
+        .nav-tab {
+
+            flex: 1;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            color: var(--text-dark);
+
+            border-bottom: 2px solid transparent;
+
+            transition: all 0.3s;
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab:hover {
+
+            color: var(--primary-color);
+
+            text-decoration: none;
+
+        }
+
+        
+
+        .nav-tab.active {
+
+            color: var(--primary-color);
+
+            border-bottom-color: var(--primary-color);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .nav-tab i {
+
+            margin-right: 5px;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 主要内容区域 */
+
+        .admin-main {
+
+            padding: var(--spacing-large) 0 60px;
+
+        }
+
+        /* Shell 嵌入模式：当通过 admin_shell.html iframe 加载时隐藏本页导航 */
+        html.embedded-shell .global-nav,
+        html.embedded-shell .main-nav {
+            display: none !important;
+        }
+
+        
+
+        /* 页面标题 */
+
+        .page-header {
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .page-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .page-title i {
+
+            margin-right: 10px;
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .page-subtitle {
+
+            color: var(--text-light);
+
+            font-size: 14px;
+
+        }
+
+        
+
+        /* 数据概览 */
+
+        .stats-section {
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .section-title {
+
+            font-size: 18px;
+
+            margin-bottom: var(--spacing-medium);
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .stat-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            align-items: center;
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+        }
+
+        
+
+        .stat-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .stat-icon {
+
+            width: 50px;
+
+            height: 50px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 15px;
+
+            font-size: 20px;
+
+        }
+
+        
+
+        .stat-icon.visitors {
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .stat-icon.comments {
+
+            background-color: rgba(82, 196, 26, 0.1);
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .stat-icon.orders {
+
+            background-color: rgba(255, 193, 7, 0.1);
+
+            color: var(--rating-color);
+
+        }
+
+        
+
+        .stat-icon.dishes {
+
+            background-color: rgba(24, 144, 255, 0.1);
+
+            color: var(--tag-blue);
+
+        }
+
+        
+
+        .stat-info {
+
+            flex: 1;
+
+        }
+
+        
+
+        .stat-value {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 3px;
+
+        }
+
+        
+
+        .stat-label {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        /* 快捷操作 */
+
+        .quick-actions {
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .actions-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+
+            gap: var(--spacing-medium);
+
+        }
+
+        
+
+        .action-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            text-align: center;
+
+            transition: all 0.3s;
+
+            cursor: pointer;
+
+            border: 1px solid transparent;
+
+        }
+
+        
+
+        .action-card:hover {
+
+            border-color: var(--primary-color);
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .action-icon {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            background-color: var(--primary-color);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: white;
+
+            margin-bottom: 12px;
+
+            font-size: 16px;
+
+        }
+
+        
+
+        .action-title {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        /* 任务和食堂管理 */
+
+        .admin-content {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .admin-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+        }
+
+        
+
+        .admin-card:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow: var(--shadow-hover);
+
+        }
+
+        
+
+        .card-header {
+
+            padding: var(--spacing-medium);
+
+            border-bottom: 1px solid var(--border-color);
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .card-header i {
+
+            margin-right: 10px;
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        .card-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .card-body {
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        /* 任务列表 */
+
+        .task-list {
+
+            list-style: none;
+
+        }
+
+        
+
+        .task-item {
+
+            padding: 12px 0;
+
+            border-bottom: 1px solid var(--border-color);
+
+            display: flex;
+
+            align-items: flex-start;
+
+        }
+
+        
+
+        .task-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .task-icon {
+
+            width: 24px;
+
+            height: 24px;
+
+            border-radius: 50%;
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 12px;
+
+            font-size: 12px;
+
+            flex-shrink: 0;
+
+        }
+
+        
+
+        .task-content {
+
+            flex: 1;
+
+        }
+
+        
+
+        .task-title {
+
+            font-size: 14px;
+
+            margin-bottom: 4px;
+
+        }
+
+        
+
+        .task-desc {
+
+            font-size: 12px;
+
+            color: var(--text-light);
+
+            margin-bottom: 6px;
+
+        }
+
+        
+
+        .task-time {
+
+            font-size: 11px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .task-action {
+
+            font-size: 12px;
+
+            color: var(--primary-color);
+
+            cursor: pointer;
+
+            flex-shrink: 0;
+
+            align-self: center;
+
+        }
+
+        
+
+        /* 食堂列表 */
+
+        .canteen-item {
+
+            padding: 12px 0;
+
+            border-bottom: 1px solid var(--border-color);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+        }
+
+        
+
+        .canteen-item:last-child {
+
+            border-bottom: none;
+
+        }
+
+        
+
+        .canteen-info {
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+        
+
+        .canteen-icon {
+
+            width: 36px;
+
+            height: 36px;
+
+            border-radius: 50%;
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            color: var(--primary-color);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 12px;
+
+        }
+
+        
+
+        .canteen-name {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .status-tag {
+
+            font-size: 12px;
+
+            padding: 3px 8px;
+
+            border-radius: 3px;
+
+            margin-left: 10px;
+
+        }
+
+        
+
+        .status-open {
+
+            background-color: rgba(82, 196, 26, 0.1);
+
+            color: var(--status-open);
+
+        }
+
+        
+
+        .status-closed {
+
+            background-color: rgba(255, 77, 79, 0.1);
+
+            color: var(--status-closed);
+
+        }
+
+        
+
+        .edit-btn {
+
+            background-color: transparent;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 3px;
+
+            padding: 5px 12px;
+
+            font-size: 12px;
+
+            color: var(--text-light);
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .edit-btn:hover {
+
+            border-color: var(--primary-color);
+
+            color: var(--primary-color);
+
+        }
+
+        
+
+        /* 退出工作台样式已集中到 navbar.js 注入，避免重复 */
+
+        
+
+        /* 响应式调整 */
+
+        @media (max-width: 768px) {
+
+            .container {
+
+                padding: 0 var(--spacing-medium);
+
+            }
+
+            
+
+            .stats-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .actions-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+            
+
+            .admin-content {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            
+
+            .nav-tabs {
+
+                overflow-x: auto;
+
+            }
+
+            
+
+            .nav-tab {
+
+                flex: 0 0 auto;
+
+                padding: 0 15px;
+
+                font-size: 14px;
+
+            }
+
+        }
+
+        
+
+        /* 操作按钮 */
+
+        .action-btn {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 10px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+        
+
+        .action-btn:hover {
+
+            background-color: #cc0010;
+
+        }
+
+        
+
+        /* 商户专属功能模块样式 */
+
+        .merchant-modules {
+
+            margin-bottom: var(--spacing-large);
+
+        }
+
+        
+
+        .merchant-modules .section-header {
+
+            margin-bottom: 15px;
+
+        }
+
+        
+
+        .merchant-modules .section-title {
+
+            font-size: 18px;
+
+            margin-bottom: 5px;
+
+            font-weight: 500;
+
+        }
+
+        
+
+        .merchant-modules .section-subtitle {
+
+            font-size: 14px;
+
+            color: var(--text-light);
+
+            font-weight: normal;
+
+        }
+
+        
+
+        .merchant-modules .modules-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+
+            gap: var(--spacing-large);
+
+            margin-top: 15px;
+
+        }
+
+        
+
+        .merchant-modules .module-card {
+
+            background-color: white;
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-card);
+
+            overflow: hidden;
+
+            transition: transform 0.3s, box-shadow 0.3s;
+
+            border: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .merchant-modules .module-card:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow: var(--shadow-hover);
+
+            border-color: #e60012;
+
+        }
+
+        
+
+        .merchant-modules .module-header {
+
+            background-color: rgba(230, 0, 18, 0.1);
+
+            padding: var(--spacing-medium);
+
+            display: flex;
+
+            align-items: center;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        
+
+        .merchant-modules .module-header i {
+
+            font-size: 20px;
+
+            color: #e60012;
+
+            margin-right: 12px;
+
+            width: 24px;
+
+            text-align: center;
+
+        }
+
+        
+
+        .merchant-modules .module-title {
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+            color: var(--text-dark);
+
+        }
+
+        
+
+        .merchant-modules .module-content {
+
+            padding: var(--spacing-medium);
+
+        }
+
+        
+
+        .merchant-modules .module-content p {
+
+            color: var(--text-dark);
+
+            margin-bottom: 15px;
+
+            line-height: 1.6;
+
+            font-size: 14px;
+
+        }
+
+        
+
+        .merchant-modules .module-stats {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 8px 0;
+
+            border-top: 1px dashed var(--border-color);
+
+        }
+
+        
+
+        .merchant-modules .module-stats:first-child {
+
+            border-top: none;
+
+        }
+
+        
+
+        .merchant-modules .stat-label {
+
+            font-size: 13px;
+
+            color: var(--text-light);
+
+        }
+
+        
+
+        .merchant-modules .stat-value {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+            color: #e60012;
+
+        }
+
+        
+
+        .merchant-modules .module-footer {
+
+            padding: var(--spacing-medium);
+
+            background-color: #fafafa;
+
+            border-top: 1px solid var(--border-color);
+
+            text-align: right;
+
+        }
+
+        
+
+        .merchant-modules .module-btn {
+
+            background-color: #e60012;
+
+            color: white;
+
+            border: none;
+
+            border-radius: var(--border-radius);
+
+            padding: 8px 20px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: all 0.3s;
+
+        }
+
+        
+
+        .merchant-modules .module-btn:hover {
+
+            background-color: #cc0010;
+
+        }
+
+        
+
+        @media (max-width: 992px) {
+
+            .merchant-modules .modules-grid {
+
+                grid-template-columns: repeat(2, 1fr);
+
+            }
+
+        }
+
+        
+
+        @media (max-width: 768px) {
+
+            .merchant-modules .modules-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+        
+
+        /* 工具类 */
+
+        .hidden {
+
+            display: none !important;
+
+        }
+
+    </style>
+
+    <script src="/config.js"></script>
+
+    <script src="/router.js"></script>
+
+</head>
+
+<body>
+
+    <!-- 顶部导航栏 -->
+
+    <nav class="global-nav">
+
+        <div class="nav-container">
+
+            <div class="logo">
+
+                <i class="fas fa-utensils"></i>
+
+                第一食堂 - 商户管理员
+
+            </div>
+
+            <div class="nav-right">
+
+                <div class="nav-item">
+
+                    <i class="fas fa-user-circle me-1"></i> 商户管理员: 李经理
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    
+
+    <!-- 主导航 -->
+
+    <nav class="main-nav">
+
+        <div class="nav-tabs">
+
+            <a class="nav-tab active" href="javascript:void(0)" onclick="Router.toAdminIndex()">
+
+                <i class="fas fa-tachometer-alt"></i> 控制台
+
+            </a>
+
+            <a class="nav-tab" href="javascript:void(0)" onclick="navigateToDishManagement()">
+
+                <i class="fas fa-utensils"></i> 菜品管理
+
+            </a>
+
+            <a class="nav-tab" href="javascript:void(0)" onclick="navigateToReputationManagement()">
+
+                <i class="fas fa-star"></i> 口碑管理
+
+            </a>
+
+            <a class="nav-tab" href="javascript:void(0)" onclick="navigateToStallManagement()">
+
+                <i class="fas fa-store-alt"></i> 档口管理
+
+            </a>
+
+            <a class="nav-tab" href="javascript:void(0)" onclick="navigateToContentPublish()">
+
+                <i class="fas fa-bullhorn"></i> 内容发布
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    
+
+    <!-- 主要内容 -->
+
+    <main class="container admin-main">
+
+        <!-- 页面标题 -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+
+                    <i class="fas fa-tachometer-alt"></i> 第一食堂 - 商户管理员工作台
+
+                </h1>
+
+                <p class="page-subtitle">本商户数据概览与运营管理 | 权限范围：仅限本商户层级</p>
+
+            </div>
+
+            <button class="action-btn" onclick="refreshData()">
+
+                <i class="fas fa-sync-alt"></i> 刷新数据
+
+            </button>
+
+        </div>
+
+        
+
+        <!-- 数据概览 -->
+
+        <section class="stats-section">
+
+            <h2 class="section-title">今日数据概览</h2>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon visitors">
+
+                        <i class="fas fa-shopping-cart"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <div class="stat-value" id="merchantTodayOrders">248</div>
+
+                        <div class="stat-label">今日订单数</div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="stat-card">
+
+                    <div class="stat-icon comments">
+
+                        <i class="fas fa-yen-sign"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <div class="stat-value" id="merchantTodayRevenue">¥5,846</div>
+
+                        <div class="stat-label">今日营业额</div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orders">
+
+                        <i class="fas fa-star"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <div class="stat-value" id="merchantAvgRating">4.8</div>
+
+                        <div class="stat-label">顾客评价分</div>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="stat-card">
+
+                    <div class="stat-icon dishes">
+
+                        <i class="fas fa-exclamation-triangle"></i>
+
+                    </div>
+
+                    <div class="stat-info">
+
+                        <div class="stat-value" id="merchantStockWarnings">3</div>
+
+                        <div class="stat-label">库存预警菜品</div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 快捷操作 -->
+
+        <section class="quick-actions">
+
+            <h2 class="section-title">快捷操作入口</h2>
+
+            <div class="actions-grid">
+
+                <div class="action-card" onclick="openQuickAction('scan')">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-qrcode"></i>
+
+                    </div>
+
+                    <div class="action-title">扫码快编菜品</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="openQuickAction('excel')">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-file-excel"></i>
+
+                    </div>
+
+                    <div class="action-title">批量导入菜品</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="openQuickAction('stall')">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-store-alt"></i>
+
+                    </div>
+
+                    <div class="action-title">档口管理</div>
+
+                </div>
+
+                
+
+                <div class="action-card" onclick="openQuickAction('map')">
+
+                    <div class="action-icon">
+
+                        <i class="fas fa-map-marker-alt"></i>
+
+                    </div>
+
+                    <div class="action-title">地图点位编辑</div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 商户专属功能模块 -->
+
+        <section class="merchant-modules">
+
+            <div class="section-header">
+
+                <div class="section-title">商户专属功能</div>
+
+                <div class="section-subtitle">仅限本商户层级的管理权限</div>
+
+            </div>
+
+            
+
+            <div class="modules-grid">
+
+                <div class="module-card" onclick="navigateToHierarchyManagement()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-sitemap"></i>
+
+                        <div class="module-title">层级管理</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>管理本商户档口层级结构，包括窗口、工作站等下级单元。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">档口总数:</span>
+
+                            <span class="stat-value">8</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">活跃档口:</span>
+
+                            <span class="stat-value">7</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToHierarchyManagement()">进入管理</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToStaffManagement()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-users-cog"></i>
+
+                        <div class="module-title">员工管理</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>管理本商户工作人员信息，包括厨师、服务员等岗位。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">员工总数:</span>
+
+                            <span class="stat-value">24</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">今日在岗:</span>
+
+                            <span class="stat-value">18</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToStaffManagement()">管理员工</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToDishManagement()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-utensils"></i>
+
+                        <div class="module-title">菜品管理</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>维护本商户菜品信息，包括价格、库存、图片等。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">菜品总数:</span>
+
+                            <span class="stat-value">86</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">在售菜品:</span>
+
+                            <span class="stat-value">78</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToDishManagement()">管理菜品</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToContentPublish()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-newspaper"></i>
+
+                        <div class="module-title">内容发布</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>发布本商户宣传内容，包括促销活动、新品推荐等。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">本月发布:</span>
+
+                            <span class="stat-value">5</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">阅读总数:</span>
+
+                            <span class="stat-value">3.2K</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToContentPublish()">发布内容</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToReputationManagement()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-star"></i>
+
+                        <div class="module-title">口碑管理</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>查看和回复顾客评价，管理本商户口碑评分。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">平均评分:</span>
+
+                            <span class="stat-value">4.8</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">待回复评价:</span>
+
+                            <span class="stat-value">5</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToReputationManagement()">管理口碑</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToDataAnalysis()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-chart-pie"></i>
+
+                        <div class="module-title">数据分析</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>查看本商户运营数据报表，了解销售趋势和顾客偏好。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">今日销售额:</span>
+
+                            <span class="stat-value">¥5,846</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">热门菜品:</span>
+
+                            <span class="stat-value">宫保鸡丁</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToDataAnalysis()">查看报表</button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <div class="module-card" onclick="navigateToMapPointEdit()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-map-marker-alt"></i>
+
+                        <div class="module-title">地图点位编辑</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>编辑本商户在校园地图上的位置和展示信息。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">地图点位:</span>
+
+                            <span class="stat-value">3</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">导航准确率:</span>
+
+                            <span class="stat-value">98%</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToMapPointEdit()">编辑点位</button>
+
+                </div>
+
+                </div>
+
+                
+
+                <!-- 岗位权限管理模块 -->
+
+                <div class="module-card" onclick="navigateToStaffRoles()">
+
+                    <div class="module-header">
+
+                        <i class="fas fa-user-shield"></i>
+
+                        <div class="module-title">岗位权限</div>
+
+                    </div>
+
+                    <div class="module-content">
+
+                        <p>配置员工岗位权限，如厨师、服务员、收银员等。</p>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">岗位数量:</span>
+
+                            <span class="stat-value">5</span>
+
+                        </div>
+
+                        <div class="module-stats">
+
+                            <span class="stat-label">权限模板:</span>
+
+                            <span class="stat-value">3</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="module-footer">
+
+                        <button class="module-btn" onclick="navigateToStaffRoles()">管理岗位</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        
+
+        <!-- 任务和档口管理 -->
+
+        <div class="admin-content">
+
+            <!-- 待处理事项 -->
+
+            <div class="admin-card">
+
+                <div class="card-header">
+
+                    <i class="fas fa-tasks"></i>
+
+                    <div class="card-title">待处理事项</div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <ul class="task-list">
+
+                        <li class="task-item">
+
+                            <div class="task-icon">
+
+                                <i class="fas fa-exclamation"></i>
+
+                            </div>
+
+                            <div class="task-content">
+
+                                <div class="task-title">5条新顾客评价需要回复</div>
+
+                                <div class="task-desc">包含2条建议需要及时处理</div>
+
+                                <div class="task-time">15分钟前</div>
+
+                            </div>
+
+                            <div class="task-action" onclick="handleTask('review')">去回复</div>
+
+                        </li>
+
+                        
+
+                        <li class="task-item">
+
+                            <div class="task-icon">
+
+                                <i class="fas fa-exclamation"></i>
+
+                            </div>
+
+                            <div class="task-content">
+
+                                <div class="task-title">川菜窗口3个菜品库存不足</div>
+
+                                <div class="task-desc">需要及时补充食材原料</div>
+
+                                <div class="task-time">45分钟前</div>
+
+                            </div>
+
+                            <div class="task-action" onclick="handleTask('menu')">去补充</div>
+
+                        </li>
+
+                        
+
+                        <li class="task-item">
+
+                            <div class="task-icon">
+
+                                <i class="fas fa-exclamation"></i>
+
+                            </div>
+
+                            <div class="task-content">
+
+                                <div class="task-title">2个档口营业时间需要调整</div>
+
+                                <div class="task-desc">根据客流情况优化营业时段</div>
+
+                                <div class="task-time">1小时前</div>
+
+                            </div>
+
+                            <div class="task-action" onclick="handleTask('hours')">去调整</div>
+
+                        </li>
+
+                        
+
+                        <li class="task-item">
+
+                            <div class="task-icon">
+
+                                <i class="fas fa-exclamation"></i>
+
+                            </div>
+
+                            <div class="task-content">
+
+                                <div class="task-title">价格异常提醒：宫保鸡丁</div>
+
+                                <div class="task-desc">原材料价格上涨需调整售价</div>
+
+                                <div class="task-time">3小时前</div>
+
+                            </div>
+
+                            <div class="task-action" onclick="handleTask('price')">去处理</div>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            
+
+            <!-- 食堂列表 -->
+
+            <div class="admin-card">
+
+                <div class="card-header">
+
+                    <i class="fas fa-store-alt"></i>
+
+                    <div class="card-title">档口列表管理</div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="canteen-list">
+
+                        <div class="canteen-item">
+
+                            <div class="canteen-info">
+
+                                <div class="canteen-icon">
+
+                                    <i class="fas fa-pepper-hot"></i>
+
+                                </div>
+
+                                <div class="canteen-name">川菜窗口</div>
+
+                                <span class="status-tag status-open">营业中</span>
+
+                            </div>
+
+                            <button class="edit-btn" onclick="editStall('川菜窗口')">编辑</button>
+
+                        </div>
+
+                        
+
+                        <div class="canteen-item">
+
+                            <div class="canteen-info">
+
+                                <div class="canteen-icon">
+
+                                    <i class="fas fa-fish"></i>
+
+                                </div>
+
+                                <div class="canteen-name">粤菜窗口</div>
+
+                                <span class="status-tag status-open">营业中</span>
+
+                            </div>
+
+                            <button class="edit-btn" onclick="editStall('粤菜窗口')">编辑</button>
+
+                        </div>
+
+                        
+
+                        <div class="canteen-item">
+
+                            <div class="canteen-info">
+
+                                <div class="canteen-icon">
+
+                                    <i class="fas fa-wheat-alt"></i>
+
+                                </div>
+
+                                <div class="canteen-name">面食窗口</div>
+
+                                <span class="status-tag status-closed">维护中</span>
+
+                            </div>
+
+                            <button class="edit-btn" onclick="editStall('面食窗口')">编辑</button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+    </main>
+
+    
+
+    <script>
+
+        // 设置管理员身份标识
+
+        localStorage.setItem('userRole', 'admin');
+
+        
+
+        // 简单的交互功能
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 导航激活状态
+
+            const currentPage = '控制台';
+
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+
+                if (tab.textContent.includes(currentPage)) {
+
+                    tab.classList.add('active');
+
+                } else {
+
+                    tab.classList.remove('active');
+
+                }
+
+            });
+
+            // 加载商户统计
+            loadMerchantStats();
+
+        });
+
+        
+
+        // 刷新数据
+
+        function refreshData() {
+
+            // 显示加载状态
+
+            const btn = event.target.closest('.action-btn');
+
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
+
+            btn.disabled = true;
+
+            
+
+            loadMerchantStats().finally(() => {
+
+                btn.innerHTML = originalText;
+
+                btn.disabled = false;
+
+            });
+
+        }
+
+        async function loadMerchantStats() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/merchant/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const result = await response.json();
+
+                if (result.code === 200 && result.data) {
+                    const stats = result.data;
+                    const ordersEl = document.getElementById('merchantTodayOrders');
+                    const revenueEl = document.getElementById('merchantTodayRevenue');
+                    const ratingEl = document.getElementById('merchantAvgRating');
+                    const stockEl = document.getElementById('merchantStockWarnings');
+
+                    if (ordersEl) ordersEl.textContent = stats.todayOrders ?? '--';
+                    if (revenueEl) revenueEl.textContent = stats.todayRevenue ?? '--';
+                    if (ratingEl) ratingEl.textContent = stats.avgRating ?? '--';
+                    if (stockEl) stockEl.textContent = stats.stockWarnings ?? '--';
+                } else {
+                    console.error('加载商户统计失败:', result.message);
+                }
+            } catch (error) {
+                console.error('加载商户统计错误:', error);
+            }
+        }
+
+
+
+        // 编辑档口
+
+        function editStall(stallName) {
+
+            alert(`即将编辑档口 ${stallName} 的信息`);
+
+            // 实际应用中这里会跳转到档口编辑页面或打开编辑弹窗
+
+        }
+
+        
+
+        // 处理任务
+
+        function handleTask(taskType) {
+
+            const taskTitles = {
+
+                'review': '评价回复',
+
+                'menu': '菜品补充',
+
+                'hours': '营业时间调整',
+
+                'price': '价格调整'
+
+            };
+
+            alert(`处理任务: ${taskTitles[taskType]}`);
+
+            // 实际应用中这里会跳转到对应任务处理页面
+
+        }
+
+        
+
+        // 快捷操作处理函数
+
+        function openQuickAction(actionType) {
+
+            const actionTitles = {
+
+                'scan': '扫码快编菜品',
+
+                'excel': '批量导入菜品',
+
+                'stall': '档口管理',
+
+                'map': '地图点位编辑'
+
+            };
+
+            alert(`打开快捷操作: ${actionTitles[actionType]}`);
+
+            // 实际应用中这里会执行相应的快捷操作
+
+        }
+
+        
+
+        // 商户功能模块导航函数
+
+        function navigateToHierarchyManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                showStallManagement();
+
+            }
+
+        }
+
+        
+
+        function navigateToStaffManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至商户员工管理页面\n权限限制：仅限本商户员工');
+
+            }
+
+        }
+
+        
+
+        function navigateToDishManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至菜品管理页面\n权限限制：仅限本商户菜品');
+
+            }
+
+        }
+
+        
+
+        function navigateToContentPublish() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至内容发布页面\n权限限制：仅限本商户内容');
+
+            }
+
+        }
+
+        
+
+        function navigateToReputationManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至口碑管理页面\n权限限制：仅限本商户评价');
+
+            }
+
+        }
+
+        
+
+        function navigateToDataAnalysis() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至数据分析页面\n权限限制：仅限本商户数据');
+
+            }
+
+        }
+
+        
+
+        function navigateToMapPointEdit() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                // 打开地图编辑弹窗
+
+                openMapEditor({
+
+                    merchantId: AdminPermission.getCurrentMerchantId(),
+
+                    allowedOperations: ['add_point', 'edit_point', 'delete_point', 'move_point'],
+
+                    onSave: function(mapData) {
+
+                        // 调用API保存地图点位
+
+                        saveMapPoints(mapData).then(() => {
+
+                            showSuccess('地图点位已保存');
+
+                        }).catch(error => {
+
+                            showError('地图保存失败: ' + error.message);
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+        }
+
+        
+
+        function navigateToStallManagement() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                alert('跳转至档口管理页面\n权限限制：仅限本商户档口');
+
+            }
+
+        }
+
+        
+
+        
+
+
+
+        
+
+        // 地图编辑相关函数
+
+        function openMapEditor(options) {
+
+            // 模拟地图编辑器
+
+            alert('地图编辑器开发中...\n商户ID: ' + options.merchantId + '\n支持操作: ' + options.allowedOperations.join(', '));
+
+            // 实际应用中应打开模态框，加载地图编辑器
+
+        }
+
+        
+
+        function saveMapPoints(mapData) {
+
+            console.log('保存地图点位数据:', mapData);
+
+            return new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    resolve({ success: true, message: '地图点位保存成功' });
+
+                }, 1000);
+
+            });
+
+        }
+
+        
+
+        function showSuccess(message) {
+
+            alert('✅ ' + message);
+
+        }
+
+        
+
+        function showError(message) {
+
+            alert('❌ ' + message);
+
+        }
+
+        
+
+        // 层级管理相关函数
+
+        function showStallManagement() {
+
+            openStallManager({
+
+                merchantId: AdminPermission.getCurrentMerchantId(),
+
+                operations: ['add_stall', 'edit_stall', 'delete_stall', 'set_status'],
+
+                onStallAdded: function(stallData) {
+
+                    showSuccess('档口添加成功: ' + stallData.name);
+
+                },
+
+                onStallStatusChanged: function(stallId, newStatus) {
+
+                    showSuccess('档口状态已更新');
+
+                }
+
+            });
+
+        }
+
+        
+
+        function openStallManager(options) {
+
+            alert('档口管理器开发中...\n商户ID: ' + options.merchantId + '\n支持操作: ' + options.operations.join(', '));
+
+        }
+
+        
+
+        function batchUpdateStallStatus() {
+
+            alert('档口状态批量设置功能开发中...\n支持批量设置营业/休息状态。');
+
+        }
+
+        
+
+        function configurePermissionInheritance() {
+
+            alert('权限继承配置功能开发中...\n支持下级单元继承上级权限。');
+
+        }
+
+        
+
+        // 岗位权限管理相关函数
+
+        function navigateToStaffRoles() {
+
+            if (AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                // 打开岗位权限管理界面
+
+                openRoleManager({
+
+                    merchantId: AdminPermission.getCurrentMerchantId(),
+
+                    roleTypes: ['chef', 'waiter', 'cashier', 'manager', 'cleaner'],
+
+                    onRoleConfigured: function(roleData) {
+
+                        saveStaffRoles(roleData).then(() => {
+
+                            showSuccess('岗位权限配置已保存');
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+        }
+
+        
+
+        function openRoleManager(options) {
+
+            alert('岗位权限管理器开发中...\n商户ID: ' + options.merchantId + '\n岗位类型: ' + options.roleTypes.join(', '));
+
+        }
+
+        
+
+        function saveStaffRoles(roleData) {
+
+            console.log('保存员工岗位权限:', roleData);
+
+            return new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    resolve({ success: true, message: '岗位权限保存成功' });
+
+                }, 1000);
+
+            });
+
+        }
+
+        
+
+        // 页面初始化权限检查
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 验证用户权限
+
+            if (window.AdminPermission) {
+
+                if (!AdminPermission.checkPermissionAndRedirect('merchant_admin')) {
+
+                    return; // 无权限，已重定向
+
+                }
+
+                
+
+                // 验证访问范围
+
+                if (!checkMerchantAccessScope()) {
+
+                    return; // 无访问权限
+
+                }
+
+            }
+
+            
+
+            // 初始化动态导航栏
+
+            if (window.DynamicNavbar) {
+
+                const currentPage = window.location.pathname.split('/').pop();
+
+                window.DynamicNavbar.updateNavbar(currentPage);
+
+                window.DynamicNavbar.updateTopNavUserInfo();
+
+            }
+
+            
+
+            // 显示当前商户信息
+
+            const currentMerchant = '第一食堂';
+
+            const merchantInfoElement = document.querySelector('.page-subtitle');
+
+            if (merchantInfoElement) {
+
+                merchantInfoElement.textContent = `本商户数据概览与运营管理 | 权限范围：仅限本商户层级`;
+
+            }
+
+        });
+
+        
+
+        // 商户访问范围检查
+
+        function checkMerchantAccessScope() {
+
+            const allowedMerchantIds = ['merchant_001']; // 从登录信息获取
+
+            const currentPageMerchantId = 'merchant_001'; // 从URL或页面参数获取
+
+            
+
+            if (!allowedMerchantIds.includes(currentPageMerchantId)) {
+
+                alert('访问权限受限！\n您只能访问本商户的管理页面。');
+
+                // Router.navigate(ADMIN_ROUTES.getAbsoluteMerchantAdminIndex());
+
+                return false;
+
+            }
+
+            
+
+            return true;
+
+        }
+
+        
+
+        // 退出工作台
+
+        function exitWorkbench() {
+
+            if (confirm('确定要退出工作台，进入学生界面吗？')) {
+
+                // 在 session 中记录当前 admin 页面，以便用户页面可返回到来源页面
+
+                try { sessionStorage.setItem('lastAdminUrl', window.location.href); } catch(e) {}
+
+                // 保留管理员标识，以便在普通用户界面中显示"进入工作台"按钮
+
+                try { localStorage.setItem('userRole', 'admin'); } catch(e) {}
+
+                // 跳转到学生首页（使用Router）
+
+                Router.toUserIndex();
+
+            }
+
+        }
+
+        
+
+
+
+    </script>
+
+    
+
+    <!-- 退出工作台按钮 -->
+
+    <div class="exit-workbench">
+
+        <button class="exit-workbench-btn" onclick="exitWorkbench()">
+
+            <i class="fas fa-sign-out-alt"></i> 退出工作台，进入学生界面
+
+        </button>
+
+    </div>
+
+    
+
+    <div class="mode-switch-tip">
+
+        点击上方按钮可切换到学生界面，以学生身份使用平台
+
+    </div>
+
+    
+
+    <!-- 页脚 -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <p>校园食光 - 多校AI美食社区平台</p>
+
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+
+        </div>
+
+    </footer>
+
+    
+
+    <style>
+
+        /* 退出工作台按钮样式 */
+
+        .exit-workbench { display: flex; justify-content: center; margin-top: 40px; padding-top: var(--spacing-medium); }
+
+        .exit-workbench-btn { background-color: white; border: 1px solid var(--border-color); border-radius: 3px; padding: 12px 24px; font-size: 15px; color: var(--text-dark); cursor: pointer; display: flex; align-items: center; transition: all 0.3s; font-weight: 500; box-shadow: var(--shadow-card); }
+
+        .exit-workbench-btn:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+        .exit-workbench-btn i { margin-right: 8px; color: var(--primary-color); }
+
+        .mode-switch-tip { text-align: center; margin-top: 12px; color: var(--text-light); font-size: 13px; }
+
+        /* 页脚样式 */
+
+        .footer {
+
+            background-color: white;
+
+            padding: 20px 0;
+
+            text-align: center;
+
+            color: #999;
+
+            font-size: 13px;
+
+            border-top: 1px solid #e5e5e5;
+
+            margin-top: 40px;
+
+        }
+
+        
+
+        .footer .container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 15px;
+
+        }
+
+    </style>
+
+</body>
+
+</html>

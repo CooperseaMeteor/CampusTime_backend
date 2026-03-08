@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>早餐打卡 - 热门话题 - 校园食光</title>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/navigation-manager.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e60012;
+            --bg-gray: #f8f8f8;
+            --border-color: #e5e5e5;
+            --text-dark: #333;
+            --text-light: #999;
+            --status-open: #52c41a;
+            --rating-color: #ffc107;
+            --tag-blue: #1890ff;
+            --spacing-small: 8px;
+            --spacing-medium: 15px;
+            --spacing-large: 20px;
+            --border-radius: 4px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-large);
+        }
+        
+        .global-nav {
+            background-color: var(--primary-color);
+            height: 45px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            margin-left: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .nav-item:hover {
+            opacity: 0.9;
+        }
+        
+        .main-nav {
+            background-color: white;
+            height: 50px;
+            margin-top: 45px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-tab:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding-top: var(--spacing-large);
+            padding-bottom: 50px;
+        }
+        
+        .topic-header {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-large);
+            box-shadow: var(--shadow-card);
+            margin-bottom: var(--spacing-large);
+            color: white;
+        }
+        
+        .topic-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .topic-icon-large {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+        }
+        
+        .topic-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: var(--spacing-medium);
+            font-size: 14px;
+        }
+        
+        .topic-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .topic-stat i {
+            margin-right: 5px;
+        }
+        
+        .topic-description {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-large);
+            box-shadow: var(--shadow-card);
+            margin-bottom: var(--spacing-large);
+        }
+        
+        .topic-description h3 {
+            font-size: 18px;
+            margin-bottom: var(--spacing-medium);
+            color: var(--text-dark);
+        }
+        
+        .topic-description p {
+            color: var(--text-dark);
+            line-height: 1.8;
+            margin-bottom: var(--spacing-medium);
+        }
+        
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: var(--spacing-medium);
+        }
+        
+        .topic-tag {
+            background-color: #fce4ec;
+            color: #f368e0;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        .filter-bar {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-medium);
+            box-shadow: var(--shadow-card);
+            margin-bottom: var(--spacing-large);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .filter-tab {
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        .filter-tab:hover {
+            color: var(--primary-color);
+        }
+        
+        .filter-tab.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .filter-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-dropdown {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: white;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+        
+        .posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-large);
+        }
+        
+        .post-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .post-header {
+            padding: var(--spacing-medium);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .post-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .post-user-info h4 {
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+        
+        .post-user-info p {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .post-time {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .post-body {
+            padding: var(--spacing-medium);
+        }
+        
+        .post-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .post-content {
+            color: var(--text-dark);
+            margin-bottom: var(--spacing-medium);
+            line-height: 1.6;
+        }
+        
+        .post-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: var(--spacing-medium);
+        }
+        
+        .post-img {
+            height: 100px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: var(--spacing-medium);
+        }
+        
+        .post-tag {
+            background-color: #fce4ec;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #f368e0;
+            cursor: pointer;
+        }
+        
+        .post-tag:hover {
+            background-color: #f8bbd0;
+        }
+        
+        .post-footer {
+            padding: var(--spacing-medium);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+        
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+        
+        .action-btn i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        .post-stats {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+        
+        .campus-tag {
+            background-color: #fce4ec;
+            color: #f368e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #d5000f;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer {
+            background-color: white;
+            padding: var(--spacing-large) 0;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 13px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .load-more {
+            text-align: center;
+            margin-top: var(--spacing-large);
+        }
+        
+        .load-more-btn {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 3px;
+            padding: 10px 30px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .load-more-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-medium);
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .nav-tab {
+                min-width: 100px;
+                font-size: 14px;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .filter-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .post-images {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <script src="/config.js"></script>
+    <script src="/router.js"></script>
+    <script src="/main/user/components/navigation-component.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="topic-header">
+                <div class="topic-title">
+                    <div class="topic-icon-large">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <div>
+                        <div>早餐打卡</div>
+                        <div style="font-size: 14px; font-weight: normal; margin-top: 5px;">每天早上吃什么？分享你的早餐时光</div>
+                    </div>
+                </div>
+                <div class="topic-stats">
+                    <div class="topic-stat">
+                        <i class="fas fa-comments"></i>
+                        <span>267 讨论</span>
+                    </div>
+                    <div class="topic-stat">
+                        <i class="fas fa-eye"></i>
+                        <span>2.9k 浏览</span>
+                    </div>
+                    <div class="topic-stat">
+                        <i class="fas fa-users"></i>
+                        <span>198 参与者</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="topic-description">
+                <h3><i class="fas fa-info-circle"></i> 话题介绍</h3>
+                <p>欢迎来到早餐打卡话题区！在这里，你可以每天分享自己的早餐，记录美好的早晨时光。无论是食堂的包子、豆浆，还是自己做的早餐，都可以在这里打卡！</p>
+                <div class="topic-tags">
+                    <span class="topic-tag">#早餐</span>
+                    <span class="topic-tag">#打卡</span>
+                    <span class="topic-tag">#早安</span>
+                    <span class="topic-tag">#校园美食</span>
+                    <span class="topic-tag">#每日一餐</span>
+                </div>
+            </div>
+            
+            <div class="filter-bar">
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="changeFilter('recommended', this)">推荐</div>
+                    <div class="filter-tab" onclick="changeFilter('latest', this)">最新</div>
+                    <div class="filter-tab" onclick="changeFilter('hot', this)">热门</div>
+                </div>
+                <div class="filter-right">
+                    <select class="filter-dropdown" onchange="filterByCampus(this.value)">
+                        <option value="">全部校区</option>
+                        <option value="松山湖">松山湖校区</option>
+                        <option value="莞城">莞城校区</option>
+                    </select>
+                    <select class="filter-dropdown" onchange="filterByCanteen(this.value)">
+                        <option value="">全部食堂</option>
+                        <option value="第一食堂">第一食堂</option>
+                        <option value="第二食堂">第二食堂</option>
+                        <option value="第三食堂">第三食堂</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="posts-list">
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="post-user-info">
+                                <h4>马同学</h4>
+                                <p>东莞理工学院 · 文学院</p>
+                            </div>
+                        </div>
+                        <div class="post-time">30分钟前</div>
+                    </div>
+                    <div class="post-body">
+                        <h3 class="post-title">早安！今天的早餐是莞城食堂的鲜虾肠粉<span class="campus-tag">莞城校区</span></h3>
+                        <p class="post-content">今天早上在莞城食堂点了鲜虾肠粉，肠粉皮薄滑嫩，虾仁新鲜饱满，酱油鲜美不腻。搭配一杯豆浆，完美开启美好的一天！</p>
+                        
+                        <div class="post-images">
+                            <div class="post-img">鲜虾肠粉图片</div>
+                            <div class="post-img">豆浆</div>
+                        </div>
+                        
+                        <div class="post-tags">
+                            <span class="post-tag">#早餐</span>
+                            <span class="post-tag">#肠粉</span>
+                            <span class="post-tag">#莞城食堂</span>
+                            <span class="post-tag">#早安</span>
+                        </div>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <div class="action-btn">
+                                <i class="fas fa-thumbs-up"></i> 点赞 <span>24</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-comment"></i> 评论 <span>12</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-share"></i> 分享
+                            </div>
+                        </div>
+                        <div class="post-stats">
+                            <span><i class="fas fa-eye"></i> 134 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="post-user-info">
+                                <h4>朱同学</h4>
+                                <p>东莞理工学院 · 教育学院</p>
+                            </div>
+                        </div>
+                        <div class="post-time">2小时前</div>
+                    </div>
+                    <div class="post-body">
+                        <h3 class="post-title">第一食堂的包子豆浆，经典早餐组合<span class="campus-tag">松山湖校区</span></h3>
+                        <p class="post-content">今天早上在第一食堂买了两个包子和一杯豆浆，总共才5元。包子皮软馅足，豆浆香浓，性价比超高！推荐给喜欢中式早餐的同学。</p>
+                        
+                        <div class="post-images">
+                            <div class="post-img">包子图片</div>
+                            <div class="post-img">豆浆</div>
+                        </div>
+                        
+                        <div class="post-tags">
+                            <span class="post-tag">#早餐</span>
+                            <span class="post-tag">#包子</span>
+                            <span class="post-tag">#豆浆</span>
+                            <span class="post-tag">#第一食堂</span>
+                        </div>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <div class="action-btn">
+                                <i class="fas fa-thumbs-up"></i> 点赞 <span>19</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-comment"></i> 评论 <span>9</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-share"></i> 分享
+                            </div>
+                        </div>
+                        <div class="post-stats">
+                            <span><i class="fas fa-eye"></i> 108 浏览</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <div class="post-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="post-user-info">
+                                <h4>高同学</h4>
+                                <p>东莞理工学院 · 音乐学院</p>
+                            </div>
+                        </div>
+                        <div class="post-time">4小时前</div>
+                    </div>
+                    <div class="post-body">
+                        <h3 class="post-title">第三食堂的粥品，暖心早餐<span class="campus-tag">松山湖校区</span></h3>
+                        <p class="post-content">今天早上在第三食堂点了皮蛋瘦肉粥，粥底熬得很稠，皮蛋和瘦肉分量很足。配上一根油条，暖胃又暖心。价格8元，很实惠！</p>
+                        
+                        <div class="post-images">
+                            <div class="post-img">皮蛋瘦肉粥图片</div>
+                            <div class="post-img">油条</div>
+                        </div>
+                        
+                        <div class="post-tags">
+                            <span class="post-tag">#早餐</span>
+                            <span class="post-tag">#粥</span>
+                            <span class="post-tag">#第三食堂</span>
+                            <span class="post-tag">#暖心</span>
+                        </div>
+                    </div>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <div class="action-btn">
+                                <i class="fas fa-thumbs-up"></i> 点赞 <span>16</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-comment"></i> 评论 <span>7</span>
+                            </div>
+                            <div class="action-btn">
+                                <i class="fas fa-share"></i> 分享
+                            </div>
+                        </div>
+                        <div class="post-stats">
+                            <span><i class="fas fa-eye"></i> 89 浏览</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="load-more">
+                <button class="load-more-btn" onclick="loadMorePosts()">加载更多帖子</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>校园食光 - 多校AI美食社区平台</p>
+            <p>平台域名：campusfood.cn | © 2025 校园食光 版权所有</p>
+            <p><a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026006924号-1</a></p>
+        </div>
+    </footer>
+    
+    <script>
+        function changeFilter(filter, element) {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            element.classList.add('active');
+            console.log(`切换到${filter}动态`);
+        }
+        
+        function filterByCampus(campus) {
+            if(campus) {
+                console.log(`筛选校区：${campus}`);
+            }
+        }
+        
+        function filterByCanteen(canteen) {
+            if(canteen) {
+                console.log(`筛选食堂：${canteen}`);
+            }
+        }
+        
+        function loadMorePosts() {
+            alert('加载更多帖子...');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = decodeURIComponent((window.location.pathname.split('/').pop() || 'index.html'));
+            const navTabs = document.querySelectorAll('.nav-tab');
+            let anyActive = false;
+
+            navTabs.forEach(tab => {
+                const href = tab.getAttribute('href') || '';
+                const tabPage = decodeURIComponent(href.split('/').pop() || '');
+                if(tabPage && tabPage === currentPage) {
+                    tab.classList.add('active');
+                    anyActive = true;
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            if(!anyActive) {
+                navTabs.forEach(tab => {
+                    const text = (tab.textContent || '').trim();
+                    if(text.startsWith('社区') || (document.title && document.title.includes('社区') && text.includes('社区'))) {
+                        tab.classList.add('active');
+                        anyActive = true;
+                    }
+                });
+            }
+            
+            console.log('早餐打卡话题页面加载完成');
+        });
+    </script>
+</body>
+</html>

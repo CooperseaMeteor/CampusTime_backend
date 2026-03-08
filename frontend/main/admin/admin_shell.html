@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理员控制台 - 校园食光</title>
+  <script src="/config.js"></script>
+  <script src="/router.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #e60012;
+      --bg-gray: #f8f8f8;
+      --border-color: #e5e5e5;
+      --text-dark: #333;
+      --text-light: #999;
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; }
+
+    body { background: var(--bg-gray); color: var(--text-dark); height: 100vh; overflow: hidden; }
+
+    .shell-topbar {
+      height: 52px;
+      background: var(--primary-color);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand i { opacity: .95; }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      font-size: 13px;
+      cursor: default;
+      user-select: none;
+    }
+
+    .position-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      font-size: 13px;
+    }
+
+    .position-select select {
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      max-width: 280px;
+    }
+
+    .position-select select option { color: #000; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn:hover { background: rgba(255,255,255,.16); }
+
+    .shell-main {
+      height: calc(100vh - 52px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shell-empty {
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .empty-card {
+      width: min(720px, 92vw);
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow-card);
+      padding: 18px;
+    }
+
+    .empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .empty-desc { color: var(--text-light); font-size: 13px; line-height: 1.6; }
+
+    .shell-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg-gray);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="shell-topbar">
+    <div class="brand">
+      <i class="fas fa-shield-alt"></i>
+      <span>校园食光 · 管理员控制台</span>
+    </div>
+
+    <div class="topbar-right">
+      <div class="position-select" title="切换职位/岗位">
+        <i class="fas fa-sitemap"></i>
+        <select id="positionSelect" aria-label="职位选择"></select>
+      </div>
+
+      <div class="user-chip" id="userChip">
+        <i class="fas fa-user-circle"></i>
+        <span id="userName">未登录</span>
+      </div>
+
+      <button class="btn" id="logoutBtn" type="button">
+        <i class="fas fa-sign-out-alt"></i>
+        退出
+      </button>
+    </div>
+  </header>
+
+  <main class="shell-main">
+    <div class="shell-empty" id="emptyState">
+      <div class="empty-card">
+        <div class="empty-title">当前账号未配置任何职位</div>
+        <div class="empty-desc">
+          该账号暂未绑定到任何管理位置（学校/商户层级节点/档口）。<br/>
+          请联系上级管理员在“人员配置”中为你绑定职位后再进入控制台。
+        </div>
+      </div>
+    </div>
+
+    <iframe class="shell-frame" id="contentFrame" title="控制台内容"></iframe>
+  </main>
+
+  <script src="./admin-shell.js"></script>
+</body>
+</html>

@@ -19,7 +19,9 @@ const pool = mysql.createPool({
 pool.getConnection()
     .then(connection => {
         console.log('✅ 数据库连接成功');
-        return connection.query('SELECT 1 AS ok')
+        // 设置连接字符集
+        return connection.query("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'")
+            .then(() => connection.query('SELECT 1 AS ok'))
             .then(([rows]) => {
                 console.log('✅ 数据库查询可用:', rows[0]);
                 connection.release();

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝塔面板 - 管理员系统迁移指南</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #e60012 0%, #ff4444 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        .step {
+            background: #f9f9f9;
+            border-left: 5px solid #e60012;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .step h2 {
+            color: #e60012;
+            font-size: 24px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #e60012;
+            color: white;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .step h3 {
+            color: #333;
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-left: 20px;
+            border-left: 3px solid #ffc107;
+        }
+        .step p {
+            margin: 10px 0;
+            color: #555;
+        }
+        .step ol, .step ul {
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+        .step li {
+            margin: 8px 0;
+            color: #555;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+        .code-block::before {
+            content: 'SQL';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: #e60012;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .warning-box p {
+            color: #856404;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .danger-box {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .danger-box h4 {
+            color: #721c24;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .info-box h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .screenshot {
+            border: 3px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 5px;
+            margin: 15px 0;
+            background: #f5f5f5;
+            text-align: center;
+        }
+        .screenshot img {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+        .screenshot p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+        .checklist li {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checklist li:hover {
+            border-color: #e60012;
+            background: #fff5f5;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .footer p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #e60012;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #c70010;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230,0,18,0.3);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 宝塔面板操作指南</h1>
+            <p>《校园食光》管理员系统数据迁移 - 完整可视化步骤</p>
+        </div>
+
+        <div class="content">
+            <!-- 重要警告 -->
+            <div class="danger-box">
+                <h4>⚠️ 开始前必读</h4>
+                <p><strong>请务必先备份数据库！</strong></p>
+                <p>在宝塔面板中：数据库 → 找到你的数据库 → 点击"备份"按钮</p>
+                <p>备份完成后再继续下面的操作。</p>
+            </div>
+
+            <!-- 第一步：备份数据库 -->
+            <div class="step">
+                <h2><span class="step-number">1</span> 备份现有数据库</h2>
+                
+                <h3>📍 在宝塔面板中操作</h3>
+                <ol>
+                    <li>登录宝塔面板</li>
+                    <li>点击左侧菜单 <strong>"数据库"</strong></li>
+                    <li>找到你的数据库（例如：<code>campus_food</code>）</li>
+                    <li>点击数据库右侧的 <strong>"备份"</strong> 按钮</li>
+                    <li>等待备份完成（会显示绿色提示）</li>
+                </ol>
+
+                <div class="success-box">
+                    <h4>✅ 验证备份</h4>
+                    <p>点击 "备份列表" 查看刚才的备份文件是否存在</p>
+                </div>
+
+                <div class="screenshot">
+                    <p>💡 宝塔面板 → 数据库 → 备份</p>
+                </div>
+            </div>
+
+            <!-- 第二步：执行 SQL 检查 -->
+            <div class="step">
+                <h2><span class="step-number">2</span> 检查现有管理员数据</h2>
+                
+                <h3>📍 在宝塔面板 phpMyAdmin 中操作</h3>
+                <ol>
+                    <li>点击数据库右侧的 <strong>"管理"</strong> 按钮（打开 phpMyAdmin）</li>
+                    <li>点击顶部 <strong>"SQL"</strong> 标签</li>
+                    <li>复制下面的 SQL 并粘贴到输入框</li>
+                    <li>点击 <strong>"执行"</strong></li>
+                </ol>
+
+                <div class="code-block">-- 查看现有管理员
+SELECT 
+    id,
+    username,
+    role,
+    real_name,
+    created_at,
+    status
+FROM users
+WHERE role = 'admin'
+ORDER BY role, created_at;
+
+-- 统计各类管理员数量
+SELECT 
+    role,
+    COUNT(*) as count
+FROM users
+WHERE role = 'admin'
+GROUP BY role;</div>
+
+                <div class="info-box">
+                    <h4>📊 记录结果</h4>
+                    <p>记下有多少个管理员，稍后验证迁移结果时会用到。</p>
+                </div>
+            </div>
+
+            <!-- 第三步：创建备份表 -->
+            <div class="step">
+                <h2><span class="step-number">3</span> 创建备份表</h2>
+                
+                <h3>📍 在 phpMyAdmin SQL 窗口执行</h3>
+
+                <div class="code-block">-- 创建 users 表的备份
+CREATE TABLE IF NOT EXISTS users_backup_20260201 AS SELECT * FROM users;</div>
+
+                <div class="success-box">
+                    <h4>✅ 验证备份表</h4>
+                    <p>在左侧数据库列表中应该能看到新创建的 <code>users_backup_20260201</code> 表</p>
+                </div>
+            </div>
+
+            <!-- 第四步：数据迁移 -->
+            <div class="step">
+                <h2><span class="step-number">4</span> 执行数据迁移</h2>
+                
+                <div class="warning-box">
+                    <h4>⚠️ 注意</h4>
+                    <p>下面的 SQL 会将现有 users 表中的管理员数据迁移到新的 admin_users 和 admin_positions 表。</p>
+                    <p>确保你已经执行过 <code>admin_system.sql</code> 创建了新表。</p>
+                </div>
+
+                <h3>4.1 迁移管理员账户</h3>
+                <div class="code-block">-- 迁移管理员账户到 admin_users
+INSERT INTO admin_users (
+    id,
+    username,
+    password_hash,
+    real_name,
+    phone,
+    email,
+    identity_label,
+    identity_suffix,
+    identity_suffix_status,
+    status,
+    created_by,
+    created_at,
+    updated_at
+)
+SELECT 
+    u.id,
+    u.username,
+    u.password_hash,
+    COALESCE(u.real_name, u.username) as real_name,
+    u.phone,
+    NULL as email,
+    CASE 
+        WHEN u.username LIKE '%超级管理员%' THEN '运营专员'
+        WHEN u.username LIKE '%学校管理员%' THEN '教职工'
+        ELSE '工作人员'
+    END as identity_label,
+    NULL as identity_suffix,
+    'draft' as identity_suffix_status,
+    CASE 
+        WHEN u.status = 'active' THEN 'active'
+        ELSE 'disabled'
+    END as status,
+    NULL as created_by,
+    u.created_at,
+    u.updated_at
+FROM users u
+WHERE u.role = 'admin'
+ON DUPLICATE KEY UPDATE
+    real_name = VALUES(real_name),
+    identity_label = VALUES(identity_label),
+    updated_at = NOW();</div>
+
+                <h3>4.2 迁移管理员职位</h3>
+                <div class="info-box">
+                    <h4>📝 重要说明</h4>
+                    <p>你的 users 表没有 <code>school_id</code>/<code>merchant_id</code>/<code>stall_id</code> 字段，所以下面仅创建职位与角色，节点绑定后续在管理员界面手动分配。</p>
+                </div>
+
+                <div class="code-block">-- 迁移管理员职位（不绑定节点，后续在后台手动分配）
+INSERT INTO admin_positions (
+    admin_id,
+    role,
+    assigned_by,
+    assigned_at
+)
+SELECT 
+    u.id as admin_id,
+    CASE 
+        WHEN u.username LIKE '%超级管理员%' THEN 'super_admin'
+        WHEN u.username LIKE '%学校管理员%' THEN 'school_admin'
+        WHEN u.username LIKE '%商户管理员%' THEN 'merchant_admin'
+        WHEN u.username LIKE '%档口管理员%' THEN 'stall_admin'
+        ELSE 'school_admin'
+    END as role,
+    COALESCE(
+        (SELECT id FROM admin_users WHERE username = '超级管理员' LIMIT 1),
+        (SELECT id FROM admin_users ORDER BY id LIMIT 1)
+    ) as assigned_by,
+    u.created_at as assigned_at
+FROM users u
+WHERE u.role = 'admin'
+ON DUPLICATE KEY UPDATE
+    assigned_at = VALUES(assigned_at);</div>
+
+                <h3>4.3 分配默认权限</h3>
+                <div class="code-block">-- 为每个职位分配默认权限
+INSERT INTO admin_permissions (
+    position_id,
+    permission,
+    granted_by,
+    granted_at
+)
+SELECT 
+    ap.id as position_id,
+    rtp.permission,
+    1 as granted_by,
+    NOW() as granted_at
+FROM admin_positions ap
+JOIN role_template_permissions rtp ON rtp.role = ap.role AND rtp.is_default = TRUE
+WHERE NOT EXISTS (
+    SELECT 1 FROM admin_permissions 
+    WHERE position_id = ap.id AND permission = rtp.permission
+);</div>
+            </div>
+
+            <!-- 第五步：验证迁移 -->
+            <div class="step">
+                <h2><span class="step-number">5</span> 验证迁移结果</h2>
+                
+                <h3>📍 执行验证 SQL</h3>
+
+                <div class="code-block">-- 检查迁移后的数据
+SELECT '原 users 表管理员' as 类型, COUNT(*) as 数量
+FROM users
+WHERE role = 'admin'
+UNION ALL
+SELECT '新 admin_users 表' as 类型, COUNT(*) as 数量
+FROM admin_users
+UNION ALL
+SELECT '新 admin_positions 表' as 类型, COUNT(*) as 数量
+FROM admin_positions
+UNION ALL
+SELECT '已分配权限' as 类型, COUNT(*) as 数量
+FROM admin_permissions
+WHERE revoked_at IS NULL;</div>
+
+                <div class="success-box">
+                    <h4>✅ 对比数量</h4>
+                    <p>原 users 表管理员数量应该等于新 admin_users 表的数量。</p>
+                    <p>如果数字匹配，说明迁移成功！</p>
+                </div>
+
+                <h3>查看具体数据</h3>
+                <div class="code-block">-- 查看迁移后的管理员
+SELECT 
+    au.id,
+    au.username,
+    au.real_name,
+    au.identity_label,
+    au.status,
+    COUNT(ap.id) as position_count
+FROM admin_users au
+LEFT JOIN admin_positions ap ON ap.admin_id = au.id AND ap.unassigned_at IS NULL
+GROUP BY au.id
+ORDER BY au.id;</div>
+            </div>
+
+            <!-- 第六步：修复注册接口 -->
+            <div class="step">
+                <h2><span class="step-number">6</span> 禁止注册管理员</h2>
+                
+                <div class="warning-box">
+                    <h4>⚠️ 重要安全措施</h4>
+                    <p>现在注册接口还可以直接注册管理员，这是严重的安全隐患！</p>
+                    <p>我们需要通过两种方式修复：</p>
+                    <ol>
+                        <li>数据库层面：添加触发器防止插入管理员</li>
+                        <li>代码层面：后端强制检查（已修复）</li>
+                    </ol>
+                </div>
+
+                <h3>6.1 添加数据库触发器</h3>
+                <div class="code-block">-- 创建触发器防止注册管理员
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS prevent_admin_registration$$
+
+CREATE TRIGGER prevent_admin_registration
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.role = 'admin' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = '禁止通过注册接口创建管理员账户';
+    END IF;
+END$$
+
+DELIMITER ;</div>
+
+                <h3>6.2 验证触发器</h3>
+                <div class="code-block">-- 验证触发器是否创建成功
+SELECT 
+    TRIGGER_NAME,
+    EVENT_MANIPULATION,
+    EVENT_OBJECT_TABLE,
+    ACTION_TIMING
+FROM information_schema.TRIGGERS
+WHERE TRIGGER_SCHEMA = DATABASE()
+  AND TRIGGER_NAME = 'prevent_admin_registration';</div>
+
+                <div class="success-box">
+                    <h4>✅ 后端代码已修复</h4>
+                    <p>文件 <code>backend/controllers/authController.js</code> 已更新。</p>
+                    <p>现在即使前端传入 <code>isAdmin=true</code>，后端也会返回 403 错误。</p>
+                </div>
+
+                <h3>6.3 标记已迁移的用户</h3>
+                <div class="code-block">-- 为 users 表添加迁移标记字段
+ALTER TABLE users ADD COLUMN IF NOT EXISTS migrated_to_admin_system BOOLEAN DEFAULT FALSE;
+
+-- 标记已迁移的管理员
+UPDATE users 
+SET migrated_to_admin_system = TRUE
+WHERE role = 'admin';</div>
+            </div>
+
+            <!-- 第七步：测试 -->
+            <div class="step">
+                <h2><span class="step-number">7</span> 测试验证</h2>
+                
+                <h3>📋 完成以下测试清单</h3>
+                <ul class="checklist">
+                    <li>
+                        <input type="checkbox" id="test1">
+                        <label for="test1">✓ 尝试通过注册窗口注册管理员（应该失败）</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test2">
+                        <label for="test2">✓ 使用现有管理员账号登录（应该成功）</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test3">
+                        <label for="test3">✓ 访问管理员列表页面 <code>admin_manage.html</code></label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test4">
+                        <label for="test4">✓ 在管理员列表中能看到迁移后的数据</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test5">
+                        <label for="test5">✓ 创建一个新管理员（通过管理员界面）</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test6">
+                        <label for="test6">✓ 测试权限校验（低级别管理员不能执行高级别操作）</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="test7">
+                        <label for="test7">✓ 查看审计日志是否正常记录</label>
+                    </li>
+                </ul>
+
+                <h3>测试注册接口</h3>
+                <div class="code-block">// 在浏览器控制台执行（应该返回 403 错误）
+fetch('/api/auth/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: 'test_admin',
+    password: '123456',
+    isAdmin: true
+  })
+})
+.then(r => r.json())
+.then(console.log);</div>
+
+                <div class="success-box">
+                    <h4>✅ 期望结果</h4>
+                    <p><code>{ "code": 403, "message": "禁止通过注册接口创建管理员账户" }</code></p>
+                </div>
+            </div>
+
+            <!-- 第八步：清理（可选） -->
+            <div class="step">
+                <h2><span class="step-number">8</span> 清理和优化（可选）</h2>
+                
+                <div class="info-box">
+                    <h4>📝 说明</h4>
+                    <p>这一步是可选的。如果你确认迁移无误，可以清理一些冗余数据。</p>
+                </div>
+
+                <h3>方案 A：保留原 users 表中的管理员（推荐）</h3>
+                <p>不删除，只是标记为已迁移。这样可以保留历史数据作为备份。</p>
+                <div class="code-block">-- 已在第 6 步完成
+-- users.migrated_to_admin_system = TRUE</div>
+
+                <h3>方案 B：删除原 users 表中的管理员（谨慎！）</h3>
+                <div class="danger-box">
+                    <h4>⚠️ 危险操作</h4>
+                    <p>只有在你<strong>完全确认</strong>迁移无误后才执行！</p>
+                    <p>建议先运行至少 1-2 周，确保系统稳定后再删除。</p>
+                </div>
+
+                <div class="code-block">-- 删除原 users 表中的管理员（谨慎！）
+-- DELETE FROM users 
+-- WHERE role = 'admin';</div>
+
+                <h3>重建索引</h3>
+                <div class="code-block">-- 优化新表
+OPTIMIZE TABLE admin_users;
+OPTIMIZE TABLE admin_positions;
+OPTIMIZE TABLE admin_permissions;</div>
+            </div>
+
+            <!-- 完成 -->
+            <div class="success-box" style="margin-top: 40px;">
+                <h4>🎉 恭喜！迁移完成</h4>
+                <p>你已经成功将现有管理员数据迁移到新的管理员权限系统。</p>
+                <p><strong>下一步：</strong></p>
+                <ul>
+                    <li>测试所有管理员功能</li>
+                    <li>检查权限校验是否正常</li>
+                    <li>查看审计日志</li>
+                    <li>培训管理员使用新系统</li>
+                </ul>
+            </div>
+
+            <!-- 问题排查 -->
+            <div class="step">
+                <h2>🆘 常见问题排查</h2>
+                
+                <h3>问题 1：迁移后数量不匹配</h3>
+                <p><strong>原因：</strong>可能有些管理员在 users 表中没有正确的 role 标记。</p>
+                <p><strong>解决：</strong>手动查看 users 表，找出漏掉的管理员并手动迁移。</p>
+
+                <h3>问题 2：职位关联字段不存在</h3>
+                <p><strong>原因：</strong>你的 users 表可能没有 school_id/merchant_id/stall_id 字段。</p>
+                <p><strong>解决：</strong>跳过步骤 4.2，改为在管理员界面手动分配职位。</p>
+
+                <h3>问题 3：管理员登录后没有权限</h3>
+                <p><strong>原因：</strong>可能没有执行步骤 4.3 分配默认权限。</p>
+                <p><strong>解决：</strong>重新执行步骤 4.3 的 SQL。</p>
+
+                <h3>问题 4：注册接口还是能创建管理员</h3>
+                <p><strong>原因：</strong>后端代码没有更新或触发器创建失败。</p>
+                <p><strong>解决：</strong>检查 authController.js 是否已更新，重启后端服务。</p>
+
+                <h3>问题 5：触发器创建失败</h3>
+                <p><strong>原因：</strong>phpMyAdmin 不支持 DELIMITER 语法。</p>
+                <p><strong>解决：</strong>改用宝塔命令行：</p>
+                <div class="code-block">mysql -u root -p数据库名 < fix_registration.sql</div>
+            </div>
+
+            <!-- 快捷SQL合集 -->
+            <div class="step">
+                <h2>📎 快捷 SQL 合集</h2>
+                
+                <h3>一键执行完整迁移</h3>
+                <p>如果你想一次性执行所有迁移步骤，可以使用以下方式：</p>
+                
+                <div class="info-box">
+                    <h4>方法 1：在宝塔面板中</h4>
+                    <ol>
+                        <li>找到文件 <code>backend/sql/migrate_existing_data.sql</code></li>
+                        <li>复制全部内容</li>
+                        <li>在 phpMyAdmin SQL 窗口粘贴并执行</li>
+                    </ol>
+                </div>
+
+                <div class="info-box">
+                    <h4>方法 2：使用宝塔终端（推荐）</h4>
+                    <div class="code-block">cd /www/wwwroot/你的项目目录/backend/sql
+mysql -u root -p数据库名 < migrate_existing_data.sql</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🎯 《校园食光》管理员系统迁移指南</p>
+            <p>最后更新：2026年2月1日</p>
+            <p>如遇问题，请查看 ADMIN_SYSTEM_PROGRESS.md 或联系技术支持</p>
+            <div style="margin-top: 20px;">
+                <a href="INTEGRATION_CHECKLIST.html" class="btn">查看集成清单</a>
+                <a href="../ADMIN_SYSTEM_FILE_INDEX.md" class="btn btn-secondary">文件索引</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 保存复选框状态
+        document.querySelectorAll('.checklist input[type="checkbox"]').forEach(checkbox => {
+            const id = checkbox.id;
+            checkbox.checked = localStorage.getItem('migration_' + id) === 'true';
+            
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem('migration_' + id, this.checked);
+            });
+        });
+
+        console.log('✅ 宝塔面板迁移指南已加载');
+        console.log('📁 迁移脚本: backend/sql/migrate_existing_data.sql');
+        console.log('📁 修复注册: backend/sql/fix_registration.sql');
+    </script>
+</body>
+</html>
