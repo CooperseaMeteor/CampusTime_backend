@@ -1364,6 +1364,33 @@
 
         }
 
+        .appflow-frame-wrap {
+            flex: 1;
+            min-height: 0;
+            background: #fff;
+        }
+
+        .appflow-frame {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: 0;
+            display: block;
+            background: #fff;
+        }
+
+        .appflow-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            padding: 24px;
+            text-align: center;
+        }
+
         
 
         .chat-header {
@@ -3272,6 +3299,8 @@
 
         .ai-fab {
 
+            display: none !important;
+
             position: fixed;
 
             bottom: 30px;
@@ -3315,6 +3344,7 @@
             box-shadow: 0 6px 16px rgba(230, 0, 18, 0.4);
 
         }
+
 
         
 
@@ -4610,15 +4640,140 @@
 
     <script>
 
-        // AI调用改为走后端代理，避免在前端暴露密钥
-        async function callBailianAI(userMessage) {
+        const conversationHistory = [];
+        let isSending = false;
+        const USE_APPFLOW_IFRAME = true;
+
+        function normalizeAppflowUrl(rawValue) {
+            if (!rawValue) return '';
+            const value = String(rawValue).trim();
+            if (!value) return '';
+
+            // 兼容用户直接粘贴官方完整 iframe 代码的情况。
+            const iframeSrcMatch = value.match(/src\s*=\s*['\"]?([^'\"\s>]+)/i);
+            const maybeUrl = iframeSrcMatch ? iframeSrcMatch[1] : value;
+
+            if (/^https?:\/\//i.test(maybeUrl)) {
+                return maybeUrl;
+            }
+
+            return '';
+        }
+
+        function getAppflowIframeUrl() {
+            const fromConfig = (window.CONFIG && CONFIG.APPFLOW_IFRAME_URL) ? CONFIG.APPFLOW_IFRAME_URL : '';
+            const fromWindow = window.APPFLOW_IFRAME_URL || '';
+            const fromStorage = localStorage.getItem('APPFLOW_IFRAME_URL') || '';
+            return normalizeAppflowUrl(fromConfig) || normalizeAppflowUrl(fromWindow) || normalizeAppflowUrl(fromStorage) || '';
+        }
+
+        function renderAppflowIframe() {
+            const chatArea = document.querySelector('.ai-chat-area');
+            if (!chatArea) return;
+
+            const appflowIframeUrl = getAppflowIframeUrl();
+
+            if (appflowIframeUrl) {
+                chatArea.innerHTML = `
+                    <div class="chat-header">
+                        <div class="chat-title">校园食光AI助手</div>
+                    </div>
+                    <div class="appflow-frame-wrap">
+                        <iframe
+                            id="appflow-iframe"
+                            class="appflow-frame"
+                            src="${escapeHtml(appflowIframeUrl)}"
+                            title="校园食光 AppFlow 智能体"
+                            referrerpolicy="no-referrer"
+                            allow="clipboard-read; clipboard-write"
+                        ></iframe>
+                    </div>
+                `;
+                return;
+            }
+
+            chatArea.innerHTML = `
+                <div class="chat-header">
+                    <div class="chat-title">校园食光AI助手</div>
+                </div>
+                <div class="appflow-placeholder">
+                    <p>未检测到 AppFlow iframe 地址。</p>
+                    <p>请在 <code>localStorage.APPFLOW_IFRAME_URL</code> 或 <code>CONFIG.APPFLOW_IFRAME_URL</code> 配置完整嵌入链接。</p>
+                </div>
+            `;
+        }
+
+        async function quickQuestionForIframe(question) {
+            const iframe = document.getElementById('appflow-iframe');
+
+            // Best-effort: if AppFlow page supports postMessage, it can consume this payload.
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/ai/chat`, {
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage(
+                        {
+                            type: 'appflow.quickQuestion',
+                            question
+                        },
+                        '*'
+                    );
+                }
+            } catch (e) {
+                // Ignore cross-origin messaging issues and continue with clipboard fallback.
+            }
+
+            try {
+                await navigator.clipboard.writeText(question);
+                alert('已复制快速提问内容，请在 AppFlow 窗口中粘贴发送。');
+            } catch (e) {
+                alert(`快速提问：${question}\n\n请手动复制到 AppFlow 窗口发送。`);
+            }
+        }
+
+        function buildApiUrl(path) {
+            const apiBase = (window.CONFIG && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : `${window.location.origin}/api`;
+            return `${apiBase}${path.startsWith('/') ? path : `/${path}`}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatMessageHtml(content) {
+            return escapeHtml(content).replace(/\n/g, '<br>');
+        }
+
+        function setSendingState(sending) {
+            const input = document.getElementById('chat-input');
+            const sendBtn = document.querySelector('.chat-send-btn');
+            if (input) input.disabled = sending;
+            if (sendBtn) sendBtn.disabled = sending;
+            isSending = sending;
+        }
+
+        function pushConversation(role, content) {
+            conversationHistory.push({ role, content });
+            if (conversationHistory.length > 20) {
+                conversationHistory.splice(0, conversationHistory.length - 20);
+            }
+        }
+
+        // AI调用改为走后端代理，避免在前端暴露密钥
+        async function callBailianAI(userMessage, history) {
+            try {
+                const response = await fetch(buildApiUrl('/ai/chat'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message: userMessage })
+                    body: JSON.stringify({
+                        message: userMessage,
+                        history: Array.isArray(history) ? history : []
+                    })
                 });
 
                 let result = null;
@@ -4629,8 +4784,12 @@
                 }
 
                 if (!response.ok || !result || result.code !== 200) {
+                    const detailText = typeof result?.detail === 'string'
+                        ? result.detail
+                        : (result?.detail ? JSON.stringify(result.detail) : '');
                     const detail = result?.message || `HTTP ${response.status}`;
-                    throw new Error(detail);
+                    const merged = detailText ? `${detail} | ${detailText.substring(0, 200)}` : detail;
+                    throw new Error(merged);
                 }
 
                 const reply = result?.data?.reply;
@@ -4726,6 +4885,10 @@
         // 初始化AI助手
 
         function initAIAssistant() {
+            if (USE_APPFLOW_IFRAME) {
+                renderAppflowIframe();
+                return;
+            }
 
             // 清空聊天记录
 
@@ -4742,6 +4905,7 @@
             // 添加欢迎消息
 
             addMessage('AI助手', '你好！我是校园食光的AI助手，我可以帮你推荐美食、解答问题、提供校园信息。有什么可以帮助你的吗？', 'ai');
+            conversationHistory.length = 0;
 
         }
 
@@ -4781,7 +4945,7 @@
 
                 <div>
 
-                    <div class="message-content">${content}</div>
+                    <div class="message-content">${formatMessageHtml(content)}</div>
 
                     <div class="message-time">${time}</div>
 
@@ -4806,8 +4970,13 @@
         // 发送消息
 
         async function sendMessage() {
+            if (USE_APPFLOW_IFRAME) {
+                alert('当前为 AppFlow iframe 模式，请在嵌入窗口中直接提问。');
+                return;
+            }
 
             const input = document.getElementById('chat-input');
+            if (!input) return;
 
             const message = input.value.trim();
 
@@ -4820,6 +4989,12 @@
                 return;
 
             }
+
+            if (isSending) {
+                return;
+            }
+
+            setSendingState(true);
 
             
 
@@ -4836,8 +5011,11 @@
             
 
             // 调用AI回复（阿里云百炼智能体）
-
-            simulateAIResponse(message);
+            try {
+                await simulateAIResponse(message);
+            } finally {
+                setSendingState(false);
+            }
 
         }
 
@@ -4873,7 +5051,7 @@
 
                 <div>
 
-                    <div class="message-content">${message}</div>
+                    <div class="message-content">${formatMessageHtml(message)}</div>
 
                     <div class="message-time">${time}</div>
 
@@ -4898,173 +5076,84 @@
         
 
         // AI回复（调用阿里云百炼智能体）
-
         async function simulateAIResponse(userMessage) {
-
             const chatMessages = document.getElementById('chat-messages');
-
             if (!chatMessages) return;
 
-            
-
-            // 显示正在输入指示器
-
             const typingIndicator = document.createElement('div');
-
             typingIndicator.className = 'message ai';
-
             typingIndicator.innerHTML = `
-
                 <div class="message-avatar">
-
                     <i class="fas fa-robot"></i>
-
                 </div>
-
                 <div>
-
                     <div class="message-content">
-
                         <div class="typing-indicator">
-
                             <span></span>
-
                             <span></span>
-
                             <span></span>
-
                         </div>
-
                     </div>
-
                 </div>
-
             `;
 
-            
-
             chatMessages.appendChild(typingIndicator);
-
             scrollToBottom();
 
-            
-
             try {
-
-                // 调用阿里云百炼API获取真实AI回复
-
-                const aiResponse = await callBailianAI(userMessage);
-
-                
-
-                // 移除正在输入指示器
+                const historyForRequest = conversationHistory.slice(-10);
+                const aiResponse = await callBailianAI(userMessage, historyForRequest);
 
                 if (typingIndicator.parentNode) {
-
                     chatMessages.removeChild(typingIndicator);
-
                 }
-
-                
-
-                // 添加AI回复
 
                 const aiMessage = document.createElement('div');
-
                 aiMessage.className = 'message ai';
 
-                
-
                 const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-                
-
                 aiMessage.innerHTML = `
-
                     <div class="message-avatar">
-
                         <i class="fas fa-robot"></i>
-
                     </div>
-
                     <div>
-
-                        <div class="message-content">${aiResponse}</div>
-
+                        <div class="message-content">${formatMessageHtml(aiResponse)}</div>
                         <div class="message-time">${time}</div>
-
                     </div>
-
                 `;
 
-                
-
-                // 添加动画类
-
                 aiMessage.classList.add('slide-in-left');
-
-                
-
                 chatMessages.appendChild(aiMessage);
 
+                pushConversation('user', userMessage);
+                pushConversation('assistant', aiResponse);
+
                 scrollToBottom();
-
             } catch (error) {
-
-                // 移除正在输入指示器
-
                 if (typingIndicator.parentNode) {
-
                     chatMessages.removeChild(typingIndicator);
-
                 }
-
-                
 
                 console.error('AI回复失败:', error);
 
-                
-
-                // 添加错误消息
-
                 const errorMessage = document.createElement('div');
-
                 errorMessage.className = 'message ai';
 
-                
-
                 const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-                
-
                 errorMessage.innerHTML = `
-
                     <div class="message-avatar">
-
                         <i class="fas fa-robot"></i>
-
                     </div>
-
                     <div>
-
-                        <div class="message-content">抱歉，AI服务暂时不可用：${error.message}</div>
-
+                        <div class="message-content">${formatMessageHtml(`抱歉，AI服务暂时不可用：${error.message}`)}</div>
                         <div class="message-time">${time}</div>
-
                     </div>
-
                 `;
 
-                
-
                 errorMessage.classList.add('slide-in-left');
-
                 chatMessages.appendChild(errorMessage);
-
                 scrollToBottom();
-
             }
-
         }
 
         
@@ -5103,23 +5192,28 @@
 
         // 回车键发送消息
 
-        document.getElementById('chat-input').addEventListener('keypress', function(e) {
-
-            if(e.key === 'Enter') {
-
-                sendMessage();
-
-            }
-
-        });
+        const chatInputEl = document.getElementById('chat-input');
+        if (chatInputEl) {
+            chatInputEl.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
 
         
 
         // 快速提问
 
         function quickQuestion(question) {
+            if (USE_APPFLOW_IFRAME) {
+                quickQuestionForIframe(question);
+                return;
+            }
 
-            document.getElementById('chat-input').value = question;
+            const input = document.getElementById('chat-input');
+            if (!input) return;
+            input.value = question;
 
             sendMessage();
 
@@ -5168,6 +5262,10 @@
         // 加载历史记录
 
         function loadHistory(id) {
+            if (USE_APPFLOW_IFRAME) {
+                alert('当前为 AppFlow iframe 模式，历史问题请在窗口内继续追问。');
+                return;
+            }
 
             const historyItems = [
 
@@ -5185,7 +5283,9 @@
 
                 const history = historyItems[id-1];
 
-                document.getElementById('chat-input').value = history.question;
+                const input = document.getElementById('chat-input');
+                if (!input) return;
+                input.value = history.question;
 
                 sendMessage();
 
@@ -5198,6 +5298,10 @@
         // 清空聊天
 
         function clearChat() {
+            if (USE_APPFLOW_IFRAME) {
+                alert('iframe 模式请在 AppFlow 窗口内使用会话管理功能。');
+                return;
+            }
 
             if(confirm('确定要清空聊天记录吗？')) {
 
@@ -5210,6 +5314,7 @@
                 chatMessages.innerHTML = '';
 
                 chatMessages.appendChild(welcomeMessage);
+                conversationHistory.length = 0;
 
             }
 
@@ -5276,6 +5381,10 @@
         
 
         function startVoiceInput() {
+            if (USE_APPFLOW_IFRAME) {
+                alert('暂不支持本页语音填充，请在 AppFlow 窗口中操作。');
+                return;
+            }
 
             const voiceIndicator = document.getElementById('voice-indicator');
 
@@ -5291,7 +5400,12 @@
 
                 const recognizedText = "今天中午有什么推荐？";
 
-                document.getElementById('chat-input').value = recognizedText;
+                const input = document.getElementById('chat-input');
+                if (!input) {
+                    stopVoiceInput();
+                    return;
+                }
+                input.value = recognizedText;
 
                 stopVoiceInput();
 

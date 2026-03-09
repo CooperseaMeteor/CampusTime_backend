@@ -19,6 +19,10 @@ var CONFIG = window.CONFIG || {
         return `${window.location.origin}/api`;
     },
 
+    // AppFlow iframe URL for AI assistant page (方式2：集中配置)
+    // 将下面地址替换为你在 AppFlow 控制台复制的完整 iframe src 链接。
+    APPFLOW_IFRAME_URL: 'https://1494565958858265.appflow.aliyunnest.com/webhook/home/b271bff17a8e26770ccc9d5bc88f6eb574a665e200dfa341439ec336417492e29c9303cb47118866f0/index',
+
     
 
     // 获取当前环境下的页面基础URL（保持根路径，避免重复追加子目录导致404）
